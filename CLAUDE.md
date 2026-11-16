@@ -28,7 +28,9 @@ These came from the parent's brief; do not trade them away for features.
    honest tries, so he can never get stuck).
 5. **Reading is never required** to play. Text on child screens is decoration or for the parent.
 6. **Short sessions**: 6 instructions per mission; a gentle "good place to stop" after a few missions.
-7. **No accounts, ads, analytics or network calls** beyond loading the app's own files.
+7. **No ads, no analytics, no third parties.** The app loads its own files and nothing else - with one
+   exception the owner decided on: the family's own private database (see "The family database"),
+   used only after a grown-up has signed in in the parent area. Without a sign-in nothing leaves the device.
 8. **The parent area is locked by a PIN the parent chooses on the device.** Only a salted hash is
    stored. Never put a PIN, a hash, or any family detail in this repository.
 9. **Rewards never take anything away.** Daily rewards and lifetime tiers are only ever won; chore
@@ -151,9 +153,39 @@ in `tools/tts/accepted.json`, with the reason. In Claude Code cloud sessions use
   `pending` -> the parent approves or sends it back in the Chores tab -> photo deleted.
 - Reward and chore names are typed by the parent, so every row has a speaker button that reads it aloud
   with the device voice (`audio.speak`), and icons are emoji picked from a list.
-- **Not built: push notifications and approving from another device.** Both need a server (Web Push needs
-  one to send, and two devices need somewhere to sync). Do not add one without the owner's explicit
-  decision - it changes the "nothing leaves the device" promise.
+- **Managing from another device** (the grown-up's phone or computer) needs somewhere to sync: see
+  "The family database" below. **Push notifications are not built**; they would be a further step
+  (a function that sends them) and need the owner's go-ahead.
+
+## The family database (Supabase) - the owner's decision, November 2026
+
+The owner created a small Supabase project of their own so that a grown-up can manage rewards, chores
+and expectations (with pictures) from their own phone or computer, check chore photos there, and see
+his points. His detailed play history stays on the device.
+
+- **State of the work:** the database side exists (`supabase/migrations/`). The app side (sign-in in
+  the parent area, sync, pictures) is the next piece of work; until it lands the app does not talk to
+  the database at all.
+- **Project:** `https://kfgtrroainxuoqfncdgf.supabase.co`. The app uses only the *publishable* key
+  (`sb_publishable_...`, safe to commit; it goes in the client code when the app side is built) plus
+  the family's own sign-in. **Never** commit or ask for the database password, a connection string or
+  a secret / service_role key. This repository is public.
+- **Model: one family = one account; the device he plays on stays the source of truth.**
+  `family_state` holds one row per family - what a grown-up's device needs to see (the lists, his
+  points, what he is owed, chores waiting). It is written by the device he plays on. `commands` holds
+  what a grown-up does on another device (add / change / remove something, approve a chore, mark a
+  reward as given); the device he plays on carries them out in order with the same pure functions as
+  the parent area (`addItem`, `editItem`, `removeItem`, `decideChore`...) and marks them applied.
+  No merging of two devices' states, so nothing can be lost to a conflict. Pictures live in the
+  private storage bucket `photos`, each family in a folder named after its account id.
+- **Row level security on everything**: a signed-in family reads and writes its own rows and files
+  only; a visitor who is not signed in gets nothing. Tables are granted to `authenticated` only.
+- **Changing the database:** add a new file in `supabase/migrations/` (never edit one that has been
+  applied). `bash tools/db/check.sh` applies all migrations to a throw-away local Postgres with a
+  stand-in for Supabase's roles and storage tables, and checks who can read and write what - run it
+  before every change. The owner linked the repository to the project: migrations are applied by
+  Supabase when they reach `main`.
+- In Claude Code cloud sessions the `learn-with-me` environment allows the project's address.
 
 ## iPad / web-app constraints (learned the hard way - keep these)
 
