@@ -14,6 +14,7 @@ export function defaultState() {
     settings: {
       sfx: true,
       slowVoice: false, // play instructions a little slower
+      earlyReminder: true, // say "please listen until I am finished" when he touches something too soon
       dailyMissions: 3, // gentle "that's enough for today" suggestion
       hardStop: false, // if true the suggestion becomes a lock until tomorrow
     },

@@ -11,7 +11,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WORLDS } from './worlds/index.mjs';
 import { TYPES } from './types/index.mjs';
-import { VOICE, UI_SPEED, LINES, POOLS } from './voice.mjs';
+import { VOICE, UI_SPEED, NAME, LINES, POOLS } from './voice.mjs';
 import { clipName } from './lib.mjs';
 import { buildLevel, levelMeta, worldMeta, prepare } from './pipeline.mjs';
 
@@ -80,7 +80,7 @@ for (const [pool, texts] of Object.entries(POOLS)) {
     return id;
   });
 }
-writeFileSync(join(DATA, 'voice.json'), `${JSON.stringify({ voice: VOICE, lines, pools }, null, 1)}\n`);
+writeFileSync(join(DATA, 'voice.json'), `${JSON.stringify({ voice: VOICE, name: NAME, lines, pools }, null, 1)}\n`);
 
 // ---- what needs a voice clip ---------------------------------------------------------------
 mkdirSync(join(ROOT, 'tools', 'tts'), { recursive: true });

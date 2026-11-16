@@ -4896,6 +4896,12 @@
   "speed": 0.97
  },
  {
+  "file": "assets/audio/ui/0a5fc95754f9.mp3",
+  "text": "Mission complete, John! Every mission makes your listening stronger.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
   "file": "assets/audio/ui/0ad27dda358f.mp3",
   "text": "Now listen for the color. Some of them look the same, so the color tells you which one.",
   "voice": "af_heart",
@@ -4908,8 +4914,8 @@
   "speed": 0.97
  },
  {
-  "file": "assets/audio/ui/0f371bf87999.mp3",
-  "text": "Good to see you! Ready to train?",
+  "file": "assets/audio/ui/0db2f5e4ffff.mp3",
+  "text": "Hi John! I am Blip, your guide. Let’s train your super listening. Tap the glowing level to start.",
   "voice": "af_heart",
   "speed": 0.97
  },
@@ -4968,6 +4974,12 @@
   "speed": 0.97
  },
  {
+  "file": "assets/audio/ui/2b07c0f44d5d.mp3",
+  "text": "Nice one, John!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
   "file": "assets/audio/ui/2b20dde672b9.mp3",
   "text": "Now listen for where things are. Next to. Between. In the middle.",
   "voice": "af_heart",
@@ -4976,12 +4988,6 @@
  {
   "file": "assets/audio/ui/2c16bfa04fa8.mp3",
   "text": "Two steps, and the cards are hidden. Say them back in your head while you wait.",
-  "voice": "af_heart",
-  "speed": 0.97
- },
- {
-  "file": "assets/audio/ui/2c4f0f632840.mp3",
-  "text": "Blip here. Let’s go!",
   "voice": "af_heart",
   "speed": 0.97
  },
@@ -5034,14 +5040,8 @@
   "speed": 0.97
  },
  {
-  "file": "assets/audio/ui/455bff3312da.mp3",
-  "text": "All done! Your rewards are unlocked.",
-  "voice": "af_heart",
-  "speed": 0.97
- },
- {
-  "file": "assets/audio/ui/47a8ca2f78da.mp3",
-  "text": "Mission complete! Every mission makes your listening stronger.",
+  "file": "assets/audio/ui/47a6ae3142c4.mp3",
+  "text": "John, please try your best to listen until I am finished talking.",
   "voice": "af_heart",
   "speed": 0.97
  },
@@ -5082,6 +5082,18 @@
   "speed": 0.97
  },
  {
+  "file": "assets/audio/ui/5fdb78e07b6f.mp3",
+  "text": "Great listening, John! Two stars!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/62b83b9873f0.mp3",
+  "text": "Great listening, John!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
   "file": "assets/audio/ui/65a49357f3ca.mp3",
   "text": "Great listening!",
   "voice": "af_heart",
@@ -5096,12 +5108,6 @@
  {
   "file": "assets/audio/ui/6906da243ec2.mp3",
   "text": "You listened all the way to the end. Nice!",
-  "voice": "af_heart",
-  "speed": 0.97
- },
- {
-  "file": "assets/audio/ui/691424cb5f7d.mp3",
-  "text": "Great training today! This is a good place to stop. See you next time!",
   "voice": "af_heart",
   "speed": 0.97
  },
@@ -5148,6 +5154,12 @@
   "speed": 0.97
  },
  {
+  "file": "assets/audio/ui/7b6c5a0d6dfc.mp3",
+  "text": "Good to see you, John! Ready to train?",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
   "file": "assets/audio/ui/82b9a8e9a03f.mp3",
   "text": "Hmm, not yet. Listen again.",
   "voice": "af_heart",
@@ -5178,14 +5190,14 @@
   "speed": 0.97
  },
  {
-  "file": "assets/audio/ui/893bff1c3be6.mp3",
-  "text": "Three steps, and the cards are hidden. You can do it. Picture each one.",
+  "file": "assets/audio/ui/878992232ce7.mp3",
+  "text": "Great training today, John! This is a good place to stop. See you next time!",
   "voice": "af_heart",
   "speed": 0.97
  },
  {
-  "file": "assets/audio/ui/894a9f36e71a.mp3",
-  "text": "Perfect listening! Three stars!",
+  "file": "assets/audio/ui/893bff1c3be6.mp3",
+  "text": "Three steps, and the cards are hidden. You can do it. Picture each one.",
   "voice": "af_heart",
   "speed": 0.97
  },
@@ -5214,14 +5226,32 @@
   "speed": 0.97
  },
  {
+  "file": "assets/audio/ui/935a9f61a14c.mp3",
+  "text": "Welcome back, John!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
   "file": "assets/audio/ui/95b9ef03dd55.mp3",
   "text": "Sneaky pirates are giving orders too. Only listen to the captain.",
   "voice": "af_heart",
   "speed": 0.97
  },
  {
+  "file": "assets/audio/ui/9733d850d658.mp3",
+  "text": "Perfect listening, John! Three stars!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
   "file": "assets/audio/ui/a018da58e6f9.mp3",
   "text": "These stories are a bit longer. Make a movie in your mind as you listen.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/a67f8f824d5c.mp3",
+  "text": "Blip here. Let’s go, John!",
   "voice": "af_heart",
   "speed": 0.97
  },
@@ -5244,8 +5274,8 @@
   "speed": 0.97
  },
  {
-  "file": "assets/audio/ui/b2f07f348035.mp3",
-  "text": "Welcome back, hero!",
+  "file": "assets/audio/ui/b1a12a6b3cc9.mp3",
+  "text": "All done, John! Your rewards are unlocked.",
   "voice": "af_heart",
   "speed": 0.97
  },
@@ -5316,12 +5346,6 @@
   "speed": 0.97
  },
  {
-  "file": "assets/audio/ui/d3d4423b7cea.mp3",
-  "text": "Great listening! Two stars!",
-  "voice": "af_heart",
-  "speed": 0.97
- },
- {
   "file": "assets/audio/ui/de1ba0032e09.mp3",
   "text": "That’s it!",
   "voice": "af_heart",
@@ -5342,12 +5366,6 @@
  {
   "file": "assets/audio/ui/e3948c66a621.mp3",
   "text": "You finished the mission! Want to try for two stars?",
-  "voice": "af_heart",
-  "speed": 0.97
- },
- {
-  "file": "assets/audio/ui/e50cfd84952f.mp3",
-  "text": "Hi! I am Blip, your guide. Let’s train your super listening. Tap the glowing level to start.",
   "voice": "af_heart",
   "speed": 0.97
  },
