@@ -19,6 +19,7 @@ export function createAudio() {
   let fast = false; // test mode: resolve almost immediately without real playback
   const blobs = new Map(); // url -> object URL, or null when the fetch failed
   let current = null; // { finish } of the clip that is playing now
+  let playId = 0; // bumps on every play()/stop(), so a clip that was still loading knows it was cancelled
   let utterance = null; // keep a reference so Safari does not garbage-collect it mid-speech
 
   function ensureEl() {
@@ -68,6 +69,7 @@ export function createAudio() {
   }
 
   function stop() {
+    playId++;
     if (current) current.finish({ ok: false, how: 'cancelled' });
     if (el) {
       el.onended = el.onerror = el.onloadedmetadata = null;
@@ -83,8 +85,17 @@ export function createAudio() {
    */
   function play(url, { rate = 1, text = '' } = {}) {
     stop();
+    // Never talk while the app is in the background or the screen is locked.
+    if (globalThis.document?.hidden) return Promise.resolve({ ok: false, how: 'cancelled' });
     if (fast) return new Promise((r) => setTimeout(() => r({ ok: true, how: 'fast' }), 30));
     ensureEl();
+    const my = playId;
+    // Always play from memory (never stream): fetch the clip first if it was not preloaded.
+    const ready = url && !blobs.get(url) ? preload([url]) : Promise.resolve();
+    return ready.then(() => (my === playId ? start(url, rate, text) : { ok: false, how: 'cancelled' }));
+  }
+
+  function start(url, rate, text) {
     return new Promise((resolve) => {
       let done = false;
       let watchdog = null;
@@ -109,7 +120,7 @@ export function createAudio() {
         speak(text, rate).then((res) => me.finish(res));
       };
 
-      const src = url ? blobs.get(url) || (blobs.has(url) ? null : url) : null;
+      const src = url ? blobs.get(url) : null;
       if (!src) return fallback();
       el.onended = () => me.finish({ ok: true, how: 'clip' });
       el.onerror = () => fallback();

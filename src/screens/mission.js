@@ -43,6 +43,7 @@ export async function missionScreen(ctx, { levelId }) {
   let answerStart = 0;
   const results = [];
   const startedAt = Date.now();
+  let gate = Promise.resolve(); // held shut while the "leave?" box is open
 
   // --- elements --------------------------------------------------------------
   const pips = h('div', { class: 'pips', 'aria-hidden': 'true' });
@@ -128,6 +129,8 @@ export async function missionScreen(ctx, { levelId }) {
 
   async function listen({ support = false } = {}) {
     const my = ++token;
+    await gate; // if the "leave?" box is open, wait for his answer before talking
+    if (!alive || my !== token) return;
     actions = [];
     board.mark(actions, item.mode);
     board.setLocked(true);
@@ -285,7 +288,9 @@ export async function missionScreen(ctx, { levelId }) {
   function askQuit() {
     if (root.querySelector('.overlay')) return;
     audio.stop();
-    const close = () => overlay.remove();
+    let release;
+    gate = new Promise((r) => { release = r; });
+    const close = () => { overlay.remove(); release(); };
     const overlay = h('div', { class: 'overlay' },
       h('div', { class: 'panel small' },
         h('h2', {}, 'Leave this mission?'),
@@ -315,7 +320,7 @@ export async function missionScreen(ctx, { levelId }) {
     renderPips();
 
     const ready = Promise.race([
-      Promise.all([audio.preload(itemUrls), voice.preload(['good', 'goodWait', 'gotIt', 'retry', 'watch', level.tip].filter(Boolean))]),
+      Promise.all([audio.preload(itemUrls), voice.preload(['good', 'goodWait', 'gotIt', 'retry', 'watch', 'result1', 'result2', 'result3', 'enough', level.tip].filter(Boolean))]),
       wait(8000),
     ]);
     ready.then(() => {
