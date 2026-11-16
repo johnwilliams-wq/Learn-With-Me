@@ -32,7 +32,8 @@ SAME = [
     {"knight", "night"}, {"blue", "blew"}, {"red", "read"}, {"cozy", "cosy"}, {"color", "colour"},
     {"colors", "colours"}, {"ok", "okay"}, {"oh", "o"}, {"hi", "high", "hey"}, {"its", "it's"},
     {"lets", "let's"}, {"captains", "captain's"}, {"heros", "hero's", "heroes"}, {"camp", "camps"},
-    {"campfire", "camp"}, {"bell", "belle"}, {"gem", "jem", "gym"}, {"boot", "boots"},
+    {"campfire", "camp"}, {"bell", "belle"}, {"gem", "jem", "gym", "jam"}, {"boot", "boots"},
+    {"wait", "weight"}, {"except", "accept"}, {"listened", "listen"},
 ]
 CANON = {}
 for group in SAME:
@@ -43,6 +44,9 @@ for group in SAME:
 
 def words(text):
     text = text.lower().replace("’", "'").replace("camp fire", "campfire")
+    for long, short in (("every one", "everyone"), ("here is", "heres"), ("that is", "thats"), ("it is", "its"),
+                        ("i am", "im"), ("do not", "dont"), ("you are", "youre"), ("what is", "whats"), ("let us", "lets")):
+        text = text.replace(long, short)
     text = re.sub(r"[^a-z0-9' ]+", " ", text).replace("'", "")
     return [CANON.get(w, w) for w in text.split()]
 

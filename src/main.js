@@ -12,6 +12,8 @@ import { missionScreen } from './screens/mission.js';
 import { resultsScreen } from './screens/results.js';
 import { collectionScreen } from './screens/collection.js';
 import { parentScreen } from './screens/parent.js';
+import { rewardsScreen } from './screens/rewards.js';
+import { choresScreen } from './screens/chores.js';
 
 export const VERSION = '1.0.0';
 
@@ -29,6 +31,8 @@ const screens = {
   results: resultsScreen,
   collection: collectionScreen,
   parent: parentScreen,
+  rewards: rewardsScreen,
+  chores: choresScreen,
 };
 
 const ctx = {
@@ -83,6 +87,7 @@ function showError(err, retry) {
 
 async function boot() {
   applySettings();
+  navigator.storage?.persist?.().catch(() => {}); // ask the browser not to clear his progress when space is short
   try {
     const [worldsFile, catalog] = await Promise.all([loadWorlds(), loadVoiceCatalog()]);
     ctx.worlds = worldsFile.worlds;
@@ -105,7 +110,10 @@ for (const type of ['gesturestart', 'gesturechange', 'dblclick', 'contextmenu'])
 if ('serviceWorker' in navigator && !params.has('nosw')) {
   const hadController = !!navigator.serviceWorker.controller;
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then((reg) => {
+      // also look for a new version whenever the app comes back to the front, not only on a cold start
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+    }).catch(() => {});
   });
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (!hadController) return; // first install: nothing to refresh
@@ -120,7 +128,11 @@ if ('serviceWorker' in navigator && !params.has('nosw')) {
  */
 async function warmAudio() {
   try {
-    if (!navigator.serviceWorker?.controller || !globalThis.caches || navigator.connection?.saveData) return;
+    if (!('serviceWorker' in navigator) || params.has('nosw') || !globalThis.caches || navigator.connection?.saveData) return;
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) { // very first visit: wait until the worker has taken charge of this page
+      await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }));
+    }
     const list = await (await fetch('assets/data/audio.json', { cache: 'no-cache' })).json();
     let i = 0;
     const worker = async () => {

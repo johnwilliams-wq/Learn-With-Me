@@ -1,6 +1,6 @@
 // Title screen. The first tap here is also what unlocks sound on the iPad.
 
-import { h } from '../core/dom.js';
+import { h, wait } from '../core/dom.js';
 import { guideSVG, iconSVG } from '../art/sprites.js';
 
 function isIOS() {
@@ -18,10 +18,10 @@ export function titleScreen(ctx) {
     h('span', { class: 'btn-icon', html: iconSVG('play') }), h('span', { class: 'btn-label' }, 'Play'));
   play.addEventListener('click', async () => {
     play.disabled = true;
-    await audio.unlock();
-    sfx.unlock();
+    sfx.unlock(); // inside the tap, before anything is awaited
+    await Promise.race([audio.unlock(), wait(1000)]);
     sfx.star();
-    await voice.preload(['hello-first', 'hello-back']);
+    await Promise.race([voice.preload(['hello-first', 'hello-back']), wait(2500)]); // never wait long on a slow network
     ctx.go('map');
     if (firstTime) {
       store.update((s) => { s.flags.welcomed = true; });

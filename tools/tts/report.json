@@ -1,0 +1,77 @@
+{
+ "clips": 879,
+ "verified": 869,
+ "missing": [],
+ "failed": [
+  {
+   "file": "assets/audio/listening/5f6f9d826d06.mp3",
+   "text": "The path up the mountain is long. Now, tap the yellow star.",
+   "heard_small_model": "The path of the mountain is long. Now, tap the yellow star.",
+   "heard_large_model": "The path of the mountain is long. Now tap the yellow star.",
+   "seconds": 3.84
+  },
+  {
+   "file": "assets/audio/listening/72c3b0d63ddd.mp3",
+   "text": "Tap the egg, then the gem, then the bell.",
+   "heard_small_model": "Tap the egg, then the jam, then the bell.",
+   "heard_large_model": "Tap the egg, then the jam, then the bell.",
+   "seconds": 2.47
+  },
+  {
+   "file": "assets/audio/listening/90c35837a461.mp3",
+   "text": "Tap the gem. No, wait! Tap the chest instead.",
+   "heard_small_model": "Tap the gem, no weight, tap the chest instead.",
+   "heard_large_model": "Tap the gem, no weight, tap the chest instead.",
+   "seconds": 3.19
+  },
+  {
+   "file": "assets/audio/listening/adbf5b13ae4b.mp3",
+   "text": "Blip had pancakes for breakfast. Now, tap the blue flag.",
+   "heard_small_model": "Bliphead pancakes for breakfast. Now, tap the blue flag.",
+   "heard_large_model": "Blip head pancakes for breakfast. Now tap the blue flag.",
+   "seconds": 3.94
+  },
+  {
+   "file": "assets/audio/listening/c3461d56a217.mp3",
+   "text": "Tap the egg, then the flag.",
+   "heard_small_model": "Tap the eggs and the flag.",
+   "heard_large_model": "Tap the eggs and the flag.",
+   "seconds": 1.8
+  },
+  {
+   "file": "assets/audio/ui/39c9316ef462.mp3",
+   "text": "Left and right. Here is a trick: hold up your hands. Your left hand makes the letter L.",
+   "heard_small_model": "Left and right. Here's a trick. Hold up your hands. Your left hand makes the letter L.",
+   "heard_large_model": "Left and right. Here's a trick. Hold up your hands. Your left hand makes the letter L.",
+   "seconds": 5.26
+  },
+  {
+   "file": "assets/audio/ui/3d6d7d3b0472.mp3",
+   "text": "Nice! You listened to every word.",
+   "heard_small_model": "Nice, you listen to every word.",
+   "heard_large_model": "Nice, you listen to every word.",
+   "seconds": 2.18
+  },
+  {
+   "file": "assets/audio/ui/41e19e57d297.mp3",
+   "text": "Woods challenge! Not, all, except, and where. Listen for the tricky word.",
+   "heard_small_model": "Wood's challenge, not all accept and wear. Listen for the tricky word. //",
+   "heard_large_model": "Woods challenge, not all accept and where. Listen for the tricky word.",
+   "seconds": 4.13
+  },
+  {
+   "file": "assets/audio/ui/933790ceb186.mp3",
+   "text": "When I say ALL, tap every one that fits. Then press Done.",
+   "heard_small_model": "When I say all, tap everyone that fits, then press done.",
+   "heard_large_model": "When I say all, tap everyone that fits, then press done.",
+   "seconds": 3.62
+  },
+  {
+   "file": "assets/audio/ui/f36b1426ed74.mp3",
+   "text": "Watch. Here is how it goes.",
+   "heard_small_model": "Watch, here's how it goes.",
+   "heard_large_model": "Watch Here's How It Goes.",
+   "seconds": 1.75
+  }
+ ]
+}

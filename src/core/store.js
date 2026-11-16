@@ -23,8 +23,21 @@ export function defaultState() {
     trials: [], // compact per-trial records (see recordTrial)
     missions: [], // per-mission summaries
     cards: [], // collected card ids, in order earned
-    days: {}, // 'YYYY-MM-DD' -> { missions, trials, ms }
+    days: {}, // 'YYYY-MM-DD' -> { missions, trials, ms, counted (missions that count toward rewards) }
     flags: {}, // onboarding / tips seen
+    // Set up by a grown-up in the parent area (see src/rewards/logic.js):
+    rewards: {
+      daily: [], // { id, title, icon, missions }  - won each day he finishes that many missions
+      tiers: [], // { id, title, icon, points }    - won once when total points (xp) reach the mark
+      earned: [], // { id, src, ref, title, icon, day, t, given } - what a grown-up owes him
+      countPerfected: false, // do repeats of 3-star levels count toward daily rewards?
+    },
+    chores: {
+      list: [], // { id, title, icon, points, repeat: 'daily' | 'weekly' | 'once', reward }
+      log: [], // { id, chore, title, points, t, day, week, status, photo, note }
+      requirePhoto: true,
+    },
+    admin: { hash: '', salt: '', tries: 0, lockUntil: 0 }, // parent PIN (salted hash only)
   };
 }
 
@@ -70,6 +83,12 @@ export function createStore(backend) {
     for (const k of ['levels', 'seen', 'days', 'flags']) if (!out[k] || typeof out[k] !== 'object') out[k] = {};
     for (const k of ['trials', 'missions', 'cards']) if (!Array.isArray(out[k])) out[k] = [];
     if (typeof out.xp !== 'number' || !isFinite(out.xp)) out.xp = 0;
+    // Sections added after the first release: fill in whatever an older save is missing.
+    for (const k of ['rewards', 'chores', 'admin']) {
+      out[k] = { ...base[k], ...(s[k] && typeof s[k] === 'object' ? s[k] : {}) };
+    }
+    for (const k of ['daily', 'tiers', 'earned']) if (!Array.isArray(out.rewards[k])) out.rewards[k] = [];
+    for (const k of ['list', 'log']) if (!Array.isArray(out.chores[k])) out.chores[k] = [];
     out.v = 1;
     return out;
   }
@@ -106,6 +125,18 @@ export function createStore(backend) {
     },
     reset() {
       state = defaultState();
+      save();
+      for (const l of listeners) l(state);
+    },
+    /** Wipe HIS progress but keep what the grown-up set up (settings, rewards, chores, PIN). */
+    resetProgress() {
+      const fresh = defaultState();
+      fresh.settings = state.settings;
+      fresh.admin = state.admin;
+      fresh.rewards = { ...fresh.rewards, daily: state.rewards.daily, tiers: state.rewards.tiers, countPerfected: state.rewards.countPerfected };
+      fresh.chores = { ...fresh.chores, list: state.chores.list, requirePhoto: state.chores.requirePhoto };
+      fresh.flags = { welcomed: state.flags.welcomed, installHintClosed: state.flags.installHintClosed };
+      state = fresh;
       save();
       for (const l of listeners) l(state);
     },
@@ -153,6 +184,7 @@ export function createStore(backend) {
         const d = (s.days[todayKey()] ||= { missions: 0, trials: 0, ms: 0 });
         d.missions += 1;
         d.ms += m.ms || 0;
+        if (m.counted) d.counted = (d.counted || 0) + 1;
         // keep the "seen" map from growing without bound
         const ids = Object.keys(s.seen);
         if (ids.length > 3000) {

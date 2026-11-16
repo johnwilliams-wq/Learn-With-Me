@@ -84,6 +84,7 @@ export function finish(rng, draft) {
 }
 
 /** Clip file name: a hash of exactly what is spoken, so identical sentences share one clip. */
+const AUDIO_REV = 2; // bump when the way clips are produced changes (padding, loudness...), so every clip gets a new name
 export function clipName(text, voice, speed) {
-  return `${createHash('sha1').update(`${voice}|${speed}|${text}`).digest('hex').slice(0, 12)}.mp3`;
+  return `${createHash('sha1').update(`${AUDIO_REV}|${voice}|${speed}|${text}`).digest('hex').slice(0, 12)}.mp3`;
 }

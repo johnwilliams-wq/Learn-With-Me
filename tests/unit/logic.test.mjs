@@ -79,8 +79,12 @@ test('unlocking: two stars opens the next level; he can never get stuck', () => 
   assert.equal(isUnlocked('l2', levels, s), false);
   s.levels.l1 = { stars: 1, plays: 3, best: 4 };
   assert.equal(isUnlocked('l2', levels, s), true, 'three tries with most right also opens it');
-  s.levels.l1 = { stars: 1, plays: 9, best: 2 };
+  s.levels.l1 = { stars: 1, plays: 4, best: 2 };
   assert.equal(isUnlocked('l2', levels, s), false);
+  s.levels.l1 = { stars: 1, plays: 5, best: 2 };
+  assert.equal(isUnlocked('l2', levels, s), true, 'five finished tries always opens it: he can never be stuck');
+  s.levels.l1 = { stars: 1, plays: 3, best: 4 };
+  assert.equal(nextLevel(levels, s).id, 'l2', 'Play moves on with him once the next level has opened');
   s.levels.l1 = { stars: 2, plays: 1, best: 5 };
   assert.equal(isUnlocked('l2', levels, s), true);
   assert.equal(nextLevel(levels, s).id, 'l2');
@@ -137,13 +141,13 @@ test('store: records, survives a reload, exports and imports, tolerates junk', (
 test('insights: skills, slips and plain-language observations', () => {
   const s = defaultState();
   const t = (k, c1, e = '', et = 0) => ({ t: 1, l: 'x', i: 'x', k, c1, c2: 0, e, rp: 0, et, ms: 1 });
-  for (let i = 0; i < 10; i++) s.trials.push(t(['detail'], 1));
-  for (let i = 0; i < 8; i++) s.trials.push(t(['before'], i < 2 ? 1 : 0, 'order', 1));
+  for (let i = 0; i < 14; i++) s.trials.push(t(['detail'], 1));
+  for (let i = 0; i < 12; i++) s.trials.push(t(['before'], i < 3 ? 1 : 0, 'order', 1));
   const skills = skillStats(s.trials);
   assert.deepEqual(skills.map((k) => k.tag), ['detail', 'before']);
   assert.equal(skills[1].pct, 25);
   assert.equal(errorStats(s.trials)[0].error, 'order');
-  assert.equal(overview(s).trials, 18);
+  assert.equal(overview(s).trials, 26);
   const obs = observations(s).join(' ');
   assert.match(obs, /before/i);
   assert.match(obs, /Going well/);

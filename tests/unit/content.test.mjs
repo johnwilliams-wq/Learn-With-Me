@@ -83,9 +83,11 @@ const ORACLE = {
     return [ids(hits)];
   },
   'not-kind': (it) => {
-    const [kind] = rx(it, /not an? (\w+)\.$/);
-    const hits = it.scene.objects.filter((o) => o.kind !== kind);
+    const [color, kind] = rx(it, /^Tap the (\w+) one that is not an? (\w+)\.$/);
+    const hits = it.scene.objects.filter((o) => o.color === color && o.kind !== kind);
     assert.equal(hits.length, 1, it.say);
+    assert.ok(it.scene.objects.some((o) => o.color === color && o.kind === kind), `${it.say}: needs a same-colour thing to rule out`);
+    assert.ok(it.scene.objects.some((o) => o.color !== color && o.kind !== kind), `${it.say}: needs a different-colour thing to rule out`);
     return [ids(hits)];
   },
   'all-kind': (it, m) => [ids(it.scene.objects.filter((o) => o.kind === m[0].kind))],
@@ -246,7 +248,7 @@ test('"do nothing" turns are a real mix, never predictable', () => {
 });
 
 test('the guide has every line the game asks for, and every clip exists', () => {
-  for (const pool of ['hello-back', 'good', 'goodWait', 'gotIt', 'retry', 'watch', 'result1', 'result2', 'result3', 'enough']) {
+  for (const pool of ['hello-back', 'good', 'goodEnd', 'goodWait', 'gotIt', 'retry', 'watch', 'result1', 'result2', 'result3', 'enough']) {
     assert.ok(voice.pools[pool]?.length, `pool ${pool}`);
     for (const id of voice.pools[pool]) assert.ok(voice.lines[id], id);
   }

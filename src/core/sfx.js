@@ -13,7 +13,7 @@ export function createSfx() {
         if (!AC) return null;
         ctx = new AC();
       }
-      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+      if (ctx.state !== 'running') ctx.resume().catch(() => {}); // also 'interrupted' (iOS, after a screen lock)
       return ctx;
     } catch {
       return null;

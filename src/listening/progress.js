@@ -21,7 +21,7 @@ export function rankFor(xp) {
   return { index: i, name: cur.name, next: next ? next.name : null, into: xp - cur.xp, span: next ? next.xp - cur.xp : 0 };
 }
 
-/** 3 stars = every instruction right on the first listen; 2 = at least 80%; 1 = finished. */
+/** 3 stars = every instruction right on the first try; 2 = at least 80%; 1 = finished. */
 export function starsFor(correctFirst, total) {
   if (total <= 0) return 1;
   if (correctFirst >= total) return 3;
@@ -44,8 +44,8 @@ export function flattenLevels(worlds) {
 }
 
 /**
- * A level opens when the one before it has 2+ stars. So that he can never get
- * stuck, it also opens after three tries at the previous level with most right.
+ * A level opens when the one before it has 2+ stars. So that he can never get stuck, it
+ * also opens after three finished tries with most right - or after five tries, whatever happened.
  */
 export function isUnlocked(levelId, levels, state) {
   if (state.flags && state.flags.unlockAll) return true;
@@ -54,16 +54,22 @@ export function isUnlocked(levelId, levels, state) {
   const prev = state.levels[levels[i - 1].id];
   if (!prev) return false;
   const need = Math.ceil((levels[i - 1].trials || 6) * 0.66);
-  return prev.stars >= 2 || (prev.plays >= 3 && prev.best >= need);
+  return prev.stars >= 2 || (prev.plays >= 3 && prev.best >= need) || prev.plays >= 5;
 }
 
-/** The level the big "Play" button should start: the furthest unlocked one not yet at 2 stars. */
+/**
+ * The level the big "Play" button should start: the first open level he has not passed
+ * (2 stars) - unless the level after it has already opened, in which case move on with him
+ * rather than sending him back to the one he struggled with.
+ */
 export function nextLevel(levels, state) {
   let pick = levels[0];
-  for (const l of levels) {
-    if (!isUnlocked(l.id, levels, state)) break;
-    pick = l;
-    if ((state.levels[l.id]?.stars || 0) < 2) break;
+  for (let i = 0; i < levels.length; i++) {
+    if (!isUnlocked(levels[i].id, levels, state)) break;
+    pick = levels[i];
+    const passed = (state.levels[pick.id]?.stars || 0) >= 2;
+    const nextOpen = !state.flags?.unlockAll && i + 1 < levels.length && isUnlocked(levels[i + 1].id, levels, state);
+    if (!passed && !nextOpen) break;
   }
   return pick;
 }
@@ -97,7 +103,9 @@ export function pickItems(items, seen, level, rng) {
   } else {
     chosen = fresh(items).slice(0, n);
   }
-  return spread(rng.shuffle(chosen));
+  // With a quota (e.g. "do nothing" turns) the order must be truly random: spacing them out
+  // would make them predictable, and he could stop listening for the key word.
+  return level.quota ? rng.shuffle(chosen) : spread(rng.shuffle(chosen));
 }
 
 /** Reorder so identical patterns (`v`) and identical groups (`g`) are not adjacent when avoidable. */

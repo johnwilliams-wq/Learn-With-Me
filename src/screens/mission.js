@@ -4,13 +4,15 @@
 //   READY      he taps the ear when HE is ready to listen
 //   LISTENING  the voice talks; the board is frozen (tapping early just gets a calm "wait")
 //   RESPOND    he does what was said (and may ask to hear it again)
-//   FEEDBACK   right -> celebrate; first miss -> hear it again, slower, with support;
-//              second miss -> the guide shows the answer. No buzzers, nothing is lost.
+//   FEEDBACK   right -> celebrate; first miss -> back to READY: he taps the ear again and hears it
+//              a little slower, with support; second miss -> the guide shows the answer.
+//              No buzzers, nothing is lost.
 
 import { h, wait, pulse, mount } from '../core/dom.js';
 import { makeRng } from '../core/rng.js';
 import { check, demoOrder } from '../listening/checker.js';
-import { pickItems, summarize } from '../listening/progress.js';
+import { pickItems, summarize, isUnlocked } from '../listening/progress.js';
+import { missionCounts, collectRewards } from '../rewards/logic.js';
 import { createBoard } from '../listening/board.js';
 import { loadBank, itemAudioUrl } from '../listening/bank.js';
 import { nextCard } from '../listening/cards.js';
@@ -51,7 +53,7 @@ export async function missionScreen(ctx, { levelId }) {
   const boardWrap = h('div', { class: 'board-wrap' });
   const caption = h('div', { class: 'caption', hidden: true });
   const steps = h('div', { class: 'steps', hidden: true, 'aria-hidden': 'true' });
-  const btnQuit = h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Leave mission', html: iconSVG('back'), onclick: askQuit });
+  const btnQuit = h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Leave mission', html: iconSVG('home'), onclick: askQuit });
   const btnListen = h('button', { class: 'btn btn-listen', type: 'button', onclick: onListen },
     h('span', { class: 'btn-icon ear', html: iconSVG('ear') }),
     h('span', { class: 'btn-icon again', html: iconSVG('replay') }),
@@ -62,7 +64,7 @@ export async function missionScreen(ctx, { levelId }) {
   const btnUndo = h('button', { class: 'btn btn-undo', type: 'button', onclick: onUndo },
     h('span', { class: 'btn-icon', html: iconSVG('back') }), h('span', { class: 'btn-label' }, 'Undo'));
   const btnHand = h('button', { class: 'btn btn-hand', type: 'button', onclick: onHand },
-    h('span', { class: 'btn-icon', html: iconSVG('hand') }), h('span', { class: 'btn-label' }, 'No order'));
+    h('span', { class: 'btn-icon', html: iconSVG('hand') }), h('span', { class: 'btn-label' }, 'Not this time'));
   if (!level.allowNone) btnHand.hidden = true;
 
   const root = h('div', { class: 'screen mission', dataset: { phase, world: level.world, level: level.id } },
@@ -87,6 +89,7 @@ export async function missionScreen(ctx, { levelId }) {
     btnDone.disabled = !(responding && actions.length > 0);
     btnUndo.disabled = !(responding && actions.length > 0);
     btnHand.disabled = !responding;
+    [...steps.children].forEach((d, i) => d.classList.toggle('on', i < actions.length));
   }
   function renderPips() {
     mount(pips, items.map((_, i) => {
@@ -160,7 +163,7 @@ export async function missionScreen(ctx, { levelId }) {
   function onListen() {
     audio.unlock();
     sfx.unlock();
-    if (phase === 'ready') listen();
+    if (phase === 'ready') listen({ support: attempt === 2 });
     else if (phase === 'respond' && replays < MAX_REPLAYS) {
       replays++;
       listen({ support: attempt === 2 });
@@ -228,7 +231,9 @@ export async function missionScreen(ctx, { levelId }) {
       board.celebrate(item.expect.flat());
       record(first, !first, ms);
       if (first && (index === 0 || Math.random() < 0.34)) {
-        await voice.sayPool(level.allowNone && earlyTaps === 0 ? 'goodWait' : 'good');
+        // Only praise the waiting / whole-sentence listening when that is what really happened.
+        const clean = earlyTaps === 0 && replays === 0;
+        await voice.sayPool(!clean ? 'good' : level.allowNone ? 'goodWait' : Math.random() < 0.5 ? 'goodEnd' : 'good');
       } else {
         await wait(first ? 800 : 500);
         if (!first && alive && my === token) await voice.sayPool('gotIt');
@@ -241,8 +246,17 @@ export async function missionScreen(ctx, { levelId }) {
       board.shake();
       await voice.sayPool('retry');
       if (!alive || my !== token) return;
+      // Back to the start of the routine: he taps the ear again when he is ready. This time it is
+      // a little slower, hidden cards stay face-up, and the dots show how many taps are needed.
+      actions = [];
+      board.mark(actions, item.mode);
+      board.setLocked(true);
+      board.setCovered(false);
       showSteps(res.total);
-      return listen({ support: true });
+      setGuide('idle');
+      setPhase('ready');
+      pulse(btnListen, 'hint', 700);
+      return;
     } else {
       sfx.soft();
       setGuide('oops');
@@ -279,9 +293,15 @@ export async function missionScreen(ctx, { levelId }) {
     const before = store.get();
     const prevStars = before.levels[levelId]?.stars || 0;
     const card = nextCard(before.cards);
-    store.recordMission({ level: levelId, ...sum, ms: Date.now() - startedAt });
-    if (card) store.update((s) => { s.cards.push(card.id); });
-    ctx.go('results', { levelId, sum, card, prevStars });
+    const next = ctx.levels[ctx.levels.findIndex((l) => l.id === levelId) + 1];
+    const nextWasOpen = !!next && isUnlocked(next.id, ctx.levels, before);
+    store.recordMission({ level: levelId, ...sum, ms: Date.now() - startedAt, counted: missionCounts(prevStars, before.rewards) });
+    let won = [];
+    store.update((s) => {
+      if (card) s.cards.push(card.id);
+      won = collectRewards(s); // any daily or lifetime reward this mission has just earned
+    });
+    ctx.go('results', { levelId, sum, card, prevStars, nextWasOpen, won });
   }
 
   // --- leaving ---------------------------------------------------------------
@@ -295,8 +315,8 @@ export async function missionScreen(ctx, { levelId }) {
       h('div', { class: 'panel small' },
         h('h2', {}, 'Leave this mission?'),
         h('div', { class: 'row' },
-          h('button', { class: 'btn btn-primary', type: 'button', onclick: close }, 'Keep playing'),
-          h('button', { class: 'btn', type: 'button', onclick: () => ctx.go('map') }, 'Leave'))));
+          h('button', { class: 'btn btn-primary', type: 'button', onclick: close }, h('span', { class: 'btn-icon', html: iconSVG('play') }), h('span', {}, 'Keep playing')),
+          h('button', { class: 'btn', type: 'button', onclick: () => ctx.go('map') }, h('span', { class: 'btn-icon', html: iconSVG('home') }), h('span', {}, 'Leave')))));
     root.append(overlay);
   }
   const onHide = () => { if (document.hidden) audio.stop(); };
@@ -318,9 +338,10 @@ export async function missionScreen(ctx, { levelId }) {
     root.append(overlay);
     setGuide('idle');
     renderPips();
+    refresh(); // hides Done / Undo until a turn needs them
 
     const ready = Promise.race([
-      Promise.all([audio.preload(itemUrls), voice.preload(['good', 'goodWait', 'gotIt', 'retry', 'watch', 'result1', 'result2', 'result3', 'enough', level.tip].filter(Boolean))]),
+      Promise.all([audio.preload(itemUrls), voice.preload(['good', 'goodEnd', 'goodWait', 'gotIt', 'retry', 'watch', 'result1', 'result2', 'result3', 'enough', level.tip].filter(Boolean))]),
       wait(8000),
     ]);
     ready.then(() => {
@@ -334,9 +355,13 @@ export async function missionScreen(ctx, { levelId }) {
       if (stage === 2) return;
       audio.unlock();
       sfx.unlock();
-      if (stage === 0 && level.tip && plays < 2 && voice.has(level.tip)) {
+      // The tip is the only teaching of each new rule, so it is spoken until he has passed the level
+      // (2 stars), and the very first time it cannot be skipped by a double tap.
+      const passed = (store.get().levels[levelId]?.stars || 0) >= 2;
+      if (stage === 0 && level.tip && (plays < 2 || !passed) && voice.has(level.tip)) {
         stage = 1;
-        start.textContent = 'Skip';
+        start.disabled = plays === 0;
+        start.textContent = plays === 0 ? '…' : 'Skip';
         overlay.querySelector('.guide').innerHTML = guideSVG('talk');
         await voice.say(level.tip);
         if (!alive || stage !== 1) return;

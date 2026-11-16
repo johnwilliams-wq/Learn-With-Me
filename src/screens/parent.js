@@ -1,10 +1,16 @@
-// Grown-ups' area: what he has practised, what the patterns are, and the settings.
+// Grown-ups' area, behind a PIN that the parent chooses on this device:
+//   Progress - what he has practised and what the patterns are
+//   Rewards  - daily and lifetime rewards, and what is waiting to be handed out
+//   Chores   - the chore list, and photos waiting to be checked
+//   Settings - voice, daily limit, backup, PIN
 // Everything shown here is computed from data stored on this device only.
 
 import { h, mount } from '../core/dom.js';
 import { overview, observations, skillStats, errorStats } from '../listening/insights.js';
 import { rankFor } from '../listening/progress.js';
+import { badges } from '../rewards/logic.js';
 import { iconSVG } from '../art/sprites.js';
+import { pinGate, changePinButton, rewardsTab, choresTab } from './admin.js';
 
 const TIPS = [
   'Get his eyes first. Say his name, wait until he looks at you, then give the instruction.',
@@ -16,39 +22,33 @@ const TIPS = [
   'Short and often beats long and rare: one or two missions a day, most days.',
 ];
 
-export function parentScreen(ctx) {
+const section = (title, ...kids) => h('section', { class: 'panel' }, h('h2', {}, title), ...kids);
+
+export function parentScreen(ctx, { tab: startTab } = {}) {
   const { store } = ctx;
   const body = h('main', { class: 'parent-body' });
+  const tabs = h('nav', { class: 'tabs', hidden: true });
+  let tab = startTab || 'progress';
+  let backupText = ''; // survives a redraw of the Settings tab, so Make backup -> Erase -> Restore works
   const el = h('div', { class: 'screen parent' },
     h('header', { class: 'sub-head' },
       h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Back', html: iconSVG('back'), onclick: () => ctx.go('map') }),
       h('h1', {}, 'For parents'),
       h('div', {})),
-    body);
+    tabs, body);
 
-  function gate() {
-    const a = 12 + Math.floor(Math.random() * 7);
-    const b = 6 + Math.floor(Math.random() * 4);
-    const input = h('input', { type: 'text', inputmode: 'numeric', autocomplete: 'off', class: 'gate-input', 'aria-label': 'Answer' });
-    const msg = h('p', { class: 'gate-msg' });
-    const form = h('form', { class: 'panel small gate' },
-      h('h2', {}, 'Grown-ups only'),
-      h('p', {}, `What is ${a} × ${b}?`),
-      input,
-      h('button', { class: 'btn btn-primary', type: 'submit' }, 'Open'),
-      msg);
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (Number(input.value.trim()) === a * b) dashboard();
-      else {
-        msg.textContent = 'Not quite - try again.';
-        input.value = '';
-      }
-    });
-    mount(body, form);
+  function show(which) {
+    tab = which;
+    const b = badges(store.get());
+    mount(tabs, [['progress', 'Progress', 0], ['rewards', 'Rewards', b.rewardsOwed], ['chores', 'Chores', b.toCheck], ['settings', 'Settings', 0]].map(([id, label, n]) =>
+      h('button', { class: `tab${id === tab ? ' on' : ''}`, type: 'button', dataset: { tab: id }, onclick: () => show(id) }, label, n ? h('span', { class: 'dot' }, String(n)) : null)));
+    tabs.hidden = false;
+    const refresh = () => show(tab);
+    mount(body, tab === 'rewards' ? rewardsTab(ctx, refresh) : tab === 'chores' ? choresTab(ctx, refresh) : tab === 'settings' ? settingsTab(refresh) : progressTab());
+    body.scrollTop = 0;
   }
 
-  function dashboard() {
+  function progressTab() {
     const s = store.get();
     const o = overview(s);
     const rank = rankFor(s.xp);
@@ -61,10 +61,33 @@ export function parentScreen(ctx) {
       if (Math.abs(d) < 5) return ' (steady)';
       return (d > 0) !== !!lowerIsBetter ? ` (up from ${before}%)` : ` (down from ${before}%)`;
     };
-
     const stat = (value, label) => h('div', { class: 'stat' }, h('b', {}, String(value)), h('span', {}, label));
-    const section = (title, ...kids) => h('section', { class: 'panel' }, h('h2', {}, title), ...kids);
+    return [
+      section('At a glance',
+        h('div', { class: 'stats' },
+          stat(o.missions, 'missions'), stat(o.days, 'days played'), stat(`${o.minutes} min`, 'total practice'),
+          stat(`${s.xp}`, `points (${rank.name})`), stat(o.trials ? `${o.firstPct}%` : '-', 'right on the first try'), stat(o.trials ? `${o.earlyPct}%` : '-', 'turns he jumped in early')),
+        o.trials ? h('p', { class: 'fine' }, `Based on his last ${Math.min(60, o.trials)} turns. First-try accuracy${trend(o.firstPct, o.prevPct, false)}; jumping in early${trend(o.earlyPct, o.prevEarlyPct, true)}; asked to hear it again on ${o.replayPct}% of turns (asking again is a good habit). Levels get harder as he goes, so a small dip after a new level opens is normal.`) : null),
+      section('What stands out', h('ul', { class: 'obs' }, observations(s).map((t) => h('li', {}, t)))),
+      section('By skill (right on the first try)',
+        skills.length
+          ? h('div', { class: 'bars' }, skills.map((k) => h('div', { class: 'bar-row' },
+              h('span', { class: 'bar-label' }, k.label),
+              h('span', { class: 'bar' }, h('i', { style: { width: `${k.pct}%` } })),
+              h('span', { class: 'bar-num' }, `${k.correct}/${k.n}`))))
+          : h('p', { class: 'fine' }, 'Nothing yet.'),
+        h('p', { class: 'fine' }, 'An instruction can count under more than one skill, so one slip may lower two bars.')),
+      section('When it goes wrong, what happens?',
+        errors.length
+          ? h('ul', { class: 'obs' }, errors.map((e) => h('li', {}, `${e.label}: ${e.n}`)))
+          : h('p', { class: 'fine' }, 'No slips recorded yet.'),
+        h('p', { class: 'fine' }, 'The game responds to every slip the same way: no buzzers; he taps the ear and hears it again a little slower; if needed the guide shows him.')),
+      section('Helping the same skills away from the screen', h('ul', { class: 'obs' }, TIPS.map((t) => h('li', {}, t)))),
+    ];
+  }
 
+  function settingsTab(refresh) {
+    const s = store.get();
     const toggle = (label, get, set, note) => {
       const box = h('input', { type: 'checkbox' });
       box.checked = !!get(store.get());
@@ -74,60 +97,45 @@ export function parentScreen(ctx) {
     const daily = h('select', {}, [2, 3, 4, 5, 8].map((n) => h('option', { value: n }, `${n} missions`)));
     daily.value = String(s.settings.dailyMissions || 3);
     daily.addEventListener('change', () => store.update((st) => { st.settings.dailyMissions = Number(daily.value); }));
-
     const backup = h('textarea', { class: 'backup', rows: 3, placeholder: 'Paste a backup here, then press Restore', 'aria-label': 'Backup text' });
     const backupMsg = h('p', { class: 'gate-msg' });
-
-    mount(body,
-      section('At a glance',
-        h('div', { class: 'stats' },
-          stat(o.missions, 'missions'), stat(o.days, 'days played'), stat(`${o.minutes} min`, 'total practice'),
-          stat(rank.name, 'rank'), stat(o.trials ? `${o.firstPct}%` : '-', 'right on first listen'), stat(o.trials ? `${o.earlyPct}%` : '-', 'turns he jumped in early')),
-        o.trials ? h('p', { class: 'fine' }, `Based on his last ${Math.min(60, o.trials)} turns. First-listen accuracy${trend(o.firstPct, o.prevPct, false)}; jumping in early${trend(o.earlyPct, o.prevEarlyPct, true)}; asked to hear it again on ${o.replayPct}% of turns (asking again is a good habit).`) : null),
-      section('What stands out', h('ul', { class: 'obs' }, observations(s).map((t) => h('li', {}, t)))),
-      section('By skill (right on the first listen)',
-        skills.length
-          ? h('div', { class: 'bars' }, skills.map((k) => h('div', { class: 'bar-row' },
-              h('span', { class: 'bar-label' }, k.label),
-              h('span', { class: 'bar' }, h('i', { style: { width: `${k.pct}%` } })),
-              h('span', { class: 'bar-num' }, `${k.correct}/${k.n}`))))
-          : h('p', { class: 'fine' }, 'Nothing yet.')),
-      section('When it goes wrong, what happens?',
-        errors.length
-          ? h('ul', { class: 'obs' }, errors.map((e) => h('li', {}, `${e.label}: ${e.n}`)))
-          : h('p', { class: 'fine' }, 'No slips recorded yet.'),
-        h('p', { class: 'fine' }, 'The game responds to every slip the same way: no buzzers, he hears the instruction again a little slower, and if needed the guide shows him.')),
-      section('Helping the same skills away from the screen', h('ul', { class: 'obs' }, TIPS.map((t) => h('li', {}, t)))),
+    backup.value = backupText;
+    backup.addEventListener('input', () => { backupText = backup.value; });
+    return [
       section('Settings',
         toggle('Sound effects', (st) => st.settings.sfx, (st, v) => { st.settings.sfx = v; }),
         toggle('Slower voice', (st) => st.settings.slowVoice, (st, v) => { st.settings.slowVoice = v; }, 'Plays every instruction about 12% slower.'),
-        h('label', { class: 'setting' }, daily, h('span', {}, h('b', {}, 'Suggest stopping after'), h('small', {}, 'Short, regular practice works better than long sessions.'))),
+        h('label', { class: 'setting' }, daily, h('span', {}, h('b', {}, 'Suggest stopping after'), h('small', {}, 'Short, regular practice works better than long sessions. If a daily reward needs more missions than this, the suggestion waits until he has won it.'))),
         toggle('Lock for the day after that', (st) => st.settings.hardStop, (st, v) => { st.settings.hardStop = v; }, 'Otherwise it is only a friendly suggestion.'),
-        toggle('Unlock every level', (st) => st.flags.unlockAll, (st, v) => { st.flags.unlockAll = v; }, 'Lets you jump anywhere. Leave off for normal step-by-step progress.')),
+        toggle('Unlock every level', (st) => st.flags.unlockAll, (st, v) => { st.flags.unlockAll = v; }, 'Lets you jump anywhere. Leave off for normal step-by-step progress.'),
+        h('div', { class: 'row', style: { justifyContent: 'flex-start' } }, changePinButton(ctx, body, () => show('settings')))),
       section('Backup',
-        h('p', { class: 'fine' }, 'Progress is stored only on this device. Copy a backup if you want to move it or keep it safe.'),
+        h('p', { class: 'fine' }, 'Everything is stored only on this device. Copy a backup if you want to move it or keep it safe. (Chore photos are not part of a backup.)'),
         h('div', { class: 'row' },
           h('button', { class: 'btn', type: 'button', onclick: async () => {
-            backup.value = store.exportJSON();
+            backup.value = backupText = store.exportJSON();
             try { await navigator.clipboard.writeText(backup.value); backupMsg.textContent = 'Backup copied. It is also in the box below.'; }
             catch { backupMsg.textContent = 'Backup is in the box below - select it and copy.'; }
           } }, 'Make backup'),
           h('button', { class: 'btn', type: 'button', onclick: () => {
-            try { store.importJSON(backup.value); backupMsg.textContent = 'Backup restored.'; dashboard(); }
+            try { store.importJSON(backup.value); ctx.applySettings(); refresh(); }
             catch { backupMsg.textContent = 'That does not look like a backup.'; }
           } }, 'Restore'),
-          h('button', { class: 'btn btn-danger', type: 'button', onclick: (e) => {
+          h('button', { class: 'btn btn-danger', type: 'button', dataset: { act: 'erase' }, onclick: (e) => {
             const b = e.currentTarget;
-            if (b.dataset.sure) { store.reset(); ctx.applySettings(); dashboard(); }
-            else { b.dataset.sure = '1'; b.textContent = 'Tap again to erase everything'; }
-          } }, 'Erase all progress')),
+            if (b.dataset.sure) { store.resetProgress(); ctx.applySettings(); refresh(); }
+            else { b.dataset.sure = '1'; b.textContent = 'Tap again to erase his progress'; }
+          } }, 'Erase his progress')),
+        h('p', { class: 'fine' }, 'Erasing clears his levels, points, cards and history. Your rewards, chores, settings and PIN are kept.'),
         backup, backupMsg),
       section('About this game',
-        h('p', { class: 'fine' }, 'Each turn follows one routine: he chooses when to listen, waits while the voice talks, then does what was said. Levels add one difficulty at a time: more details, more steps, tricky words (not, except, before, after, if), listening from memory, and stories. A level opens when the one before it earns two stars.'),
+        h('p', { class: 'fine' }, 'Each turn follows one routine: he chooses when to listen, waits while the voice talks, then does what was said. Levels add one difficulty at a time: more details, more steps, tricky words (not, except, before, after, if), listening from memory, and stories. A level opens when the one before it earns two stars, or after a few honest tries, so he is never stuck.'),
         h('p', { class: 'fine' }, 'This is practice, not a test or a diagnosis. If you are worried about his hearing, understanding or attention - for example he often mishears, struggles to follow speech in noise, or things are not improving - talk to his teacher, your family doctor, an audiologist or a speech-language pathologist.'),
-        h('p', { class: 'fine' }, `No accounts, no ads, no tracking. Version ${ctx.version}.`)));
+        h('p', { class: 'fine', dataset: { soundcheck: '1' } }, `Sound check since the app was opened: ${ctx.audio.stats.clip} recorded clips played, ${ctx.audio.stats.speech} read by the device voice, ${ctx.audio.stats.none} silent${ctx.audio.stats.lastError ? ` (last problem: ${ctx.audio.stats.lastError})` : ''}. Offline copy: ${navigator.serviceWorker?.controller ? 'ready' : 'not yet'}.`),
+        h('p', { class: 'fine' }, `No accounts, no ads, no tracking. Version ${ctx.version}.`)),
+    ];
   }
 
-  gate();
+  pinGate(ctx, body, () => show(tab));
   return { el };
 }

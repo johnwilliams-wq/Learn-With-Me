@@ -17,7 +17,7 @@
      "id": "w1l2",
      "title": "Color It",
      "tip": "tip-w1l2",
-     "tipText": "Now listen for the color. There is more than one, so the color tells you which.",
+     "tipText": "Now listen for the color. Some of them look the same, so the color tells you which one.",
      "trials": 6
     },
     {
@@ -74,7 +74,7 @@
      "id": "w2l1",
      "title": "This, Then That",
      "tip": "tip-w2l1",
-     "tipText": "Now there are two things to do. Tap them in the order I say, then press Done. If you slip, press Undo.",
+     "tipText": "Two things to do now. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.",
      "trials": 6
     },
     {
@@ -141,7 +141,7 @@
      "id": "w3l2",
      "title": "All of Them",
      "tip": "tip-w3l2",
-     "tipText": "When I say ALL, tap every one that fits. Then press Done.",
+     "tipText": "When I say ALL, tap every one that fits. Then press the green check mark.",
      "trials": 6
     },
     {
@@ -162,7 +162,7 @@
      "id": "w3l5",
      "title": "Left and Right",
      "tip": "tip-w3l5",
-     "tipText": "Left and right. Here is a trick: hold up your hands. Your left hand makes the letter L.",
+     "tipText": "Left and right. Here is a trick: hold up both hands with your thumbs sticking out. The hand that makes an L is your left.",
      "trials": 6
     },
     {
@@ -212,14 +212,14 @@
      "id": "w4l4",
      "title": "Flip It: Before",
      "tip": "tip-w4l4",
-     "tipText": "Careful! Sometimes I say the second thing first. Listen for BEFORE, and think: what happens first?",
+     "tipText": "Careful! Sometimes I say it backwards. Before you eat, wash your hands. So washing comes first. Listen for BEFORE, and think: what comes first?",
      "trials": 6
     },
     {
      "id": "w4l5",
      "title": "Flip It: After",
      "tip": "tip-w4l5",
-     "tipText": "Careful again. Listen for AFTER, and think: what happens first?",
+     "tipText": "Careful again. Eat after you wash your hands. Washing still comes first. Listen for AFTER, and think: what comes first?",
      "trials": 6
     },
     {

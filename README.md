@@ -27,11 +27,19 @@ and works offline.
 
 ## For parents
 
-Tap the parent icon on the map (it asks a multiplication question first). You will find what he has
-practised, which kinds of instruction go well, what tends to go wrong, ideas for practising the same
-skills away from the screen, and the settings (slower voice, daily limit, backup, reset).
+Tap the parent icon on the map. The first time, it asks a multiplication question and then lets you
+choose a PIN; after that it always asks for the PIN. Inside:
 
-All progress stays on the device. There are no accounts, ads or tracking.
+- **Progress** - what he has practised, which kinds of instruction go well, what tends to go wrong,
+  and ideas for practising the same skills away from the screen.
+- **Rewards** - set daily rewards ("3 missions today = 15 minutes of game time") and lifetime rewards
+  ("1000 points = trampoline park"). When he wins one it waits under "To hand out" until you mark it given.
+- **Chores** - add chores with points. He taps Done and takes a photo; you approve it or send it back.
+  Approved chores add to the same points total as missions. Photos never leave the iPad.
+- **Settings** - slower voice, daily limit, backup, erase, change PIN.
+
+Everything stays on the device. There are no accounts, ads or tracking. Because there is no server,
+the game cannot send push notifications: badges inside the app show what is waiting.
 
 This is practice, not a test or a diagnosis.
 

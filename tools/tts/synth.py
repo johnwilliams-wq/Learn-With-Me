@@ -24,7 +24,7 @@ MODELS = Path(os.environ.get("LWM_TTS_MODELS", Path.home() / ".cache" / "tts"))
 SR = 24000
 TARGET_RMS_DB = -18.0   # loudness of the spoken part of every clip
 PEAK_LIMIT_DB = -1.5
-LEAD_PAD = 0.08         # seconds of silence before / after the speech
+LEAD_PAD = 0.25         # seconds of silence before / after the speech (Bluetooth speakers swallow the first instant)
 TAIL_PAD = 0.18
 
 

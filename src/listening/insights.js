@@ -8,13 +8,15 @@ export const SKILLS = {
   steps2: 'Two-step instructions',
   count: 'How many times',
   hidden: 'Listen first, then look (from memory)',
-  not: '“Not” and “don’t”',
+  not: '“Not”',
   all: '“All”, “both”, “every”',
   except: '“Except”',
-  where: 'Position words (left, right, next to, between)',
+  where: 'Position words (next to, between, middle, top, bottom)',
+  side: 'Left and right',
   order: '“First”, “then”, “last”',
   after: '“After”',
   before: '“Before”',
+  flip: 'Before / after said backwards (“Before you do B, do A”)',
   wait: 'Waiting for the real order',
   if: '“If” instructions',
   steps3: 'Three-step instructions',
@@ -81,7 +83,7 @@ export function observations(state) {
   const trials = (state.trials || []).slice(-150);
   const out = [];
   if (trials.length < 12) return ['Not enough practice yet to say anything useful. Check back after a few missions.'];
-  const skills = skillStats(trials).filter((s) => s.n >= 6);
+  const skills = skillStats(trials).filter((s) => s.n >= 12); // too few turns say nothing reliable
   const weak = skills.filter((s) => s.pct < 70).sort((a, b) => a.pct - b.pct)[0];
   const strong = skills.filter((s) => s.pct >= 85).sort((a, b) => b.n - a.n)[0];
   if (strong) out.push(`Going well: ${strong.label.toLowerCase()} (${strong.correct} of ${strong.n} right first time).`);

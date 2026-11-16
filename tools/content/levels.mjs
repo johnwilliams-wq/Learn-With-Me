@@ -62,13 +62,13 @@ const LEAD_INS = [
   'It is a sunny day at camp.',
   'The heroes are getting ready for an adventure.',
   'Wow, what a windy morning.',
-  'Blip had pancakes for breakfast.',
+  'Blip ate pancakes for breakfast.',
   'A little bird is singing outside.',
   'The camp fire is warm and cozy.',
   'Everybody is waiting for you.',
   'It rained all night long.',
   'Blip polished his antenna today.',
-  'The path up the mountain is long.',
+  'The mountain path is very long.',
 ];
 
 // ----------------------------------------------------------------------------- world 1
@@ -77,17 +77,18 @@ const w1 = {
   id: 'w1', name: 'Rookie Camp', blurb: 'One thing at a time. Listen for every clue.', speed: 0.88,
   levels: [
     {
-      id: 'w1l1', title: 'Name It', n: 22,
+      id: 'w1l1', title: 'Name It', n: 30,
       tip: 'Welcome to Rookie Camp! Here is how it works. Tap the ear when you are ready to listen. Wait until I finish talking. Then tap what I said.',
       gen(rng, i) {
-        const target = OBJECTS[i % OBJECTS.length];
-        const objects = [target, ...pickKinds(rng, 2, { avoid: [target] })].map((k) => obj(k, col(rng)));
+        const all = [...OBJECTS, ...CHARS];
+        const target = all[i % all.length];
+        const objects = [target, ...pickKinds(rng, 2, { from: CHARS.includes(target) ? CHARS : OBJECTS, avoid: [target] })].map((k) => obj(k, col(rng)));
         return single(`Tap the ${target}.`, objects, objects[0], ['name'], 'name');
       },
     },
     {
       id: 'w1l2', title: 'Color It', n: 24,
-      tip: 'Now listen for the color. There is more than one, so the color tells you which.',
+      tip: 'Now listen for the color. Some of them look the same, so the color tells you which one.',
       gen(rng) {
         const [K, K2] = pickKinds(rng, 2);
         const [C, C2, C3, C4] = pickColors(rng, 4);
@@ -159,7 +160,7 @@ const w2 = {
   levels: [
     {
       id: 'w2l1', title: 'This, Then That', n: 24,
-      tip: 'Now there are two things to do. Tap them in the order I say, then press Done. If you slip, press Undo.',
+      tip: 'Two things to do now. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.',
       gen(rng, i) {
         const objects = things(rng, 4);
         const [a, b] = objects;
@@ -227,9 +228,10 @@ const w3 = {
       tip: 'Tricky word alert: NOT. Listen for the one I do not want.',
       gen(rng, i) {
         if (i % 3 === 2) {
-          const [K, K2] = pickKinds(rng, 2);
-          const t = obj(K2, col(rng));
-          return single(`Tap the one that is not ${an(K)} ${K}.`, [t, ...pickColors(rng, 3).map((c) => obj(K, c))], t, ['not'], 'not-kind');
+          const [K, K2, K3] = pickKinds(rng, 3);
+          const [C, C2] = pickColors(rng, 2);
+          const t = obj(K2, C);
+          return single(`Tap the ${C} one that is not ${an(K)} ${K}.`, [t, obj(K, C), obj(K, C2), obj(K3, C2)], t, ['not', 'detail'], 'not-kind');
         }
         const [K, K2, K3] = pickKinds(rng, 3);
         const [C, D, E] = pickColors(rng, 3);
@@ -241,7 +243,7 @@ const w3 = {
     },
     {
       id: 'w3l2', title: 'All of Them', n: 24, maxSame: 2,
-      tip: 'When I say ALL, tap every one that fits. Then press Done.',
+      tip: 'When I say ALL, tap every one that fits. Then press the green check mark.',
       gen(rng, i) {
         switch (i % 4) {
           case 0: {
@@ -299,7 +301,7 @@ const w3 = {
       gen(rng, i) {
         switch (i % 4) {
           case 0: {
-            const n = rng.pick([3, 5]);
+            const n = 5;
             const objects = things(rng, n);
             return single('Tap the one in the middle.', objects, objects[(n - 1) / 2], ['where'], 'middle', { keepOrder: true, cols: n });
           }
@@ -333,7 +335,7 @@ const w3 = {
     },
     {
       id: 'w3l5', title: 'Left and Right', n: 24,
-      tip: 'Left and right. Here is a trick: hold up your hands. Your left hand makes the letter L.',
+      tip: 'Left and right. Here is a trick: hold up both hands with your thumbs sticking out. The hand that makes an L is your left.',
       gen(rng, i) {
         const side = i % 2 ? 'right' : 'left';
         if (i % 4 < 2) {
@@ -344,14 +346,14 @@ const w3 = {
           const x = obj(X, col(rng));
           const y = obj(Y, col(rng));
           const objects = rng.pick([[a, x, y, b], [a, x, b, y], [x, a, y, b]]);
-          return single(`Tap the ${K} on the ${side}.`, objects, side === 'left' ? a : b, ['where'], 'on-side', { keepOrder: true, cols: 4 });
+          return single(`Tap the ${K} on the ${side}.`, objects, side === 'left' ? a : b, ['side'], 'on-side', { keepOrder: true, cols: 4 });
         }
         const n = rng.pick([4, 5]);
         const objects = things(rng, n);
         // Only one thing lies on that side of the named object, so "to the left of" cannot be misread.
         const ref = side === 'left' ? objects[1] : objects[n - 2];
         const t = side === 'left' ? objects[0] : objects[n - 1];
-        return single(`Tap the one to the ${side} of the ${ref.kind}.`, objects, t, ['where'], 'side-of', { keepOrder: true, cols: n });
+        return single(`Tap the one to the ${side} of the ${ref.kind}.`, objects, t, ['side'], 'side-of', { keepOrder: true, cols: n });
       },
     },
     { id: 'w3l6', title: 'Woods Wizard', boss: true, mix: ['w3l1', 'w3l2', 'w3l3', 'w3l4', 'w3l5'], tip: 'Woods challenge! Not, all, except, and where. Listen for the tricky word.' },
@@ -365,7 +367,9 @@ function orderItem(forms, s, v) {
   return (rng, i) => {
     const objects = things(rng, 4);
     const [a, b] = objects;
-    return { say: forms[i % forms.length](a.kind, b.kind), objects, expect: [[a], [b]], auto: false, s, v };
+    const form = forms[i % forms.length];
+    const [fn, fv] = Array.isArray(form) ? form : [form, v];
+    return { say: fn(a.kind, b.kind), objects, expect: [[a], [b]], auto: false, s: fv === v ? s : s.filter((t) => t !== 'flip'), v: fv };
   };
 }
 
@@ -399,19 +403,21 @@ const w4 = {
     },
     {
       id: 'w4l4', title: 'Flip It: Before', n: 24,
-      tip: 'Careful! Sometimes I say the second thing first. Listen for BEFORE, and think: what happens first?',
+      tip: 'Careful! Sometimes I say it backwards. Before you eat, wash your hands. So washing comes first. Listen for BEFORE, and think: what comes first?',
       gen: orderItem([
         (a, b) => `Before you tap the ${b}, tap the ${a}.`,
+        [(a, b) => `Tap the ${a} before you tap the ${b}.`, 'before'],
         (a, b) => `Before tapping the ${b}, tap the ${a}.`,
-      ], ['before'], 'before-flipped'),
+      ], ['before', 'flip'], 'before-flipped'),
     },
     {
       id: 'w4l5', title: 'Flip It: After', n: 24,
-      tip: 'Careful again. Listen for AFTER, and think: what happens first?',
+      tip: 'Careful again. Eat after you wash your hands. Washing still comes first. Listen for AFTER, and think: what comes first?',
       gen: orderItem([
         (a, b) => `Tap the ${b} after you tap the ${a}.`,
+        [(a, b) => `After you tap the ${a}, tap the ${b}.`, 'after'],
         (a, b) => `Tap the ${b} after the ${a}.`,
-      ], ['after'], 'after-flipped'),
+      ], ['after', 'flip'], 'after-flipped'),
     },
     { id: 'w4l6', title: 'Tower Boss', boss: true, mix: ['w4l1', 'w4l2', 'w4l3', 'w4l4', 'w4l5'], tip: 'Tower boss! Before and after, all mixed up. Think: what happens first?' },
   ],
@@ -420,6 +426,7 @@ const w4 = {
 // ----------------------------------------------------------------------------- world 5
 
 const IMPOSTORS = ['The pirate', 'The dragon', 'The wizard', 'The parrot'];
+const FLAMES = ['torch', 'rocket']; // drawn with a yellow flame, so "is it yellow?" would be unfair
 
 const w5 = {
   id: 'w5', name: "Captain's Deck", blurb: 'Wait for the real order.', speed: 0.95, allowNone: true,
@@ -467,7 +474,7 @@ const w5 = {
           return { say: `If you see ${an(ch)} ${ch}, tap the ${t.kind}.`, objects: scene, expect: go ? [[t]] : [], auto: true, s: ['if'], v: 'if-see', g: go ? 'go' : 'nogo' };
         }
         const [K, K2, K3, K4] = pickKinds(rng, 4);
-        const [C, D] = pickColors(rng, 2);
+        const [C, D] = pickColors(rng, 2, { avoid: FLAMES.includes(K) ? ['yellow'] : [] });
         const t = obj(K, go ? C : D);
         return { say: `If the ${K} is ${C}, tap it.`, objects: [t, obj(K2, C), obj(K3, col(rng)), obj(K4, col(rng))], expect: go ? [[t]] : [], auto: true, s: ['if'], v: 'if-colour', g: go ? 'go' : 'nogo' };
       },
@@ -504,7 +511,7 @@ const w5 = {
         if (p === 1 || p === 4) {
           const go = p === 1;
           const [K, K2, K3, K4] = pickKinds(rng, 4);
-          const [C, D] = pickColors(rng, 2);
+          const [C, D] = pickColors(rng, 2, { avoid: FLAMES.includes(K) ? ['yellow'] : [] });
           const t = obj(K, go ? C : D);
           return { say: `Tap the ${K}, but only if it is ${C}.`, objects: [t, obj(K2, C), obj(K3, col(rng)), obj(K4, col(rng))], expect: go ? [[t]] : [], auto: false, s: ['end', 'if'], v: go ? 'only-if-go' : 'only-if-no' };
         }

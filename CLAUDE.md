@@ -24,6 +24,10 @@ These came from the parent's brief; do not trade them away for features.
 5. **Reading is never required** to play. Text on child screens is decoration or for the parent.
 6. **Short sessions**: 6 instructions per mission; a gentle "good place to stop" after a few missions.
 7. **No accounts, ads, analytics or network calls** beyond loading the app's own files.
+8. **The parent area is locked by a PIN the parent chooses on the device.** Only a salted hash is
+   stored. Never put a PIN, a hash, or any family detail in this repository.
+9. **Rewards never take anything away.** Daily rewards and lifetime tiers are only ever won; chore
+   points arrive when a grown-up approves. Chore photos stay on the device and are deleted once checked.
 
 ## Layout
 
@@ -34,7 +38,10 @@ src/core/                   dom helpers, store (localStorage), audio (voice clip
 src/art/sprites.js          all art as inline SVG: spriteSVG(kind, color), guideSVG(mood), iconSVG(name)
 src/listening/              checker (is the answer right), progress (stars/unlocks/picking items),
                             board (tappable grid), bank (data loading), cards, insights (parent stats)
-src/screens/                title, map, mission, results, collection, parent
+src/rewards/logic.js        rules for daily rewards, lifetime tiers and chores (pure functions)
+src/core/pin.js, photos.js  parent PIN (salted hash), chore photos (IndexedDB, shrunk JPEGs)
+src/screens/                title, map, mission, results, collection, rewards, chores,
+                            parent (tabs: Progress / Rewards / Chores / Settings), admin (PIN pad + the two tabs)
 assets/data/                GENERATED: listening/levels.json, listening/<level>.json, voice.json, audio.json
 assets/audio/               GENERATED voice clips (mp3): listening/ = instructions, ui/ = the guide's lines
 tools/content/              levels.mjs (the curriculum + item generators), voice.mjs (guide lines), build.mjs
@@ -97,6 +104,22 @@ bash tools/tts/setup.sh                               # once per machine; needs 
 `verify.py` writes `tools/tts/report.json`; anything listed under `failed` must be reworded or accepted
 knowingly. In Claude Code cloud sessions use the `learn-with-me` environment (it allows the Hugging Face hosts).
 
+## Rewards and chores (all on the device)
+
+- State lives in `store` under `rewards` (`daily`, `tiers`, `earned`), `chores` (`list`, `log`) and `admin` (PIN hash).
+- **Points are XP.** Missions add XP; an approved chore adds its points to the same total. Lifetime tiers
+  are thresholds on that total; daily rewards count missions finished today.
+- A mission counts toward daily rewards only if the level was below 3 stars before it was played
+  (`missionCounts`), unless the parent turns that off - otherwise replaying level 1 would farm rewards.
+- Everything a grown-up owes him sits in `rewards.earned` until marked "Given" in the Rewards tab.
+- Chores: he taps Done -> camera (a file input with `capture`) -> photo saved in IndexedDB -> entry is
+  `pending` -> the parent approves or sends it back in the Chores tab -> photo deleted.
+- Reward and chore names are typed by the parent, so every row has a speaker button that reads it aloud
+  with the device voice (`audio.speak`), and icons are emoji picked from a list.
+- **Not built: push notifications and approving from another device.** Both need a server (Web Push needs
+  one to send, and two devices need somewhere to sync). Do not add one without the owner's explicit
+  decision - it changes the "nothing leaves the device" promise.
+
 ## iPad / web-app constraints (learned the hard way - keep these)
 
 - Sound needs a user tap first: the title screen's Play button unlocks one shared `<audio>` element
@@ -105,6 +128,9 @@ knowingly. In Claude Code cloud sessions use the `learn-with-me` environment (it
 - Voice goes through a media element, not Web Audio, so the iPad's mute setting does not silence it;
   only the small sound effects use Web Audio.
 - Safari and the home-screen app keep separate storage: install first, then play.
+- The built-in voice (`speechSynthesis`) only works on iOS after it has spoken once inside a tap; `audio.unlock()` primes it.
+- Nothing may wait without a time limit (network or playback): a stuck "Listening" state is the worst failure.
+- After a miss he taps the ear again (audio always starts from a tap; it also keeps the routine).
 - All URLs are relative (the site lives in a sub-folder on GitHub Pages). `.nojekyll` must stay.
 - It has only been tested in desktop Chromium at iPad size. Anything touching audio, storage or the
   service worker should be re-checked on the real iPad by the parent.

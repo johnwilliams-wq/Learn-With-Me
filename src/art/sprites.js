@@ -465,6 +465,18 @@ const ICONS = {
     `<circle cx="36" cy="22" r="14" fill="${CC}"/>` + IF('M12 93V62C12 48 22 41 36 41S60 48 60 62V93Z') +
     `<circle cx="77" cy="50" r="10" fill="${CC}"/>` + IF('M63 93V78C63 69 69 64 77 64S91 69 91 78V93Z'),
   close: () => IS('M22 22 78 78M78 22 22 78', 15),
+  // a wrapped present: lid and box split by a ribbon, with a bow on top
+  gift: () =>
+    `<rect x="10" y="32" width="32" height="15" rx="4" fill="${CC}"/><rect x="58" y="32" width="32" height="15" rx="4" fill="${CC}"/>` +
+    `<rect x="16" y="53" width="26" height="37" rx="4" fill="${CC}"/><rect x="58" y="53" width="26" height="37" rx="4" fill="${CC}"/>` +
+    `<rect x="46" y="32" width="8" height="58" rx="2" fill="${CC}"/>` +
+    `<circle cx="37" cy="19" r="9" fill="none" stroke="${CC}" stroke-width="7"/><circle cx="63" cy="19" r="9" fill="none" stroke="${CC}" stroke-width="7"/>`,
+  // a camera: body with a ring-shaped lens
+  camera: () =>
+    IF('M12 34Q12 26 20 26H32L38 16H62L68 26H80Q88 26 88 34V76Q88 84 80 84H20Q12 84 12 76ZM50 38a17 17 0 1 0 0.01 0ZM50 47a8 8 0 1 0 0.01 0Z', 0, 'evenodd'),
+  // a to-do list: a card with two ticked lines
+  chores: () =>
+    IF('M22 12H78Q86 12 86 20V82Q86 90 78 90H22Q14 90 14 82V20Q14 12 22 12ZM25 35 33 43 46 28 41 23 33 32 30 30ZM53 29H76V38H53ZM25 64 33 72 46 57 41 52 33 61 30 59ZM53 58H76V67H53Z', 0, 'evenodd'),
 };
 
 export function iconSVG(name) {
