@@ -177,8 +177,9 @@ async function warmAudio() {
 
 // --- the family account: keep in step while the app is in front ---------------
 // The device he plays on reports after every change and looks for what grown-ups asked for;
-// a grown-up's own device only looks while its parent area is open.
-const inStep = () => family.status().role === 'player' || ctx.debug.screen === 'parent';
+// a grown-up's own device only looks while its parent area is open - except that
+// a change that has not left it yet is sent as soon as it can be, whatever is on screen.
+const inStep = () => { const st = family.status(); return st.role === 'player' || ctx.debug.screen === 'parent' || st.unsent > 0; };
 store.subscribe(() => family.kick('change'));
 document.addEventListener('visibilitychange', () => { if (!document.hidden && inStep()) family.kick('look'); });
 setInterval(() => { if (!document.hidden && inStep()) family.kick('tick'); }, 30000);

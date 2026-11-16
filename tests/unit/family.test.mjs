@@ -31,14 +31,16 @@ function photoShelf() {
   };
 }
 /** One device: its own save, its own pictures, its own record of the account. */
-function device(server, { clock } = {}) {
+function device(server, { clock, screen, slow = 0 } = {}) {
   const store = createStore(memoryBackend());
   const box = createBox(memoryBackend());
   const photos = photoShelf();
-  const api = createApi({ url: server.url, key: 'test-key', timeout: 3000, session: { get: () => box.get().session, set: (s) => box.set((b) => { b.session = s; }) } });
-  const family = createFamily({ store, api, box, photos, ...(clock ? { clock } : {}) });
+  const fetchFn = slow ? (...a) => new Promise((r) => setTimeout(r, slow)).then(() => fetch(...a)) : undefined;
+  const api = createApi({ url: server.url, key: 'test-key', timeout: 3000, session: { get: () => box.get().session, set: (s) => box.set((b) => { b.session = s; }) }, ...(fetchFn ? { fetchFn } : {}) });
+  const family = createFamily({ store, api, box, photos, ...(clock ? { clock } : {}), ...(screen ? { screen } : {}) });
   return { store, box, photos, api, family };
 }
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /** A family with the device he plays on (with a few things on it) and a grown-up's device, both signed in. */
 async function household(t) {
   const server = await startFamilyServer();
@@ -475,3 +477,220 @@ test('housekeeping: old commands and pictures nothing points to are cleared away
   assert.deepEqual([...server.db.objects.keys()].map((k) => k.split('/')[1]), [used]);
   assert.equal(server.db.commands.length, 0);
 });
+
+// ---------------------------------------------------------------- what a review found (each of these went wrong once)
+
+test('an expectation is ticked for the day it was pressed on, never for the next one', async (t) => {
+  const server = await startFamilyServer();
+  t.after(() => server.close());
+  let time = new Date(2026, 10, 16, 21, 0).getTime(); // Monday evening
+  const clock = () => time;
+  const ipad = device(server, { clock });
+  let ex;
+  ipad.store.update((s) => { ex = addItem(s, 'expect', { title: 'Brush your teeth' }); s.expectations.confirm = true; });
+  await ipad.family.signUp('days@example.com', 'correct horse');
+  await ipad.family.setRole('player');
+  const phone = device(server, { clock });
+  await phone.family.signIn('days@example.com', 'correct horse');
+  await phone.family.setRole('manager');
+  phone.family.desk().run('expect', { id: ex.id, done: true });
+  assert.equal(expectationsToday(phone.family.desk().state(), new Date(time)).done, 1, 'shown as done on the phone, on Monday');
+  await phone.family.sync();
+  time = new Date(2026, 10, 17, 7, 0).getTime(); // his device is next opened on Tuesday morning
+  await ipad.family.sync();
+  assert.equal(expectationsToday(ipad.store.get(), new Date(time)).done, 0, 'Tuesday starts with nothing done');
+  assert.deepEqual(server.db.commands.map((c) => c.outcome), ['late']);
+  await phone.family.sync();
+  assert.equal(expectationsToday(phone.family.desk().state(), new Date(time)).done, 0, 'and the phone agrees');
+  assert.equal(phone.family.status().waiting, 0);
+  // the same day works as before; an odd day changes nothing
+  phone.family.desk().run('expect', { id: ex.id, done: true });
+  await phone.family.sync(); await ipad.family.sync();
+  assert.equal(expectationsToday(ipad.store.get(), new Date(time)).done, 1);
+  assert.equal(act(ipad.store.get(), 'expect', { id: ex.id, done: false, day: '../../x' }, new Date(time)).why, 'late');
+});
+
+test('a change made while the device is busy sending the one before is sent right after it', async (t) => {
+  const server = await startFamilyServer();
+  t.after(() => server.close());
+  const phone = device(server, { slow: 120 });
+  await phone.family.signUp('quick@example.com', 'correct horse');
+  await phone.family.setRole('manager');
+  phone.family.desk().run('add', { kind: 'chore', item: { title: 'First' } });
+  await sleep(500); // the round that sends it is under way
+  assert.equal(phone.family.status().busy, true);
+  phone.family.desk().run('add', { kind: 'chore', item: { title: 'Second' } });
+  assert.equal(phone.family.status().unsent >= 1, true);
+  await sleep(2500);
+  assert.deepEqual(server.db.commands.map((c) => c.payload.item.title), ['First', 'Second'], 'both left the device without waiting for the clock');
+  assert.equal(phone.family.status().unsent, 0);
+});
+
+test('trouble with a picture does not keep his state and the grown-ups\' changes waiting', async (t) => {
+  const { server, ipad, phone, settle } = await household(t);
+  const photo = await ipad.photos.save(jpeg('bed'));
+  let entry;
+  ipad.store.update((s) => { entry = submitChore(s, s.chores.list[0], photo); s.xp += 7; });
+  phone.family.desk().run('add', { kind: 'expect', item: { title: 'Pack your bag' } });
+  await phone.family.sync();
+  server.failOnce(/^POST \/storage\/v1\/object\/photos/);
+  await ipad.family.sync();
+  assert.equal(ipad.family.status().error, 'server', 'the trouble is reported');
+  assert.ok(server.db.commands.every((c) => c.applied_at), 'but the command was carried out and ticked off');
+  assert.equal(server.db.family_state[0].data.xp, 507, 'and his state was published');
+  assert.equal(server.db.objects.size, 0);
+  await ipad.family.sync();
+  assert.deepEqual([ipad.family.status().error, server.db.objects.size], ['', 1], 'the picture follows in the next round');
+
+  // a picture that could not be deleted from the folder stays on the list until it can be
+  ipad.family.desk().run('chore', { id: entry.id, ok: true });
+  server.failOnce(/^DELETE \/storage\/v1\/object\/photos/);
+  await ipad.family.sync();
+  assert.deepEqual([ipad.family.status().error, server.db.objects.size, ipad.box.get().trash], ['server', 1, [photo]]);
+  await ipad.family.sync();
+  assert.deepEqual([ipad.family.status().error, server.db.objects.size, ipad.box.get().trash], ['', 0, []]);
+  await settle();
+  assert.equal(phone.family.desk().state().xp, 527);
+});
+
+test('a device made "his" by mistake cannot lose the real one\'s pictures for good', async (t) => {
+  const { server, ipad } = await household(t);
+  const pic = await ipad.photos.save(jpeg('park'));
+  ipad.family.desk().run('edit', { kind: 'tier', id: ipad.store.get().rewards.tiers[0].id, item: { photo: pic } });
+  await ipad.family.sync();
+  const folder = () => [...server.db.objects.keys()].map((k) => k.split('/')[1]);
+  assert.deepEqual(folder(), [pic]);
+
+  let time = Date.now();
+  const wrong = device(server, { clock: () => time });
+  await wrong.family.signIn('family@example.com', 'correct horse');
+  await wrong.family.setRole('player', { takeOver: true });
+  for (const o of server.db.objects.values()) o.created_at = new Date(time - 2 * 3600000).toISOString();
+  await wrong.family.sync();
+  assert.deepEqual(folder(), [pic], 'a device that has just become "his" does not tidy the folder');
+  time += 13 * 3600000; // the mistake goes unnoticed for a day: now it does tidy
+  await wrong.family.sync();
+  assert.deepEqual(folder(), []);
+  await ipad.family.sync();
+  assert.equal(ipad.family.status().role, 'manager');
+  await ipad.family.setRole('player', { takeOver: true });
+  assert.deepEqual(folder(), [pic], 'taking the place back sends every picture again');
+});
+
+test('signing out on his device takes his chore photos out of the folder; deleting the account never leaves pictures behind', async (t) => {
+  const { server, ipad } = await household(t);
+  const reward = await ipad.photos.save(jpeg('park'));
+  ipad.family.desk().run('edit', { kind: 'tier', id: ipad.store.get().rewards.tiers[0].id, item: { photo: reward } });
+  const chore = await ipad.photos.save(jpeg('bed'));
+  ipad.store.update((s) => { submitChore(s, s.chores.list[0], chore); });
+  await ipad.family.sync();
+  const folder = () => [...server.db.objects.keys()].map((k) => k.split('/')[1]).sort();
+  assert.deepEqual(folder(), [reward, chore].sort());
+  await ipad.family.signOut();
+  assert.deepEqual(folder(), [reward], 'the photo of his room does not stay online');
+  assert.equal(await ipad.photos.has(chore), true, 'it is still on his device, waiting for a check');
+
+  await ipad.family.signIn('family@example.com', 'correct horse');
+  await ipad.family.setRole('player');
+  assert.deepEqual(folder(), [reward, chore].sort(), 'signed in again, it is sent again');
+  server.failOnce(/^DELETE \/storage\/v1\/object\/photos/);
+  await assert.rejects(ipad.family.deleteAccount(), { code: 'server' });
+  assert.deepEqual([server.db.users.length, ipad.family.status().signedIn, folder().length], [1, true, 2], 'pictures could not be removed: nothing is deleted');
+  await ipad.family.deleteAccount();
+  assert.deepEqual([server.db.users.length, ipad.family.status().signedIn, folder().length], [0, false, 0]);
+});
+
+test('a sign-in that could not be renewed once does not stop later ones from being renewed', async (t) => {
+  const { server, phone } = await household(t);
+  phone.box.set((b) => { b.session = { ...b.session, refresh_token: '', expires_at: 1 }; }); // nothing to renew with
+  await phone.family.sync();
+  assert.deepEqual([phone.family.status().signedIn, phone.family.status().lapsed, phone.family.status().lapsedRole], [false, true, 'manager']);
+  assert.equal(phone.family.desk().remote, false);
+  await phone.family.signIn('family@example.com', 'correct horse');
+  assert.equal(phone.family.status().lapsed, false);
+  server.expireTokens();
+  await phone.family.sync();
+  assert.deepEqual([phone.family.status().error, phone.family.status().signedIn], ['', true], 'renewed as usual');
+  // a grown-up may also decide not to use the account on this device any more
+  server.revoke();
+  await phone.family.sync();
+  assert.equal(phone.family.status().lapsed, true);
+  await phone.family.signOut();
+  assert.deepEqual([phone.family.status().lapsed, phone.family.status().role, phone.box.get().account], [false, '', '']);
+});
+
+test('a picture that was not there yet is asked for again later', async (t) => {
+  const server = await startFamilyServer();
+  t.after(() => server.close());
+  let time = Date.now();
+  const ipad = device(server);
+  await ipad.family.signUp('late@example.com', 'correct horse');
+  await ipad.family.setRole('player');
+  const phone = device(server, { clock: () => time });
+  await phone.family.signIn('late@example.com', 'correct horse');
+  await phone.family.setRole('manager');
+  const pic = await ipad.photos.save(jpeg('kite'));
+  for (let i = 0; i < 4; i++) assert.equal(await phone.family.picture(pic), null);
+  const asked = server.requests.filter((r) => r.startsWith('GET /storage')).length;
+  assert.equal(asked, 3, 'asked a few times, then left alone');
+  ipad.family.desk().run('add', { kind: 'tier', item: { title: 'Kite', points: 600, photo: pic } });
+  await ipad.family.sync();
+  assert.equal(await phone.family.picture(pic), null, 'not asked again straight away');
+  time += 6 * 60000;
+  assert.equal(await (await phone.family.picture(pic)).text(), 'kite', 'but a few minutes later it is found');
+  // no connection is not "not there": it is simply tried again the next time
+  const other = await ipad.photos.save(jpeg('ball'));
+  ipad.family.desk().run('add', { kind: 'tier', item: { title: 'Ball', points: 700, photo: other } });
+  await ipad.family.sync();
+  server.setDown(true);
+  for (let i = 0; i < 5; i++) assert.equal(await phone.family.picture(other), null);
+  server.setDown(false);
+  assert.equal(await (await phone.family.picture(other)).text(), 'ball');
+});
+
+test('creating an account with an address that has one already says so, also when addresses must be confirmed', async (t) => {
+  const { server } = await household(t);
+  server.setConfirm(true);
+  const d = device(server);
+  await assert.rejects(d.family.signUp('family@example.com', 'another password'), { code: 'exists' });
+  assert.equal(await d.family.signUp('brand-new@example.com', 'another password'), 'confirm');
+});
+
+test('nothing of a grown-up\'s is carried out while he is in a mission', async (t) => {
+  const server = await startFamilyServer();
+  t.after(() => server.close());
+  let screen = 'mission';
+  const ipad = device(server, { screen: () => screen });
+  await ipad.family.signUp('calm@example.com', 'correct horse');
+  await ipad.family.setRole('player');
+  const phone = device(server);
+  await phone.family.signIn('calm@example.com', 'correct horse');
+  await phone.family.setRole('manager');
+  phone.family.desk().run('add', { kind: 'chore', item: { title: 'Dishes' } });
+  await phone.family.sync();
+  await ipad.family.sync();
+  assert.deepEqual([ipad.store.get().chores.list.length, server.db.commands[0].applied_at], [0, null]);
+  screen = 'map';
+  await ipad.family.sync();
+  assert.deepEqual([titles(ipad.store.get().chores.list), !!server.db.commands[0].applied_at], [['Dishes'], true]);
+});
+
+test('a photo store that has stopped answering does not hang the device', async (t) => {
+  const server = await startFamilyServer();
+  t.after(() => server.close());
+  const store = createStore(memoryBackend());
+  const box = createBox(memoryBackend());
+  const stuck = { load: () => new Promise(() => {}), has: () => new Promise(() => {}), save: () => new Promise(() => {}), delete: () => new Promise(() => {}) };
+  const api = createApi({ url: server.url, key: 'test-key', timeout: 3000, session: { get: () => box.get().session, set: (s) => box.set((b) => { b.session = s; }) } });
+  const realTimeout = globalThis.setTimeout;
+  globalThis.setTimeout = (fn, ms, ...a) => realTimeout(fn, ms === 8000 ? 30 : ms, ...a); // the photo time limit, shortened for the test
+  t.after(() => { globalThis.setTimeout = realTimeout; });
+  const family = createFamily({ store, api, box, photos: stuck });
+  store.update((s) => { addItem(s, 'tier', { title: 'Kite', points: 600, photo: 'pstuck0001' }); s.xp = 12; });
+  await family.signUp('stuck@example.com', 'correct horse');
+  await family.setRole('player');
+  assert.equal(family.status().busy, false, 'the round ended');
+  assert.equal(family.status().error, 'photos');
+  assert.equal(server.db.family_state[0].data.xp, 12, 'and his state was still published');
+});
+

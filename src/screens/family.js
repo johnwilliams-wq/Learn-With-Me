@@ -13,6 +13,7 @@ const WHY = {
   busy: 'Too many tries. Wait a minute, then try again.',
   setup: 'The family database is not set up yet.',
   auth: 'The sign-in has run out. Please sign in again.',
+  photos: 'The pictures on this device could not be read just now. Close the game completely, open it again and try once more.',
   server: 'That did not work. Try again in a moment.',
 };
 export const explain = (e) => WHY[e?.code || e] || WHY.server;
@@ -40,13 +41,23 @@ const PLAY_HERE = 'On the device he plays on: For parents, Settings, Family acco
 /** A grown-up's own device: a line above the lists saying whose they are and how fresh. */
 export function familyNote(ctx) {
   const st = ctx.family.status();
+  const note = (...lines) => h('section', { class: 'panel note-panel family-note', dataset: { note: 'family' } }, lines.filter(Boolean).map((t) => h('p', {}, t)));
+  // The sign-in has run out: say so on every tab, or a grown-up would take these lists for his.
+  if (st.lapsed) {
+    return note(st.lapsedRole === 'manager'
+      ? 'The sign-in to the family account has run out, so these are this device’s OWN lists, not his. Sign in again under Settings to see and change his.'
+      : 'The sign-in to the family account has run out, so nothing is being shared with your other devices at the moment. Sign in again under Settings.');
+  }
   if (st.role !== 'manager') return null;
-  const lines = [st.connected
-    ? `These are HIS lists, from the device he plays on (it last reported ${ago(st.heard)}).`
-    : `No device is set as the one he plays on yet, so what you do here waits. ${PLAY_HERE}`];
-  if (st.waiting) lines.push(`${st.waiting} ${st.waiting === 1 ? 'change is' : 'changes are'} waiting for his device: ${st.waiting === 1 ? 'it is' : 'they are'} carried out the next time the game is open there with internet.`);
-  if (st.error) lines.push(explain(st.error));
-  return h('section', { class: 'panel note-panel family-note', dataset: { note: 'family' } }, lines.map((t) => h('p', {}, t)));
+  const sent = st.waiting - st.unsent;
+  const are = (n) => `${n} ${n === 1 ? 'change is' : 'changes are'}`;
+  return note(
+    st.connected
+      ? `These are HIS lists, from the device he plays on (it last reported ${ago(st.heard)}).`
+      : `No device is set as the one he plays on yet, so what you do here waits. ${PLAY_HERE}`,
+    st.unsent ? `${are(st.unsent)} still on this device and will be sent as soon as there is a connection.` : null,
+    sent > 0 ? `${are(sent)} waiting for his device: ${sent === 1 ? 'it is' : 'they are'} carried out the next time the game is open there with internet.` : null,
+    st.error ? explain(st.error) : null);
 }
 
 /** The "Family account" section. `redraw` draws the tab again. */
@@ -116,19 +127,35 @@ export function familySection(ctx, redraw) {
       await fam.signIn(t.e, t.p);
       return '';
     }));
-    if (st.error === 'auth' && !said) msg.textContent = WHY.auth;
+    if ((st.lapsed || st.error === 'auth') && !said) msg.textContent = WHY.auth;
     return section(
       h('p', { class: 'fine' }, 'Optional. With a family account you can manage his rewards, chores and expectations from your own phone or computer, check his chore photos there, and see his points. Create the account once, then sign in with it on each device. Without it, nothing leaves this device.'),
-      form);
+      form,
+      st.lapsed ? h('div', { class: 'row family-foot' }, button('Do not use the family account on this device any more', job(async () => { await fam.signOut(); return ''; }), { data: { act: 'forget' } })) : null);
   }
 
-  const out = button('Sign out', job(async () => {
-    await fam.sync(); // send what is still waiting, if it can be sent
+  /**
+   * Before something that empties the list of changes waiting on this device: try to send them.
+   * If some cannot be sent, say so once; a second press goes ahead and drops them.
+   */
+  const unsentFirst = async (b, what) => {
+    if (b.dataset.drop) return '';
+    await fam.sync();
+    const n = fam.status().unsent;
+    if (!n) return '';
+    b.dataset.drop = '1';
+    return `${n} ${n === 1 ? 'change' : 'changes'} made on this device could not be sent yet (no connection?). ${what} now drops ${n === 1 ? 'it' : 'them'} - press again to do it anyway, or try later.`;
+  };
+  const out = button('Sign out', job(async (ev) => {
+    const warn = await unsentFirst(ev.currentTarget, 'Signing out');
+    if (warn) return warn;
     await fam.signOut();
     return '';
   }), { data: { act: 'sign-out' } });
   const playHere = (label, cls) => button(label, job(async (ev) => {
     const b = ev.currentTarget;
+    const warn = await unsentFirst(b, 'Switching');
+    if (warn) return warn;
     const res = await fam.setRole('player', { takeOver: !!b.dataset.sure });
     if (!res.taken) return '';
     b.dataset.sure = '1';
@@ -153,7 +180,7 @@ export function familySection(ctx, redraw) {
   const ownCount = own.rewards.daily.length + own.rewards.tiers.length + own.chores.list.length + own.expectations.list.length;
   const state = st.error ? explain(st.error)
     : player ? `Up to date in the family account: ${ago(st.lastSync)}.`
-      : st.connected ? `His device last reported ${ago(st.heard)}.${st.waiting ? ` ${st.waiting} of your changes ${st.waiting === 1 ? 'is' : 'are'} waiting for it.` : ''}`
+      : st.connected ? `His device last reported ${ago(st.heard)}.${st.waiting ? ` ${st.waiting} of your changes ${st.waiting === 1 ? 'is' : 'are'} waiting${st.unsent ? ` (${st.unsent} not sent yet)` : ' for it'}.` : ''}`
         : `No device is set as the one he plays on yet. ${PLAY_HERE}`;
   return section(
     h('p', {}, 'Signed in as ', h('b', {}, st.email), '. ', h('b', { dataset: { is: st.role } }, player ? 'He plays on this device.' : 'This is a grown-up’s device.')),

@@ -44,11 +44,15 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
   let open = false; // the PIN has been typed
   /** Is a grown-up in the middle of typing something? Then news from another device waits for the next redraw. */
   const typing = () => {
-    if (body.querySelector('.admin-row.is-open')) return true;
+    if (body.querySelector('.gate, .admin-row.is-open, form[data-dirty]')) return true; // the PIN pad, a row being edited, a form someone has touched
     if ([...body.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], textarea')].some((x) => x.value !== (x.dataset.was ?? ''))) return true;
     const at = document.activeElement;
     return !!at && body.contains(at) && (at.tagName === 'SELECT' || at.tagName === 'TEXTAREA' || (at.tagName === 'INPUT' && at.type !== 'checkbox'));
   };
+  // Any form a grown-up has touched (a number, a picture, the icon - not only text) counts as being typed in.
+  const touched = (e) => { const form = e.target.closest?.('form'); if (form) form.dataset.dirty = '1'; };
+  body.addEventListener('input', touched);
+  body.addEventListener('change', touched);
   const stopNews = family.subscribe((what) => {
     if (!open || typing() || (what !== 'data' && tab !== 'settings')) return;
     show(tab, { keep: true });

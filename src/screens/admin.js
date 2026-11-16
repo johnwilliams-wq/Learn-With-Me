@@ -17,8 +17,10 @@ import { loadPhoto, shrinkImage, showPhoto } from '../core/photos.js';
 /**
  * Shows the lock. First time: a sum only a grown-up can do, then "choose a PIN".
  * After that: the PIN pad. Calls onOpen() once the door is open.
+ * `change`: a grown-up who is already inside chooses a new PIN. The old one stays in force
+ * until the new one has been typed twice - walking away half-way changes nothing.
  */
-export function pinGate(ctx, body, onOpen) {
+export function pinGate(ctx, body, onOpen, { change = false } = {}) {
   const { store } = ctx;
 
   function pad(title, hint, onDone) {
@@ -82,6 +84,7 @@ export function pinGate(ctx, body, onOpen) {
     mount(body, form);
   }
 
+  if (change) return choose();
   if (!hasPin(store)) return sum();
   pad('Parent PIN', '', async (pin) => {
     const res = await checkPin(store, pin);
@@ -95,10 +98,7 @@ export function pinGate(ctx, body, onOpen) {
 
 /** "Change PIN" for the settings tab. */
 export function changePinButton(ctx, body, back) {
-  return h('button', { class: 'btn', type: 'button', onclick: () => {
-    ctx.store.update((s) => { s.admin = { hash: '', salt: '', tries: 0, lockUntil: 0 }; });
-    pinGate(ctx, body, back);
-  } }, 'Change PIN');
+  return h('button', { class: 'btn', type: 'button', dataset: { act: 'change-pin' }, onclick: () => pinGate(ctx, body, back, { change: true }) }, 'Change PIN');
 }
 
 // ------------------------------------------------------------------ small form helpers

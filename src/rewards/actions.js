@@ -4,6 +4,7 @@
 // action is sent to his device, which carries it out with this very function. What arrives from
 // another device is treated as untrusted: unknown names and odd values change nothing.
 
+import { todayKey } from '../core/dom.js';
 import { addItem, editItem, removeItem, decideChore, setExpectation, markGiven } from './logic.js';
 
 const KINDS = ['daily', 'tier', 'chore', 'expect'];
@@ -42,8 +43,13 @@ const ACTIONS = {
     const { photo, won } = decideChore(s, entry.id, !!p.ok, text(p.note), now);
     return { result: { won }, drop: [photo] };
   },
-  /** { id, done }  one of today's expectations is set to done / not done */
+  /**
+   * { id, done, day }  one of today's expectations is set to done / not done. `day` is the day it
+   * was pressed on (sent along by another device): pressed on Monday evening and only arriving
+   * on Tuesday, it must not tick Tuesday's.
+   */
   expect(s, p, now) {
+    if (text(p.day) && p.day !== todayKey(now)) return { fail: 'late' };
     if (!s.expectations.list.some((e) => e.id === text(p.id))) return { fail: 'gone' };
     setExpectation(s, text(p.id), !!p.done, now);
     return {};
@@ -60,7 +66,7 @@ const NEEDS_KIND = ['add', 'edit', 'remove'];
 /**
  * Carry out one action on the state.
  * Returns { ok, why, result, drop }: `drop` lists pictures that nothing uses any more (the caller
- * deletes them); `why` says in a word what stopped it ('unknown', 'gone', 'no name').
+ * deletes them); `why` says in a word what stopped it ('unknown', 'gone', 'no name', 'late').
  */
 export function act(state, type, payload, now = new Date()) {
   const p = thing(payload);

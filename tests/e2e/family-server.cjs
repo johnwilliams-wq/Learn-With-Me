@@ -155,10 +155,16 @@ function startFamilyServer() {
     if (path === 'signup' && req.method === 'POST') {
       const email = String(body?.email || '').toLowerCase();
       if (String(body?.password || '').length < 6) return fail(422, 'weak_password', 'Password should be at least 6 characters.');
-      if (db.users.some((u) => u.email === email)) return fail(422, 'user_already_exists', 'User already registered');
+      const stamp = new Date().toISOString();
+      if (db.users.some((u) => u.email === email)) {
+        // As the real service does: when addresses must be confirmed it does not give away that the
+        // address is taken - it answers with a made-up user (no identities) and sends no email.
+        if (confirm) return [200, { id: crypto.randomUUID(), email, aud: 'authenticated', role: '', identities: [], confirmation_sent_at: stamp }];
+        return fail(422, 'user_already_exists', 'User already registered');
+      }
       const user = { id: crypto.randomUUID(), email, password: body.password, confirmed: !confirm };
       db.users.push(user);
-      return [200, confirm ? { id: user.id, email, aud: 'authenticated', role: 'authenticated', confirmation_sent_at: new Date().toISOString() } : session(user)];
+      return [200, confirm ? { id: user.id, email, aud: 'authenticated', role: 'authenticated', identities: [{ id: user.id, provider: 'email' }], confirmation_sent_at: stamp } : session(user)];
     }
     if (path === 'token' && req.method === 'POST' && params.get('grant_type') === 'password') {
       const user = db.users.find((u) => u.email === String(body?.email || '').toLowerCase() && u.password === body?.password);

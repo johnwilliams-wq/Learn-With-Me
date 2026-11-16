@@ -1364,6 +1364,46 @@ scenario('23 family account: a grown-up signs in on their own device and manages
   await round(phone);
   await rowOf(phone, 'Added on his device').waitFor({ timeout: 5000 }).catch(() => t.check(false, 'something added on his device should appear on the phone without touching it'));
 
+  // --- news must never wipe what a grown-up is in the middle of: a half-filled form, or a new PIN
+  await phone.fill('[data-form="tier"] input[type="number"]', '2500'); // only the points so far - no name yet
+  await ipad.evaluate(() => globalThis.__lwm.family.desk().run('add', { kind: 'tier', item: { title: 'While you were typing', points: 9000 } }));
+  await round(ipad);
+  await round(phone);
+  await sleep(400);
+  t.check((await phone.inputValue('[data-form="tier"] input[type="number"]')) === '2500', 'news from his device must not reset a form that has been touched');
+  await H.openTab(phone, 'chores');
+  await H.openTab(phone, 'rewards');
+  t.check((await rowOf(phone, 'While you were typing').count()) === 1, 'and the news shows the next time the tab is drawn');
+
+  await ipad.click('.screen.chores .sub-head .icon-btn');
+  await ipad.waitForSelector('.screen.map');
+  await H.openParent(ipad);
+  await H.openTab(ipad, 'settings');
+  const hashBefore = (await getState(ipad)).admin.hash;
+  await ipad.click('[data-act="change-pin"]');
+  await ipad.waitForSelector('.gate .pin-pad');
+  await ipad.evaluate(() => globalThis.__lwm.store.update((st) => { st.xp += 1; })); // something changes, a round follows, news arrives ...
+  await round(ipad);
+  await sleep(3200);
+  t.check((await ipad.locator('.gate .pin-pad').count()) === 1, '... and the "choose a PIN" pad must still be there');
+  t.check((await getState(ipad)).admin.hash === hashBefore, 'until the new PIN has been typed twice the old one stays in force');
+  await H.openTab(ipad, 'progress'); // walking away half-way
+  t.check((await getState(ipad)).admin.hash === hashBefore && (await ipad.locator('.gate').count()) === 0, 'walking away half-way must leave the old PIN in place');
+  await H.openTab(ipad, 'settings');
+  await ipad.click('[data-act="change-pin"]');
+  await H.typePin(ipad, '112233');
+  await H.typePin(ipad, '112233');
+  await ipad.waitForSelector('[data-family="player"]');
+  const hashAfter = (await getState(ipad)).admin.hash;
+  t.check(hashAfter.length > 20 && hashAfter !== hashBefore, 'typed twice, the new PIN replaces the old one');
+  await ipad.click('.screen.parent .sub-head .icon-btn');
+  await ipad.waitForSelector('.screen.map');
+  await ipad.click('[data-open="parent"]');
+  await H.typePin(ipad, '246810');
+  await ipad.waitForFunction(() => /Wrong PIN/.test(document.querySelector('.gate-msg')?.textContent || ''));
+  await H.typePin(ipad, '112233');
+  await ipad.waitForSelector('.tabs:not([hidden])', { timeout: 5000 }).catch(() => t.check(false, 'the new PIN should open the parent area'));
+
   // --- signing out on the phone: its own game again; his device carries on, also after a restart
   await H.openTab(phone, 'settings');
   await phone.click('[data-act="sign-out"]');
@@ -1375,7 +1415,7 @@ scenario('23 family account: a grown-up signs in on their own device and manages
   await ipad.waitForSelector('.screen.title .btn-huge');
   t.check((await status(ipad)).role === 'player', 'his device should still be signed in after the app is opened again');
   s = await getState(ipad);
-  t.check(s.xp === 483 && s.rewards.tiers.length === 3, 'and nothing of his should have changed by that');
+  t.check(s.xp === 484 && s.rewards.tiers.length === 4, `and nothing of his should have changed by that (xp ${s.xp}, ${s.rewards.tiers.length} rewards)`);
 });
 
 async function main() {

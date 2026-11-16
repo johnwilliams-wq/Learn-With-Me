@@ -84,26 +84,28 @@ export function createApi({ url, key, session, fetchFn = (...a) => globalThis.fe
     return next;
   }
 
-  function renew() {
-    renewing ||= (async () => {
-      const now = session.get();
-      try {
-        if (!now?.refresh_token) throw new FamilyError('auth');
-        const next = keep(await send('POST', '/auth/v1/token?grant_type=refresh_token', { body: { refresh_token: now.refresh_token } }));
-        if (!next) throw new FamilyError('auth');
-        return next;
-      } catch (e) {
-        // Refused (not merely unreachable): this sign-in is over. A grown-up signs in again.
-        if (e.code !== 'network' && e.code !== 'busy' && !(e.status >= 500)) {
-          session.set(null);
-          throw new FamilyError('auth', e.message, e.status);
-        }
-        throw e;
-      } finally {
-        renewing = null;
+  async function renewNow() {
+    const now = session.get();
+    try {
+      if (!now?.refresh_token) throw new FamilyError('auth');
+      const next = keep(await send('POST', '/auth/v1/token?grant_type=refresh_token', { body: { refresh_token: now.refresh_token } }));
+      if (!next) throw new FamilyError('auth');
+      return next;
+    } catch (e) {
+      // Refused (not merely unreachable): this sign-in is over. A grown-up signs in again.
+      if (e.code !== 'network' && e.code !== 'busy' && !(e.status >= 500)) {
+        session.set(null);
+        throw new FamilyError('auth', e.message, e.status);
       }
-    })();
-    return renewing;
+      throw e;
+    }
+  }
+  function renew() {
+    if (renewing) return renewing;
+    // (cleared only by the very renewal that set it - also when that one fails before it has waited for anything)
+    const mine = renewNow().finally(() => { if (renewing === mine) renewing = null; });
+    renewing = mine;
+    return mine;
   }
 
   /** A call as the signed-in family: renews the sign-in when it is about to run out, or once when it is refused. */
@@ -135,7 +137,11 @@ export function createApi({ url, key, session, fetchFn = (...a) => globalThis.fe
     // ---- the sign-in
     /** Returns true when signed in straight away, false when the email address must be confirmed first. */
     async signUp(email, password) {
-      return !!keep(await send('POST', '/auth/v1/signup', { body: { email, password } }));
+      const res = await send('POST', '/auth/v1/signup', { body: { email, password } });
+      // When addresses must be confirmed, an address that has an account already is answered with a
+      // made-up user (no identities) and no email is sent: say what is really the matter.
+      if (!res?.access_token && Array.isArray(res?.identities) && !res.identities.length) throw new FamilyError('exists', 'User already registered', 422);
+      return !!keep(res);
     },
     async signIn(email, password) {
       if (!keep(await send('POST', '/auth/v1/token?grant_type=password', { body: { email, password } }))) throw new FamilyError('server', 'no session');
