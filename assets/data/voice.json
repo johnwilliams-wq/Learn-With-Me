@@ -2,6 +2,182 @@
  "voice": "af_heart",
  "name": "John",
  "lines": {
+  "tip-w1l1": {
+   "text": "Welcome to Rookie Camp! Here is how it works. Tap the ear when you are ready to listen. Wait until I finish talking. Then tap what I said.",
+   "file": "71d41226547f.mp3"
+  },
+  "tip-w1l2": {
+   "text": "Now listen for the color. Some of them look the same, so the color tells you which one.",
+   "file": "0ad27dda358f.mp3"
+  },
+  "tip-w1l3": {
+   "text": "This time, listen for big or small.",
+   "file": "b7c8cc7c84de.mp3"
+  },
+  "tip-w1l4": {
+   "text": "Two clues now: the color, and the thing. You need both.",
+   "file": "205beb18d708.mp3"
+  },
+  "tip-w1l5": {
+   "text": "Three clues! The size, the color, and the thing. Here is a trick: say it back in your head.",
+   "file": "8781bca93075.mp3"
+  },
+  "tip-w1l6": {
+   "text": "Sometimes the important part comes at the very end. Keep listening until I stop talking.",
+   "file": "108258de84be.mp3"
+  },
+  "tip-w1l7": {
+   "text": "Camp challenge! A mix of everything you have learned so far.",
+   "file": "b512869c34b3.mp3"
+  },
+  "tip-w2l1": {
+   "text": "Two things to do now. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.",
+   "file": "442d65b202db.mp3"
+  },
+  "tip-w2l2": {
+   "text": "Two steps, with colors. Here is a trick: make a picture of each one in your mind.",
+   "file": "70279a88774e.mp3"
+  },
+  "tip-w2l3": {
+   "text": "Listen for how many times.",
+   "file": "405256943361.mp3"
+  },
+  "tip-w2l4": {
+   "text": "This time the cards are hidden while I talk. Listen first, hold it in your head, then look.",
+   "file": "268827a57063.mp3"
+  },
+  "tip-w2l5": {
+   "text": "Two steps, and the cards are hidden. Say them back in your head while you wait.",
+   "file": "2c16bfa04fa8.mp3"
+  },
+  "tip-w2l6": {
+   "text": "Trail boss! Two steps, counting, and hidden cards, all mixed up.",
+   "file": "f3081169c898.mp3"
+  },
+  "tip-w3l1": {
+   "text": "Tricky word alert: NOT. Listen for the one I do not want.",
+   "file": "8549dbde3df3.mp3"
+  },
+  "tip-w3l2": {
+   "text": "When I say ALL, tap every one that fits. Then press the green check mark.",
+   "file": "ebf45d4a6854.mp3"
+  },
+  "tip-w3l3": {
+   "text": "Tricky word: EXCEPT. Except means: leave that one out.",
+   "file": "bfb9226758f5.mp3"
+  },
+  "tip-w3l4": {
+   "text": "Now listen for where things are. Next to. Between. In the middle.",
+   "file": "2b20dde672b9.mp3"
+  },
+  "tip-w3l5": {
+   "text": "Left and right. Here is a trick: hold up both hands with your thumbs sticking out. The hand that makes an L is your left.",
+   "file": "cdb9f4cad89f.mp3"
+  },
+  "tip-w3l6": {
+   "text": "Woods challenge! Not, all, except, and where. Listen for the tricky word.",
+   "file": "4902ded7f520.mp3"
+  },
+  "tip-w4l1": {
+   "text": "First, then, last. These words tell you the order.",
+   "file": "48dd49017b08.mp3"
+  },
+  "tip-w4l2": {
+   "text": "Listen for the word AFTER.",
+   "file": "0c5b3b8e6eaa.mp3"
+  },
+  "tip-w4l3": {
+   "text": "Listen for the word BEFORE.",
+   "file": "b653045f6475.mp3"
+  },
+  "tip-w4l4": {
+   "text": "Careful! Sometimes I say it backwards. Before you eat, wash your hands. So washing comes first. Listen for BEFORE, and think: what comes first?",
+   "file": "717a4c63923a.mp3"
+  },
+  "tip-w4l5": {
+   "text": "Careful again. Eat after you wash your hands. Washing still comes first. Listen for AFTER, and think: what comes first?",
+   "file": "71432dbfe7ab.mp3"
+  },
+  "tip-w4l6": {
+   "text": "Tower boss! Before and after, all mixed up. Think: what happens first?",
+   "file": "8d0aca746418.mp3"
+  },
+  "tip-w5l1": {
+   "text": "Captain’s rule: only do it if I say, Captain says. If I do not say Captain says, tap the hand.",
+   "file": "2ada308db995.mp3"
+  },
+  "tip-w5l2": {
+   "text": "Sneaky pirates are giving orders too. Only listen to the captain.",
+   "file": "95b9ef03dd55.mp3"
+  },
+  "tip-w5l3": {
+   "text": "IF is a tricky word. If it is true, do it. If it is not true, tap the hand.",
+   "file": "798bf846f218.mp3"
+  },
+  "tip-w5l4": {
+   "text": "Now there are two choices. If it is true, do the first thing. If not, do the second.",
+   "file": "3560402eabe9.mp3"
+  },
+  "tip-w5l5": {
+   "text": "Sometimes I change my mind at the end. Wait until I have completely finished.",
+   "file": "6b6ae77e2206.mp3"
+  },
+  "tip-w5l6": {
+   "text": "Captain’s test! Wait for every word before you move.",
+   "file": "67685659e358.mp3"
+  },
+  "tip-w6l1": {
+   "text": "Three steps now. Here is a trick: count them on your fingers as you listen.",
+   "file": "ff42fcf67e6f.mp3"
+  },
+  "tip-w6l2": {
+   "text": "Three steps, with colors. Say them back in your head.",
+   "file": "251189696226.mp3"
+  },
+  "tip-w6l3": {
+   "text": "Three steps, and the cards are hidden. You can do it. Picture each one.",
+   "file": "893bff1c3be6.mp3"
+  },
+  "tip-w6l4": {
+   "text": "Four steps! Take a breath, listen all the way, and go one at a time.",
+   "file": "36e51dcb6866.mp3"
+  },
+  "tip-w6l5": {
+   "text": "Mountain boss! Long instructions. Breathe, listen, and go one step at a time.",
+   "file": "39268f8b0ef4.mp3"
+  },
+  "tip-w7l1": {
+   "text": "Story time! Listen to the story, then answer my question.",
+   "file": "df6c463ff34e.mp3"
+  },
+  "tip-w7l2": {
+   "text": "These stories are a bit longer. Make a movie in your mind as you listen.",
+   "file": "a018da58e6f9.mp3"
+  },
+  "tip-w7l3": {
+   "text": "Listen for what happens first, next, and last.",
+   "file": "3329c59e4a45.mp3"
+  },
+  "tip-w7l4": {
+   "text": "Be a detective. I will not tell you the answer. Use the clues to work it out.",
+   "file": "86a287f3fa92.mp3"
+  },
+  "tip-w7l5": {
+   "text": "Cave boss! Stories and clues. Make a movie in your mind.",
+   "file": "c8698630f28f.mp3"
+  },
+  "tip-w8l1": {
+   "text": "Hero’s Trial, part one. Clues, steps, and tricky words.",
+   "file": "abc6e9c464b0.mp3"
+  },
+  "tip-w8l2": {
+   "text": "Hero’s Trial, part two. Wait for the real order, and remember every step.",
+   "file": "32d380db03aa.mp3"
+  },
+  "tip-w8l3": {
+   "text": "The Legend Run. Everything you have learned. You are ready.",
+   "file": "90cb2c98c40f.mp3"
+  },
   "tip-camp1": {
    "text": "Welcome to Training Camp! Tap the ear when you are ready. Wait until I finish talking. Then do what I said.",
    "file": "adb0131514be.mp3"
@@ -27,8 +203,8 @@
    "file": "d2c9356359cf.mp3"
   },
   "tip-memory1": {
-   "text": "Welcome to Memory Mountain! Three things to tap, and the colors matter. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.",
-   "file": "dbf568616a40.mp3"
+   "text": "Welcome to Memory Summit! Three things to tap, and the colors matter. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.",
+   "file": "83558968ea05.mp3"
   },
   "tip-memory2": {
    "text": "Four steps now. Here is a trick: count them on your fingers while I talk. Then tap one thing for each finger.",
@@ -283,8 +459,8 @@
    "file": "2730a8fbb148.mp3"
   },
   "tip-stories1": {
-   "text": "Welcome to Story Cave! Listen to the whole story. Keep track of who has what, because things get swapped. Then tap the answer to my question.",
-   "file": "8f8384453612.mp3"
+   "text": "Welcome to Story Island! Listen to the whole story. Keep track of who has what, because things get swapped. Then tap the answer to my question.",
+   "file": "fe145e58b795.mp3"
   },
   "tip-stories2": {
    "text": "Now listen for the order things happen in. I will ask what came right before, or right after. Tap the thing from that part of the story.",
@@ -325,182 +501,6 @@
   "tip-legend-boss": {
    "text": "The final boss. Only the hardest challenge from every world. You are ready.",
    "file": "b3a9e22d7444.mp3"
-  },
-  "tip-w1l1": {
-   "text": "Welcome to Rookie Camp! Here is how it works. Tap the ear when you are ready to listen. Wait until I finish talking. Then tap what I said.",
-   "file": "71d41226547f.mp3"
-  },
-  "tip-w1l2": {
-   "text": "Now listen for the color. Some of them look the same, so the color tells you which one.",
-   "file": "0ad27dda358f.mp3"
-  },
-  "tip-w1l3": {
-   "text": "This time, listen for big or small.",
-   "file": "b7c8cc7c84de.mp3"
-  },
-  "tip-w1l4": {
-   "text": "Two clues now: the color, and the thing. You need both.",
-   "file": "205beb18d708.mp3"
-  },
-  "tip-w1l5": {
-   "text": "Three clues! The size, the color, and the thing. Here is a trick: say it back in your head.",
-   "file": "8781bca93075.mp3"
-  },
-  "tip-w1l6": {
-   "text": "Sometimes the important part comes at the very end. Keep listening until I stop talking.",
-   "file": "108258de84be.mp3"
-  },
-  "tip-w1l7": {
-   "text": "Camp challenge! A mix of everything you have learned so far.",
-   "file": "b512869c34b3.mp3"
-  },
-  "tip-w2l1": {
-   "text": "Two things to do now. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.",
-   "file": "442d65b202db.mp3"
-  },
-  "tip-w2l2": {
-   "text": "Two steps, with colors. Here is a trick: make a picture of each one in your mind.",
-   "file": "70279a88774e.mp3"
-  },
-  "tip-w2l3": {
-   "text": "Listen for how many times.",
-   "file": "405256943361.mp3"
-  },
-  "tip-w2l4": {
-   "text": "This time the cards are hidden while I talk. Listen first, hold it in your head, then look.",
-   "file": "268827a57063.mp3"
-  },
-  "tip-w2l5": {
-   "text": "Two steps, and the cards are hidden. Say them back in your head while you wait.",
-   "file": "2c16bfa04fa8.mp3"
-  },
-  "tip-w2l6": {
-   "text": "Trail boss! Two steps, counting, and hidden cards, all mixed up.",
-   "file": "f3081169c898.mp3"
-  },
-  "tip-w3l1": {
-   "text": "Tricky word alert: NOT. Listen for the one I do not want.",
-   "file": "8549dbde3df3.mp3"
-  },
-  "tip-w3l2": {
-   "text": "When I say ALL, tap every one that fits. Then press the green check mark.",
-   "file": "ebf45d4a6854.mp3"
-  },
-  "tip-w3l3": {
-   "text": "Tricky word: EXCEPT. Except means: leave that one out.",
-   "file": "bfb9226758f5.mp3"
-  },
-  "tip-w3l4": {
-   "text": "Now listen for where things are. Next to. Between. In the middle.",
-   "file": "2b20dde672b9.mp3"
-  },
-  "tip-w3l5": {
-   "text": "Left and right. Here is a trick: hold up both hands with your thumbs sticking out. The hand that makes an L is your left.",
-   "file": "cdb9f4cad89f.mp3"
-  },
-  "tip-w3l6": {
-   "text": "Woods challenge! Not, all, except, and where. Listen for the tricky word.",
-   "file": "4902ded7f520.mp3"
-  },
-  "tip-w4l1": {
-   "text": "First, then, last. These words tell you the order.",
-   "file": "48dd49017b08.mp3"
-  },
-  "tip-w4l2": {
-   "text": "Listen for the word AFTER.",
-   "file": "0c5b3b8e6eaa.mp3"
-  },
-  "tip-w4l3": {
-   "text": "Listen for the word BEFORE.",
-   "file": "b653045f6475.mp3"
-  },
-  "tip-w4l4": {
-   "text": "Careful! Sometimes I say it backwards. Before you eat, wash your hands. So washing comes first. Listen for BEFORE, and think: what comes first?",
-   "file": "717a4c63923a.mp3"
-  },
-  "tip-w4l5": {
-   "text": "Careful again. Eat after you wash your hands. Washing still comes first. Listen for AFTER, and think: what comes first?",
-   "file": "71432dbfe7ab.mp3"
-  },
-  "tip-w4l6": {
-   "text": "Tower boss! Before and after, all mixed up. Think: what happens first?",
-   "file": "8d0aca746418.mp3"
-  },
-  "tip-w5l1": {
-   "text": "Captain’s rule: only do it if I say, Captain says. If I do not say Captain says, tap the hand.",
-   "file": "2ada308db995.mp3"
-  },
-  "tip-w5l2": {
-   "text": "Sneaky pirates are giving orders too. Only listen to the captain.",
-   "file": "95b9ef03dd55.mp3"
-  },
-  "tip-w5l3": {
-   "text": "IF is a tricky word. If it is true, do it. If it is not true, tap the hand.",
-   "file": "798bf846f218.mp3"
-  },
-  "tip-w5l4": {
-   "text": "Now there are two choices. If it is true, do the first thing. If not, do the second.",
-   "file": "3560402eabe9.mp3"
-  },
-  "tip-w5l5": {
-   "text": "Sometimes I change my mind at the end. Wait until I have completely finished.",
-   "file": "6b6ae77e2206.mp3"
-  },
-  "tip-w5l6": {
-   "text": "Captain’s test! Wait for every word before you move.",
-   "file": "67685659e358.mp3"
-  },
-  "tip-w6l1": {
-   "text": "Three steps now. Here is a trick: count them on your fingers as you listen.",
-   "file": "ff42fcf67e6f.mp3"
-  },
-  "tip-w6l2": {
-   "text": "Three steps, with colors. Say them back in your head.",
-   "file": "251189696226.mp3"
-  },
-  "tip-w6l3": {
-   "text": "Three steps, and the cards are hidden. You can do it. Picture each one.",
-   "file": "893bff1c3be6.mp3"
-  },
-  "tip-w6l4": {
-   "text": "Four steps! Take a breath, listen all the way, and go one at a time.",
-   "file": "36e51dcb6866.mp3"
-  },
-  "tip-w6l5": {
-   "text": "Mountain boss! Long instructions. Breathe, listen, and go one step at a time.",
-   "file": "39268f8b0ef4.mp3"
-  },
-  "tip-w7l1": {
-   "text": "Story time! Listen to the story, then answer my question.",
-   "file": "df6c463ff34e.mp3"
-  },
-  "tip-w7l2": {
-   "text": "These stories are a bit longer. Make a movie in your mind as you listen.",
-   "file": "a018da58e6f9.mp3"
-  },
-  "tip-w7l3": {
-   "text": "Listen for what happens first, next, and last.",
-   "file": "3329c59e4a45.mp3"
-  },
-  "tip-w7l4": {
-   "text": "Be a detective. I will not tell you the answer. Use the clues to work it out.",
-   "file": "86a287f3fa92.mp3"
-  },
-  "tip-w7l5": {
-   "text": "Cave boss! Stories and clues. Make a movie in your mind.",
-   "file": "c8698630f28f.mp3"
-  },
-  "tip-w8l1": {
-   "text": "Hero’s Trial, part one. Clues, steps, and tricky words.",
-   "file": "abc6e9c464b0.mp3"
-  },
-  "tip-w8l2": {
-   "text": "Hero’s Trial, part two. Wait for the real order, and remember every step.",
-   "file": "32d380db03aa.mp3"
-  },
-  "tip-w8l3": {
-   "text": "The Legend Run. Everything you have learned. You are ready.",
-   "file": "90cb2c98c40f.mp3"
   },
   "hello-first": {
    "text": "Hi John! I am Blip, your guide. Let’s train your super listening. Tap the glowing level to start.",

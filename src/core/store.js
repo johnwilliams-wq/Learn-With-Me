@@ -72,11 +72,19 @@ export function createStore(backend) {
   const listeners = new Set();
 
   function load() {
+    let raw = null;
     try {
-      const raw = storage.getItem(KEY);
+      raw = storage.getItem(KEY);
       if (!raw) return defaultState();
-      return migrate(JSON.parse(raw));
+      const saved = JSON.parse(raw);
+      if (!saved || typeof saved !== 'object' || Array.isArray(saved)) throw new Error('not a save');
+      return migrate(saved);
     } catch {
+      // A save that cannot be read is never thrown away: the first one found is kept under another
+      // name before play starts again from nothing, so that it can still be rescued by hand.
+      try {
+        if (raw && !storage.getItem(`${KEY}.bad`)) storage.setItem(`${KEY}.bad`, raw);
+      } catch { /* storage full: nothing more can be done */ }
       return defaultState();
     }
   }

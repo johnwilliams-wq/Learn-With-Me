@@ -491,10 +491,10 @@ function tellItBack(rng, i) {
 // ----------------------------------------------------------------------------- the world
 
 export default {
-  id: 'stories', name: 'Story Cave', blurb: 'Long stories. Who, when, where, and why.', color: '#c2713a', speed: 0.95,
+  id: 'stories', name: 'Story Island', blurb: 'Long stories. Who, when, where, and why.', color: '#c2713a', speed: 0.95,
   levels: [
     { id: 'stories1', title: 'Who Has What', n: 18, gen: whoHasWhat,
-      tip: 'Welcome to Story Cave! Listen to the whole story. Keep track of who has what, because things get swapped. Then tap the answer to my question.' },
+      tip: 'Welcome to Story Island! Listen to the whole story. Keep track of who has what, because things get swapped. Then tap the answer to my question.' },
     { id: 'stories2', title: 'What Happened When', n: 18, gen: whatHappenedWhen,
       tip: 'Now listen for the order things happen in. I will ask what came right before, or right after. Tap the thing from that part of the story.' },
     { id: 'stories3', title: 'Where Did It Go', n: 18, gen: whereDidItGo,

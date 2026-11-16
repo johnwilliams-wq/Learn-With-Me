@@ -23,4 +23,8 @@ import { legend } from './legend.mjs';
 const zones = [memory, logic, pack, paint, build, route, panel, truth, stories].filter(Boolean).map((w) => ({ needs: ['camp'], ...w }));
 const trials = legend(zones);
 
-export const WORLDS = [camp, ...zones, ...(trials ? [trials] : []), ...STARTER];
+// The Starter worlds come FIRST in the file. The game does not care (it sorts by the `starter` flag),
+// but the first release does: for a moment after an update its old code reads this list with its old
+// rule ("each level opens the next one"), and with his old levels at the top it shows them just as
+// they were - the new worlds simply appear, locked, underneath.
+export const WORLDS = [...STARTER, camp, ...zones, ...(trials ? [trials] : [])];

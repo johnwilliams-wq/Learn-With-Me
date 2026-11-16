@@ -89,11 +89,11 @@ function detailCube(rng) {
 }
 
 export default {
-  id: 'memory', name: 'Memory Mountain', blurb: 'Long orders. Hold every step in your head.', color: '#9b6bff', speed: 0.92,
+  id: 'memory', name: 'Memory Summit', blurb: 'Long orders. Hold every step in your head.', color: '#9b6bff', speed: 0.92,
   levels: [
     {
       id: 'memory1', title: 'Three Colors', n: 18,
-      tip: 'Welcome to Memory Mountain! Three things to tap, and the colors matter. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.',
+      tip: 'Welcome to Memory Summit! Three things to tap, and the colors matter. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.',
       gen(rng, i) {
         const { targets, objects } = colourTrio(rng);
         return chain('trio', ['then', 'first', 'list'], i, targets, objects, hue, ['steps3', 'detail']);

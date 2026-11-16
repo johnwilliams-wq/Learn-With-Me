@@ -160,7 +160,7 @@ export function rewardsTab(ctx, refresh) {
       h('form', { class: 'admin-form', dataset: { form: 'daily' }, onsubmit: add('daily', () => ({ id: uid(), icon: dIcon.value, title: dTitle.value.trim(), missions: Math.max(1, Math.min(20, Number(dNeed.value) || 1)) })) },
         dIcon, field('Reward', dTitle), field('Missions in a day', dNeed), h('button', { class: 'btn btn-primary', type: 'submit' }, 'Add')),
       h('label', { class: 'setting' }, repeat, h('span', {}, h('b', {}, 'Count easy and repeated missions too'),
-        h('small', {}, 'Off: only levels below 3 stars count, and the easy Starter levels never count - so replaying something easy does not earn rewards.')))),
+        h('small', {}, 'Off: only levels below 3 stars count - so replaying something he has already mastered does not earn rewards.')))),
     section('Lifetime rewards',
       h('p', { class: 'fine' }, `Won once, when his total points reach the number you set. He has ${s.xp} points now. A mission earns roughly 40 to 95 points; a chore earns what you give it.`),
       h('div', { class: 'admin-list' }, R.tiers.slice().sort((a, b) => a.points - b.points).map((t) => h('div', { class: 'admin-row' },

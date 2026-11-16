@@ -84,6 +84,15 @@ export function mapScreen(ctx) {
 
   const main = ctx.worlds.filter((w) => !w.starter);
   const starter = ctx.worlds.filter((w) => w.starter);
+  // A child who already has stars on the Starter levels (he played them before the new worlds came)
+  // must find them at once: the drawer starts open, and sits right under Training Camp until the new
+  // worlds are his. Everybody else finds it shut at the bottom.
+  const starterStars = starter.some((w) => w.levels.some((l) => s.levels[l.id]?.stars));
+  const zonesShut = main.length > 1 && !worldOpen(main[1].id, levels, s);
+  const drawer = starter.length ? h('details', { class: 'starter', open: starterStars },
+    h('summary', { onclick: (e) => { const d = e.currentTarget.parentElement; if (!d.open) setTimeout(() => d.scrollIntoView({ block: 'start', behavior: 'smooth' }), 0); } },
+      'Starter levels', h('small', {}, ' - easier, one new thing at a time')),
+    starter.map(worldSection)) : null;
   const hasRewards = s.rewards.daily.length || s.rewards.tiers.length || b.rewardsOwed;
   const el = h('div', { class: 'screen map' },
     h('header', { class: 'map-head' },
@@ -105,10 +114,7 @@ export function mapScreen(ctx) {
         h('button', { class: 'icon-btn', type: 'button', dataset: { open: 'parent' }, 'aria-label': 'For parents', html: iconSVG('parent'), onclick: () => ctx.go('parent') },
           dot(b.toCheck + b.rewardsOwed + b.toConfirm)))),
     h('main', { class: 'map-body' },
-      main.map(worldSection),
-      starter.length ? h('details', { class: 'starter', ontoggle: (e) => { if (e.currentTarget.open) e.currentTarget.scrollIntoView({ block: 'start', behavior: 'smooth' }); } },
-        h('summary', {}, 'Starter levels', h('small', {}, ' - easier, one new thing at a time')),
-        starter.map(worldSection)) : null),
+      starterStars && zonesShut ? [worldSection(main[0]), drawer, main.slice(1).map(worldSection)] : [main.map(worldSection), drawer]),
     h('footer', { class: 'map-foot' },
       h('button', { class: 'btn btn-primary btn-big', type: 'button', dataset: { play: upNext.id }, onclick: () => start(upNext.id) },
         h('span', { class: 'btn-icon', html: iconSVG('play') }), h('span', { class: 'btn-label' }, 'Play'))),

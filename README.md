@@ -20,7 +20,7 @@ and works offline.
   what was said.
 - It starts in **Training Camp**. Beating the camp boss opens nine worlds, each with its own kind of
   task, seven levels and a boss:
-  - **Memory Mountain** - long orders: up to six steps, backwards, with skips and counts, from memory.
+  - **Memory Summit** - long orders: up to six steps, backwards, with skips and counts, from memory.
   - **Logic Lab** - count along a row, groups, two clues at once, more and fewer, unless, only if.
   - **Move and Pack** - pick things up and put them in, on or under the right place.
   - **Paint Shop** - colour the right things the right colour.
@@ -28,7 +28,7 @@ and works offline.
   - **Map Routes** - steer a rover by directions, landmarks and rules.
   - **Control Room** - buttons, switches, a dial and secret codes.
   - **Truth Detector** - look at the picture: is the sentence true or not?
-  - **Story Cave** - longer stories, then who, when, where and why.
+  - **Story Island** - longer stories, then who, when, where and why.
 - In an open world the first level and the boss are open; the other levels open one by one. Beating a
   boss with two stars clears the whole world, so a strong listener can skip ahead. **Legend Trials**
   (everything mixed) opens after four worlds are cleared. The original gentle ladder stays available

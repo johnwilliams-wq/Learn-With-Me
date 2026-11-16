@@ -12102,6 +12102,12 @@
   "speed": 0.97
  },
  {
+  "file": "assets/audio/ui/83558968ea05.mp3",
+  "text": "Welcome to Memory Summit! Three things to tap, and the colors matter. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
   "file": "assets/audio/ui/852b54598e71.mp3",
   "text": "So close! One more listen.",
   "voice": "af_heart",
@@ -12182,12 +12188,6 @@
  {
   "file": "assets/audio/ui/8eb348023049.mp3",
   "text": "Now you have to compare. Listen for words like longest, bigger, more and fewer. Twice as many means two times as many. Look along the whole row before you choose.",
-  "voice": "af_heart",
-  "speed": 0.97
- },
- {
-  "file": "assets/audio/ui/8f8384453612.mp3",
-  "text": "Welcome to Story Cave! Listen to the whole story. Keep track of who has what, because things get swapped. Then tap the answer to my question.",
   "voice": "af_heart",
   "speed": 0.97
  },
@@ -12432,12 +12432,6 @@
   "speed": 0.97
  },
  {
-  "file": "assets/audio/ui/dbf568616a40.mp3",
-  "text": "Welcome to Memory Mountain! Three things to tap, and the colors matter. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.",
-  "voice": "af_heart",
-  "speed": 0.97
- },
- {
   "file": "assets/audio/ui/dd7f420b8e0d.mp3",
   "text": "Welcome to the Robot Workshop! I tell you what the robot looks like. Tap one picture in each row to build it. When your robot is ready, tap the green check mark.",
   "voice": "af_heart",
@@ -12524,6 +12518,12 @@
  {
   "file": "assets/audio/ui/fb78342cf8d7.mp3",
   "text": "The Workshop Boss! Hard robots, tricky words and some hidden pictures. Take your time. Listen to the very end, then build.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/fe145e58b795.mp3",
+  "text": "Welcome to Story Island! Listen to the whole story. Keep track of who has what, because things get swapped. Then tap the answer to my question.",
   "voice": "af_heart",
   "speed": 0.97
  },

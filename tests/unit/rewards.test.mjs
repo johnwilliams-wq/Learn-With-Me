@@ -193,3 +193,23 @@ test('erasing his progress keeps the expectations a grown-up set up', () => {
   assert.equal(s.expectations.confirm, true);
   assert.deepEqual(s.expectations.days, {});
 });
+
+test('a save that cannot be read is kept under another name, never thrown away', () => {
+  for (const raw of ['{"v":1,"xp":4476,"cards":["g-shield-blue"', 'null', '[]', '"oops"']) {
+    const backend = memory();
+    backend.setItem('lwm.state.v1', raw);
+    const store = createStore(backend);
+    assert.equal(store.get().xp, 0, 'play starts again from nothing');
+    store.update((s) => { s.xp = 5; }); // the first save overwrites the unreadable one...
+    assert.equal(backend.getItem('lwm.state.v1.bad'), raw, `...but a copy is kept (${raw.slice(0, 12)})`);
+    // a later bad save does not replace the first copy
+    backend.setItem('lwm.state.v1', '{{{');
+    createStore(backend);
+    assert.equal(backend.getItem('lwm.state.v1.bad'), raw);
+  }
+  // a good save leaves no such copy
+  const fine = memory();
+  createStore(fine).update((s) => { s.xp = 7; });
+  createStore(fine);
+  assert.equal(fine.getItem('lwm.state.v1.bad'), null);
+});

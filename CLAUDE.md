@@ -307,3 +307,13 @@ the mission routine and the reward loop (stars, XP, cards). Add its skill tags t
 Work on a branch, open a pull request; merging to `main` publishes via GitHub Pages
 (Settings -> Pages -> Deploy from a branch -> `main`, `/ (root)`). The installed app picks up a new
 version on its next launch.
+
+**An update must never cost him his progress.** Everything he has is one JSON object in localStorage
+(`lwm.state.v1`, `src/core/store.js`) plus chore photos in IndexedDB. Rules: only ever ADD to the save
+(`migrate()` fills in what an older save lacks); never rename or remove a level id, card id or field;
+a save that cannot be read is copied to `lwm.state.v1.bad`, never thrown away. Before publishing,
+rehearse the real update: `node tests/e2e/upgrade.cjs sw nosw` plays the first release (commit 8cd3c39)
+with rewards, chores, photos and a PIN, swaps in the working tree, lets the service worker update by
+itself and compares every saved value and what the screens show. For a moment after publishing, the
+old page code still runs with the new `assets/data` (data is fetched network-first): that is why the
+Starter worlds come first in `levels.json`, and why level data must stay readable by the previous release.

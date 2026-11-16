@@ -340,7 +340,7 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
     const prevStars = before.levels[levelId]?.stars || 0;
     const card = nextCard(before.cards);
     const openBefore = openCount(ctx.levels, before);
-    store.recordMission({ level: levelId, ...sum, ms: Date.now() - startedAt, counted: missionCounts(prevStars, before.rewards, level) });
+    store.recordMission({ level: levelId, ...sum, ms: Date.now() - startedAt, counted: missionCounts(prevStars, before.rewards) });
     let won = [];
     store.update((s) => {
       if (card) s.cards.push(card.id);
