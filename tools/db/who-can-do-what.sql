@@ -49,6 +49,11 @@ select pg_sleep(0.02);
 update public.family_state set data = '{"xp": 600}' returning 'A11 state updated, stamped later than created: ' || (updated_at > '2000-01-01');
 delete from storage.objects where name like 'aaaaaaaa-%' returning 'A12 own photo removed';
 select public.delete_my_account();
+\echo '--- family A is gone, but a device of theirs is still signed in for a while'
+insert into storage.objects (bucket_id, name) values ('photos', 'aaaaaaaa-0000-0000-0000-000000000001/late.jpg') returning 'A13 WRONG: added a photo after the account was deleted';
+insert into public.family_state (data) values ('{}') returning 'A14 WRONG: wrote a row after the account was deleted';
+insert into public.commands (type) values ('late') returning 'A15 WRONG: added a command after the account was deleted';
+select 'A16 a signed-in family cannot read the table of accounts itself: ' || count(*) from auth.users;
 reset role;
 reset request.jwt.claim.sub;
 select 'END users left: ' || string_agg(email, ',') from auth.users;

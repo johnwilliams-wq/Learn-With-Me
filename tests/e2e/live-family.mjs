@@ -123,6 +123,16 @@ try {
         const gone = await again.family.signIn(email, password).then(() => false, (e) => e.code === 'credentials');
         say(gone, gone ? 'the test account and its files are deleted again' : `the test account ${email} could still be signed in to: delete it in the dashboard`);
         if (!gone) failed = true;
+        // the other device's sign-in is still good for a while: it must not be able to leave anything behind
+        if (phone.family.status().signedIn) {
+          const refused = await phone.api.upload('pafterdelete1', jpeg('late')).then(() => false, () => true);
+          const left = await phone.api.list().then((o) => o.length, () => -1);
+          const rows = await phone.api.insert('commands', { type: 'late', payload: {} }).then(() => false, () => true);
+          const clean = refused && rows && left === 0;
+          say(clean, clean ? 'a device that is still signed in can add nothing to the deleted account' : `after the account was deleted: upload refused ${refused}, row refused ${rows}, files left ${left}`);
+          if (left > 0) await phone.api.remove(['pafterdelete1']).catch(() => {});
+          if (!clean) failed = true;
+        }
       },
       (e) => { failed = true; say(false, `could not delete the test account ${email} (delete it in the dashboard): ${e.message}`); },
     );

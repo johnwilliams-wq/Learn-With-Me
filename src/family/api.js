@@ -58,18 +58,22 @@ export function createApi({ url, key, session, fetchFn = (...a) => globalThis.fe
     let info = {};
     try { info = JSON.parse(got) || {}; } catch { /* no details */ }
     const message = String(info.msg || info.message || info.error_description || info.error || res.statusText || '');
+    // The picture service answers nearly all trouble with HTTP 400 and says what it really is inside
+    // ("statusCode": "503" for a passing hiccup, "413" for a picture that is too big): that is the status we keep.
+    const status = Number(info.statusCode) || res.status;
     let code = AUTH_CODES[info.error_code] || 'server';
     if (code === 'server') {
-      if (res.status === 429) code = 'busy';
+      if (status === 429) code = 'busy';
       else if (/invalid login credentials/i.test(message)) code = 'credentials';
       else if (/not confirmed/i.test(message)) code = 'confirm';
       else if (/already registered/i.test(message)) code = 'exists';
       else if (/password should be/i.test(message)) code = 'weak';
       else if (/signups not allowed/i.test(message)) code = 'closed';
       else if (info.code === 'PGRST205' || info.code === 'PGRST202' || /bucket not found/i.test(message)) code = 'setup';
-      else if (res.status === 401 || /jwt|token is expired|invalid claim/i.test(message)) code = 'auth';
+      // a sign-in that is no longer accepted (not "403" alone: a refusal by the database's rules is 403 too)
+      else if (res.status === 401 || /jwt|jws|token is expired|invalid claim|claim timestamp check failed|signature verification failed/i.test(message)) code = 'auth';
     }
-    throw new FamilyError(code, message, res.status);
+    throw new FamilyError(code, message, status);
   }
 
   function keep(res) {
@@ -166,7 +170,8 @@ export function createApi({ url, key, session, fetchFn = (...a) => globalThis.fe
 
     // ---- pictures: the family's own folder in the private bucket "photos"
     upload: (name, picture) => authed('POST', `/storage/v1/object/photos/${file(name)}`, { raw: picture, headers: { 'Content-Type': picture.type || 'image/jpeg', 'x-upsert': 'true' }, ms: 30000 }),
-    download: (name) => authed('GET', `/storage/v1/object/photos/${file(name)}`, { blob: true, ms: 20000 }),
+    // (the "authenticated" address: there a sign-in that has run out is refused as such, and renewed - the plain one just says "not found")
+    download: (name) => authed('GET', `/storage/v1/object/authenticated/photos/${file(name)}`, { blob: true, ms: 20000 }),
     /** The pictures in the folder: [{ name, created_at }]. */
     list: () => authed('POST', '/storage/v1/object/list/photos', { body: { prefix: me(), limit: 1000, offset: 0, sortBy: { column: 'name', order: 'asc' } } })
       .then((rows) => (Array.isArray(rows) ? rows.filter((o) => o && NAME.test(o.name || '')) : [])),

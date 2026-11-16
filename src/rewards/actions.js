@@ -44,14 +44,16 @@ const ACTIONS = {
     return { result: { won }, drop: [photo] };
   },
   /**
-   * { id, done, day }  one of today's expectations is set to done / not done. `day` is the day it
-   * was pressed on (sent along by another device): pressed on Monday evening and only arriving
-   * on Tuesday, it must not tick Tuesday's.
+   * { id, done, day }  one of a day's expectations is set to done / not done. `day` is the day the
+   * grown-up was looking at (sent along by another device): pressed on Monday evening and only
+   * arriving on Tuesday, it is written down for Monday and never ticks Tuesday's. Without a day
+   * (pressed on this device) it is today's.
    */
   expect(s, p, now) {
-    if (text(p.day) && p.day !== todayKey(now)) return { fail: 'late' };
+    const day = p.day === undefined ? now : dayNear(p.day, now);
+    if (!day) return { fail: 'late' };
     if (!s.expectations.list.some((e) => e.id === text(p.id))) return { fail: 'gone' };
-    setExpectation(s, text(p.id), !!p.done, now);
+    setExpectation(s, text(p.id), !!p.done, day);
     return {};
   },
   /** { name, on }  one of the switches in the parent area */
@@ -62,6 +64,16 @@ const ACTIONS = {
   },
 };
 const NEEDS_KIND = ['add', 'edit', 'remove'];
+
+/** 'YYYY-MM-DD' as a date - only a real day close to now: up to two weeks back (what is kept), or tomorrow (a device a time zone ahead). */
+function dayNear(day, now) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text(day));
+  if (!m) return null;
+  const date = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12);
+  if (todayKey(date) !== m[0]) return null; // the 31st of February
+  const days = Math.round((date - new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12)) / 86400000);
+  return days >= -14 && days <= 1 ? date : null;
+}
 
 /**
  * Carry out one action on the state.

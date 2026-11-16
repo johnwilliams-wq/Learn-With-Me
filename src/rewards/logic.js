@@ -33,8 +33,14 @@ export const missionCounts = (starsBefore, rewards) => starsBefore < 3 || !!rewa
 
 export const countedToday = (state, now = new Date()) => state.days[todayKey(now)]?.counted || 0;
 
-function earn(src, r, now) {
-  return { id: uid(), src, ref: r.id, title: r.title, icon: r.icon || '', day: todayKey(now), t: +now, given: false };
+/**
+ * Something he has won. Its id is worked out from what it was won for - not made up - so that
+ * the device he plays on and a grown-up's own device (which shows the win before his device
+ * has heard of it) call it by the same name, however often either of them works it out.
+ */
+function earn(state, src, r, now, id) {
+  const free = /^[a-z0-9]{6,40}$/.test(id) && !state.rewards.earned.some((e) => e.id === id);
+  return { id: free ? id : uid(), src, ref: r.id, title: r.title, icon: r.icon || '', day: todayKey(now), t: +now, given: false };
 }
 
 /** Add any rewards that have just been reached to state.rewards.earned. Returns the new ones. */
@@ -44,10 +50,10 @@ export function collectRewards(state, now = new Date()) {
   const earned = state.rewards.earned;
   const won = [];
   for (const r of state.rewards.daily) {
-    if (r.missions > 0 && counted >= r.missions && !earned.some((e) => e.src === 'daily' && e.ref === r.id && e.day === day)) won.push(earn('daily', r, now));
+    if (r.missions > 0 && counted >= r.missions && !earned.some((e) => e.src === 'daily' && e.ref === r.id && e.day === day)) won.push(earn(state, 'daily', r, now, `d${r.id}${day.replace(/\D/g, '')}`));
   }
   for (const t of state.rewards.tiers) {
-    if (t.points > 0 && state.xp >= t.points && !earned.some((e) => e.src === 'tier' && e.ref === t.id)) won.push(earn('tier', t, now));
+    if (t.points > 0 && state.xp >= t.points && !earned.some((e) => e.src === 'tier' && e.ref === t.id)) won.push(earn(state, 'tier', t, now, `t${t.id}`));
   }
   earned.push(...won);
   // Keep the list from growing for ever: drop old rewards that were handed out long ago.
@@ -65,12 +71,15 @@ export const owed = (state) => state.rewards.earned.filter((e) => !e.given);
 /**
  * A grown-up has handed a reward over. `which` names it by its id; when that is not known here
  * (it was pressed on another device, before that device had heard the id), by what it was won
- * for: { src, ref, day }. Returns the entry, or null when there is nothing to mark.
+ * for: { src, ref, day }. A daily reward is won afresh every day, so its day must match; a mine
+ * reward is won once; a chore's extra reward may have been written down a day later than the
+ * grown-up pressed (his device was closed overnight), so the oldest one still owed is meant.
+ * Returns the entry, or null when there is nothing to mark.
  */
 export function markGiven(state, which = {}) {
   const earned = state.rewards.earned;
   const e = earned.find((x) => x.id === which.id)
-    || earned.find((x) => !x.given && x.src === which.src && x.ref === which.ref && (x.src === 'tier' || x.day === which.day));
+    || earned.find((x) => !x.given && x.src === which.src && x.ref === which.ref && (x.src !== 'daily' || x.day === which.day));
   if (!e || e.given) return null;
   e.given = true;
   return e;
@@ -112,7 +121,7 @@ export function decideChore(state, entryId, approve, note = '', now = new Date()
   const entry = state.chores.log.find((e) => e.id === entryId);
   if (!entry || entry.status !== 'pending') return { photo: null, won: [] };
   entry.status = approve ? 'approved' : 'rejected';
-  entry.note = approve ? '' : String(note || '').slice(0, 120);
+  entry.note = approve ? '' : tidy(note, 120);
   entry.decided = +now;
   const photo = entry.photo;
   entry.photo = null;
@@ -120,7 +129,7 @@ export function decideChore(state, entryId, approve, note = '', now = new Date()
   if (approve) {
     state.xp += entry.points;
     if (entry.reward) {
-      const e = earn('chore', { id: entry.chore, title: entry.reward, icon: entry.icon }, now);
+      const e = earn(state, 'chore', { id: entry.chore, title: entry.reward, icon: entry.icon }, now, `c${entry.id}`);
       state.rewards.earned.push(e);
       won.push(e);
     }
@@ -169,8 +178,30 @@ export function setExpectation(state, id, done, now = new Date()) {
 
 // ------------------------------------------------------------------ what a grown-up types
 
-/** One line of typed text: no line breaks, no runs of spaces, at most `max` characters. */
-export const tidy = (text, max = 60) => String(text ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
+/**
+ * Text without half characters: an emoji is two units, and one cut in the middle (or a stray
+ * zero byte) cannot be stored by the family database - one such name would stop his device
+ * from reporting at all. Whole text is returned as it is.
+ */
+export function wellFormed(text) {
+  const s = String(text ?? '');
+  let out = '';
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if (c === 0) continue;
+    if (c >= 0xd800 && c <= 0xdbff) { // the first half of a pair: kept only together with its second half
+      const d = s.charCodeAt(i + 1);
+      if (d >= 0xdc00 && d <= 0xdfff) out += s[i] + s[++i];
+      continue;
+    }
+    if (c >= 0xdc00 && c <= 0xdfff) continue; // a second half on its own
+    out += s[i];
+  }
+  return out;
+}
+
+/** One line of typed text: no line breaks, no runs of spaces, at most `max` characters (and never half of one). */
+export const tidy = (text, max = 60) => wellFormed(String(text ?? '').replace(/\s+/g, ' ').trim().slice(0, max)).trim();
 export const TITLE_MAX = 60;
 export const NOTE_MAX = 200;
 const blank = (value) => value == null || String(value).trim() === '';
@@ -187,7 +218,7 @@ const LISTS = {
 
 /** The fields a grown-up may set for each kind of thing, tidied and kept within limits. */
 export function cleanItem(kind, raw = {}) {
-  const out = { title: tidy(raw.title, TITLE_MAX), icon: String(raw.icon || '').slice(0, 8), note: tidy(raw.note, NOTE_MAX) };
+  const out = { title: tidy(raw.title, TITLE_MAX), icon: wellFormed(String(raw.icon || '').slice(0, 8)), note: tidy(raw.note, NOTE_MAX) };
   if (kind === 'daily') out.missions = whole(raw.missions, 1, 20, 3);
   if (kind === 'tier') {
     out.points = whole(raw.points, 10, 1000000, 1000);

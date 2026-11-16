@@ -182,8 +182,11 @@ The owner created a small Supabase project of their own so that a grown-up can m
 and expectations (with pictures) from their own phone or computer, check chore photos there, and see
 his points. His detailed play history stays on the device.
 
-- **State of the work:** both sides are built. Nothing talks to the database until a grown-up signs
-  in (parent area, Settings, "Family account"); a device that is not signed in behaves exactly as before.
+- **State of the work:** both sides are built, and the database side is live in the project (both
+  files in `supabase/migrations/` were applied on 16 November 2026, by hand through Supabase's
+  management API - the GitHub link had not applied them; they are safe to apply again). Nothing talks
+  to the database until a grown-up signs in (parent area, Settings, "Family account"); a device that
+  is not signed in behaves exactly as before.
 - **Project:** `https://kfgtrroainxuoqfncdgf.supabase.co`. The app uses only the *publishable* key
   (`sb_publishable_...`, safe to commit; it is in `src/family/config.js`) plus
   the family's own sign-in. **Never** commit or ask for the database password, a connection string or
@@ -198,6 +201,9 @@ his points. His detailed play history stays on the device.
   private storage bucket `photos`, each family in a folder named after its account id.
 - **Row level security on everything**: a signed-in family reads and writes its own rows and files
   only; a visitor who is not signed in gets nothing. Tables are granted to `authenticated` only.
+  A sign-in stays good for up to an hour after its account is deleted on another device: rows can
+  no longer be added then (they point to the account), and files neither (the two rules that add or
+  replace a file ask `private.family_exists()`), so "Delete the family account" leaves nothing behind.
 - **Changing the database:** add a new file in `supabase/migrations/` (never edit one that has been
   applied). `bash tools/db/check.sh` applies all migrations to a throw-away local Postgres with a
   stand-in for Supabase's roles and storage tables, and checks who can read and write what - run it
@@ -219,6 +225,23 @@ his points. His detailed play history stays on the device.
   Trouble with a picture never holds up his state or the commands (it is reported and retried), every
   call to the photo store inside a round has a time limit, and a change that has not left a grown-up's
   device is retried whatever is on screen.
+- **What a win is called** (`earn()` in `src/rewards/logic.js`): the id of something he has won is
+  worked out from what it was won for (the reward, the day, the chore entry), never made up - a
+  grown-up's device shows a win before his device has heard of it, and "Given" pressed there must
+  mean the same thing on both. Keep it that way for anything new that both devices can create.
+- **Pictures are deleted when they are let go of** (`drop`, `release`, sign-out, account deletion) -
+  not by looking for what "nothing points to": a picture in the folder may be the only copy (a new
+  iPad that signs in before its backup is restored points to nothing yet). The sweep in `tidy()` only
+  takes strays that are a month old, on a device that has been "his" for a month, when no command is
+  waiting. An upload is given up only when it can never succeed (too big, not a picture).
+- **Text that goes to the database must be whole** (`wellFormed`, used by `tidy()` and by everything
+  that is sent): the column type refuses half an emoji or a zero byte, and one such name would stop
+  his device from reporting at all. Cut with `tidy()`, never with a bare `.slice()`.
+- **How the real services answer** differs from what one would guess, and the stand-in follows the
+  real thing: the picture service wraps most trouble in HTTP 400 with the true status inside
+  (`statusCode`), refuses a run-out sign-in with `"exp" claim timestamp check failed` (plain "not
+  found" on the un-authenticated download address), and sign-up with an address that exists answers
+  200 with a made-up user when addresses must be confirmed. `src/family/api.js` reads all of these.
 - What a device remembers about the account (the sign-in, its role, the queue, which commands it has
   carried out) is its own localStorage record `lwm.family.v1` - **never inside the save**, so a backup
   never contains a sign-in. Signing out forgets it; his save is never touched by signing in or out.
@@ -227,10 +250,16 @@ his points. His detailed play history stays on the device.
 - Pictures are named by their id in the family's folder. Ids and everything else read from the
   database are untrusted: ids are checked against a pattern before they go into an address, and
   `stateFrom()` rebuilds the lists defensively.
-- **Project settings the owner chooses in the Supabase dashboard** (not in this repository):
-  Authentication, Email: "Confirm email" off (or the confirmation link's Site URL set to the game's
-  address); once the family account exists, "Allow new users to sign up" off, so nobody else can
-  make an account in the project (they could never see the family's rows, but they do not belong there).
+- **Project settings** (in the Supabase project, not in this repository): "Confirm email" is off, so
+  the account can be created inside the game. Once the family account exists, "Allow new users to
+  sign up" is to be switched off, so nobody else can make an account in the project (they could
+  never see the family's rows, but they do not belong there).
+- **Doing things in the project from a Claude Code cloud session:** the owner saved a Supabase access
+  token in the `learn-with-me` environment (a network secret for `api.supabase.com`; its value is
+  never visible to the session or in this repository). With it, `POST /v1/projects/<ref>/database/query`
+  runs a migration file and `PATCH /v1/projects/<ref>/config/auth` changes sign-in settings. Use it
+  only for what the owner asked for, and check afterwards what really changed. The owner can
+  revoke the token at any time; without it, changes go through the dashboard.
 - **Testing it:** `tests/unit/family.test.mjs` runs two devices against `tests/e2e/family-server.cjs`
   (the same addresses, status codes and error bodies as the real services, answered from memory);
   scenario 23 of `tests/e2e/run.cjs` clicks through it with two browsers (`?family=http://127.0.0.1:<port>`

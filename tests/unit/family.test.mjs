@@ -454,7 +454,7 @@ test('accounts: wrong password, an address that needs confirming, another family
   await assert.rejects(ipad.family.signIn('family@example.com', 'correct horse'), { code: 'credentials' });
 });
 
-test('housekeeping: old commands and pictures nothing points to are cleared away', async (t) => {
+test('housekeeping: old commands go; a stray picture goes only when it is a month old and nothing is waiting for it', async (t) => {
   const server = await startFamilyServer();
   t.after(() => server.close());
   let time = Date.now();
@@ -465,17 +465,36 @@ test('housekeeping: old commands and pictures nothing points to are cleared away
   await phone.family.signIn('tidy@example.com', 'correct horse');
   await phone.family.setRole('manager');
   const used = await phone.family.desk().savePhoto(jpeg('used'));
-  await phone.family.desk().savePhoto(jpeg('abandoned')); // a form that was never saved
+  const stray = await phone.family.desk().savePhoto(jpeg('abandoned'));
   phone.family.desk().run('add', { kind: 'tier', item: { title: 'Kite', points: 600, photo: used } });
   await phone.family.sync();
   await ipad.family.sync();
-  assert.equal(server.db.objects.size, 2, 'a fresh stray picture is left alone (its command may still be on the way)');
+  const folder = () => [...server.db.objects.keys()].map((k) => k.split('/')[1]).sort();
+  const age = (days) => { for (const o of server.db.objects.values()) o.created_at = new Date(time - days * 86400000).toISOString(); };
   time += 13 * 3600000;
-  for (const o of server.db.objects.values()) o.created_at = new Date(time - 2 * 3600000).toISOString();
-  for (const c of server.db.commands) c.applied_at = new Date(time - 8 * 24 * 3600000).toISOString();
+  age(2);
+  for (const c of server.db.commands) c.applied_at = new Date(time - 8 * 86400000).toISOString();
   await ipad.family.sync();
-  assert.deepEqual([...server.db.objects.keys()].map((k) => k.split('/')[1]), [used]);
-  assert.equal(server.db.commands.length, 0);
+  assert.equal(server.db.commands.length, 0, 'commands carried out more than a week ago are gone');
+  assert.deepEqual(folder(), [used, stray].sort(), 'a young stray picture is left alone: its change may still be on the way');
+
+  // a picture whose change has not been carried out yet is never swept, however old
+  time += 40 * 86400000;
+  const late = await phone.family.desk().savePhoto(jpeg('late'));
+  phone.family.desk().run('add', { kind: 'tier', item: { title: 'Ball', points: 700, photo: late } });
+  await phone.family.sync();
+  age(45);
+  let screen = 'mission'; // he is in a mission: the change waits, and so does the sweep
+  const busy = createFamily({ store: ipad.store, api: ipad.api, box: ipad.box, photos: ipad.photos, clock: () => time, screen: () => screen });
+  await busy.sync();
+  assert.deepEqual(folder(), [used, stray, late].sort());
+  screen = 'map';
+  time += 13 * 3600000;
+  age(45);
+  await busy.sync();
+  assert.deepEqual(folder(), [used, late].sort(), 'the month-old stray is gone; what the rewards point to stays');
+  assert.deepEqual(titles(ipad.store.get().rewards.tiers), ['Kite', 'Ball']);
+  assert.equal(await (await ipad.photos.load(late)).text(), 'late');
 });
 
 // ---------------------------------------------------------------- what a review found (each of these went wrong once)
@@ -499,15 +518,20 @@ test('an expectation is ticked for the day it was pressed on, never for the next
   time = new Date(2026, 10, 17, 7, 0).getTime(); // his device is next opened on Tuesday morning
   await ipad.family.sync();
   assert.equal(expectationsToday(ipad.store.get(), new Date(time)).done, 0, 'Tuesday starts with nothing done');
-  assert.deepEqual(server.db.commands.map((c) => c.outcome), ['late']);
+  assert.equal(ipad.store.get().expectations.days['2026-11-16'][ex.id], 'done', 'it is written down for Monday, the day it was about');
+  assert.deepEqual(server.db.commands.map((c) => c.outcome), ['done']);
   await phone.family.sync();
   assert.equal(expectationsToday(phone.family.desk().state(), new Date(time)).done, 0, 'and the phone agrees');
   assert.equal(phone.family.status().waiting, 0);
-  // the same day works as before; an odd day changes nothing
+  // the same day works as before; days that make no sense change nothing
   phone.family.desk().run('expect', { id: ex.id, done: true });
   await phone.family.sync(); await ipad.family.sync();
   assert.equal(expectationsToday(ipad.store.get(), new Date(time)).done, 1);
-  assert.equal(act(ipad.store.get(), 'expect', { id: ex.id, done: false, day: '../../x' }, new Date(time)).why, 'late');
+  const before = JSON.stringify(ipad.store.get().expectations);
+  for (const day of ['../../x', '2026-02-31', '2026-10-01', '2027-01-01', '', 7, null]) {
+    assert.equal(act(ipad.store.get(), 'expect', { id: ex.id, done: false, day }, new Date(time)).why, 'late', `day ${JSON.stringify(day)}`);
+  }
+  assert.equal(JSON.stringify(ipad.store.get().expectations), before);
 });
 
 test('a change made while the device is busy sending the one before is sent right after it', async (t) => {
@@ -559,16 +583,23 @@ test('a device made "his" by mistake cannot lose the real one\'s pictures for go
   ipad.family.desk().run('edit', { kind: 'tier', id: ipad.store.get().rewards.tiers[0].id, item: { photo: pic } });
   await ipad.family.sync();
   const folder = () => [...server.db.objects.keys()].map((k) => k.split('/')[1]);
+  const age = (days) => { for (const o of server.db.objects.values()) o.created_at = new Date(time - days * 86400000).toISOString(); };
   assert.deepEqual(folder(), [pic]);
 
   let time = Date.now();
   const wrong = device(server, { clock: () => time });
   await wrong.family.signIn('family@example.com', 'correct horse');
   await wrong.family.setRole('player', { takeOver: true });
-  for (const o of server.db.objects.values()) o.created_at = new Date(time - 2 * 3600000).toISOString();
+  age(400); // his reward picture is old - and the only copy may be the one in the folder
   await wrong.family.sync();
-  assert.deepEqual(folder(), [pic], 'a device that has just become "his" does not tidy the folder');
-  time += 13 * 3600000; // the mistake goes unnoticed for a day: now it does tidy
+  time += 13 * 3600000;
+  await wrong.family.sync();
+  time += 20 * 86400000;
+  age(400);
+  await wrong.family.sync();
+  assert.deepEqual(folder(), [pic], 'a device that became "his" less than a month ago clears nothing away (a new iPad waiting for its backup)');
+  time += 15 * 86400000; // the mistake goes unnoticed for more than a month: now it does
+  age(400);
   await wrong.family.sync();
   assert.deepEqual(folder(), []);
   await ipad.family.sync();
@@ -692,5 +723,145 @@ test('a photo store that has stopped answering does not hang the device', async 
   assert.equal(family.status().busy, false, 'the round ended');
   assert.equal(family.status().error, 'photos');
   assert.equal(server.db.family_state[0].data.xp, 12, 'and his state was still published');
+});
+
+// ---------------------------------------------------------------- what the second review found
+
+test('a picture that could not be sent just now is sent later; only one that can never be taken is given up', async (t) => {
+  const { server, ipad, phone } = await household(t);
+  const folder = () => [...server.db.objects.keys()].map((k) => k.split('/')[1]).sort();
+  const a = await ipad.photos.save(jpeg('a'));
+  ipad.family.desk().run('edit', { kind: 'tier', id: ipad.store.get().rewards.tiers[0].id, item: { photo: a } });
+  // the picture service says "busy" its own way: HTTP 400 with the real status inside
+  server.failOnce(/^POST \/storage\/v1\/object\/photos/, [400, { statusCode: '503', error: 'LockTimeout', message: 'acquiring lock timeout' }]);
+  await ipad.family.sync();
+  assert.deepEqual([folder(), ipad.box.get().uploaded, ipad.family.status().error], [[], [], 'server'], 'not taken for "refused for good"');
+  await ipad.family.sync();
+  assert.deepEqual([folder(), ipad.family.status().error], [[a], '']);
+
+  // refused for a reason that may pass (here: the rules said no): asked again later, not marked as sent
+  const b = await ipad.photos.save(jpeg('b'));
+  ipad.family.desk().run('add', { kind: 'tier', item: { title: 'Ball', points: 700, photo: b } });
+  server.failOnce(/^POST \/storage\/v1\/object\/photos/, [400, { statusCode: '403', error: 'Unauthorized', message: 'new row violates row-level security policy' }]);
+  await ipad.family.sync();
+  assert.deepEqual([folder(), ipad.box.get().uploaded], [[a], [a]]);
+  await ipad.family.sync();
+  assert.deepEqual(folder(), [a, b].sort());
+
+  // too big: that will never change - given up, and his state is published all the same
+  const c = await ipad.photos.save(jpeg('c'));
+  ipad.family.desk().run('add', { kind: 'tier', item: { title: 'Car', points: 800, photo: c } });
+  server.failOnce(/^POST \/storage\/v1\/object\/photos/, [400, { statusCode: '413', error: 'Payload too large', message: 'The object exceeded the maximum allowed size' }]);
+  await ipad.family.sync();
+  await ipad.family.sync();
+  assert.deepEqual([folder(), ipad.box.get().uploaded.includes(c), ipad.family.status().error], [[a, b].sort(), true, '']);
+  await phone.family.sync();
+  assert.deepEqual(titles(phone.family.desk().state().rewards.tiers), ['Trampoline park', 'Ball', 'Car']);
+});
+
+test('the picture service refusing a sign-in that has run out is understood: it is renewed and tried again', async (t) => {
+  const { server, phone, ipad } = await household(t);
+  server.expireTokens();
+  const pic = await phone.family.desk().savePhoto(jpeg('first call after it ran out')); // straight to the picture service
+  assert.equal(await (await ipad.api.download(pic)).text(), 'first call after it ran out', 'and so is a download');
+  server.expireTokens();
+  assert.deepEqual((await phone.api.list()).map((o) => o.name), [pic]);
+  server.expireTokens();
+  await phone.api.remove([pic]);
+  assert.equal(server.db.objects.size, 0);
+  assert.deepEqual([phone.family.status().signedIn, ipad.family.status().signedIn], [true, true]);
+});
+
+test('"Given" pressed on a grown-up\'s device always lands - also for a reward his device has not heard of yet, also over midnight', async (t) => {
+  const server = await startFamilyServer();
+  t.after(() => server.close());
+  let time = new Date(2026, 10, 16, 19, 30).getTime(); // Monday evening
+  const clock = () => time;
+  const ipad = device(server, { clock });
+  ipad.store.update((s) => { s.xp = 500; addItem(s, 'chore', { title: 'Wash the car', points: 30, repeat: 'once', reward: 'One dollar' }); });
+  await ipad.family.signUp('given@example.com', 'correct horse');
+  await ipad.family.setRole('player');
+  let entry;
+  ipad.store.update((s) => { entry = submitChore(s, s.chores.list[0], null); });
+  await ipad.family.sync();
+  const phone = device(server, { clock });
+  await phone.family.signIn('given@example.com', 'correct horse');
+  await phone.family.setRole('manager');
+  time = new Date(2026, 10, 16, 21, 0).getTime();
+  const desk = phone.family.desk();
+  desk.run('chore', { id: entry.id, ok: true });
+  desk.run('add', { kind: 'tier', item: { title: 'Cinema', points: 400 } }); // he has the points: won at once
+  const shown = owed(desk.state()).map((e) => e.id); // the ids on the buttons of the phone's screen
+  assert.equal(shown.length, 2);
+  await phone.family.sync(); // rounds come and go while the screen stays as it is ...
+  await phone.family.sync();
+  assert.deepEqual(owed(phone.family.desk().state()).map((e) => e.id), shown, '... and what is shown keeps its name');
+  for (const id of shown) phone.family.desk().run('given', { id });
+  assert.equal(owed(phone.family.desk().state()).length, 0);
+  await phone.family.sync();
+
+  time = new Date(2026, 10, 17, 7, 15).getTime(); // his device is opened the next morning
+  await ipad.family.sync();
+  const his = ipad.store.get();
+  assert.equal(his.xp, 530);
+  assert.deepEqual(his.rewards.earned.map((e) => [e.title, e.given]), [['One dollar', true], ['Cinema', true]], 'both were handed out once, nothing is owed twice');
+  assert.deepEqual(his.rewards.earned.map((e) => e.id), shown, 'his device calls them by the same names');
+  assert.ok(server.db.commands.every((c) => c.outcome === 'done'), JSON.stringify(server.db.commands.map((c) => c.outcome)));
+  await phone.family.sync();
+  assert.deepEqual([owed(phone.family.desk().state()).length, phone.family.status().waiting], [0, 0]);
+});
+
+test('a name cut in the middle of an emoji never stops his device from reporting', async (t) => {
+  const { server, ipad, phone, settle } = await household(t);
+  const cut = `${'x'.repeat(59)}\u{1F600}`.slice(0, 60); // as an older version would have saved it: half an emoji at the end
+  ipad.store.update((s) => { s.chores.list[0].title = cut; s.rewards.tiers[0].note = 'zero\u0000byte'; });
+  await ipad.family.sync();
+  assert.equal(ipad.family.status().error, '', 'his state is still accepted by the database');
+  assert.equal(server.db.family_state[0].data.chores.list[0].title, 'x'.repeat(59));
+  // and what a grown-up types is cut between characters, never inside one
+  const long = `${'y'.repeat(59)}\u{1F600} and more`;
+  phone.family.desk().run('add', { kind: 'chore', item: { title: long, note: `${'n'.repeat(199)}\u{1F680}`, icon: '\u{1F468}‍\u{1F469}‍\u{1F467}' } });
+  await settle();
+  const added = ipad.store.get().chores.list.at(-1);
+  assert.deepEqual([added.title, added.note], ['y'.repeat(59), 'n'.repeat(199)]);
+  assert.ok(added.icon.length > 0 && JSON.stringify(added.icon) === JSON.stringify(added.icon.toWellFormed?.() ?? added.icon));
+  assert.deepEqual([phone.family.status().waiting, ipad.family.status().error, server.db.commands.every((c) => c.outcome === 'done')], [0, '', true]);
+});
+
+test('once an account is deleted, a device that is still signed in can add nothing to it', async (t) => {
+  const { server, ipad, phone } = await household(t);
+  const pic = await ipad.photos.save(jpeg('park'));
+  ipad.family.desk().run('edit', { kind: 'tier', id: ipad.store.get().rewards.tiers[0].id, item: { photo: pic } });
+  await ipad.family.sync();
+  // the account cannot be deleted while its pictures cannot be looked up
+  server.failOnce(/^POST \/storage\/v1\/object\/list\/photos/);
+  await assert.rejects(phone.family.deleteAccount(), { code: 'server' });
+  assert.deepEqual([server.db.users.length, server.db.objects.size, phone.family.status().signedIn], [1, 1, true]);
+  await phone.family.deleteAccount();
+  assert.deepEqual([server.db.users.length, server.db.objects.size, server.db.family_state.length], [0, 0, 0]);
+  // his device still has a sign-in that is good for a while
+  const photo = await ipad.photos.save(jpeg('bed'));
+  ipad.store.update((s) => { submitChore(s, s.chores.list[0], photo); });
+  await ipad.family.sync();
+  assert.deepEqual([server.db.objects.size, server.db.family_state.length, server.db.commands.length], [0, 0, 0], 'nothing new is stored for an account that is gone');
+  assert.equal(await ipad.photos.has(photo), true, 'his game is untouched');
+  server.expireTokens();
+  await ipad.family.sync();
+  assert.deepEqual([ipad.family.status().signedIn, ipad.family.status().lapsed], [false, true], 'and when the sign-in runs out the device says so');
+});
+
+test('a grown-up\'s device that gives up changes it never sent takes their pictures out of the folder again', async (t) => {
+  const { server, phone } = await household(t);
+  const kept = await phone.family.desk().savePhoto(jpeg('sent'));
+  phone.family.desk().run('add', { kind: 'tier', item: { title: 'Sent', points: 900, photo: kept } });
+  await phone.family.sync();
+  server.setDown(true);
+  const lost = await phone.photos.save(jpeg('x')); // (stands for a picture that went up just before the connection dropped)
+  server.setDown(false);
+  await phone.api.upload(lost, jpeg('never sent'));
+  phone.box.set((b) => { b.outbox.push({ id: newId(), type: 'add', payload: { kind: 'tier', item: { id: 'tiernever1', title: 'Never sent', points: 950, photo: lost } }, sent: false }); });
+  assert.equal(server.db.objects.size, 2);
+  await phone.family.signOut();
+  assert.deepEqual([...server.db.objects.keys()].map((k) => k.split('/')[1]), [kept], 'the picture of the change that was sent stays for his device to fetch');
 });
 

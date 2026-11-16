@@ -43,7 +43,8 @@ for mode in open strict; do
     "END users left: b@example.com" "END rows left: state 1 (family B only), commands 0" "END grants to anon on the tables: none" "END rls on: family_state=true, commands=true"; do
     echo "$out" | grep -qF "$want" || { echo "FAIL ($mode): expected \"$want\""; fail=1; }
   done
-  [ "$(echo "$out" | grep -c 'permission denied')" -ge 4 ] || { echo "FAIL ($mode): a visitor was not refused everywhere"; fail=1; }
-  [ "$fail" = 0 ] && echo "ok ($mode): migrations apply (twice); each family sees only its own rows and photos; visitors get nothing"
+  [ "$(echo "$out" | grep -c 'permission denied')" -ge 5 ] || { echo "FAIL ($mode): a visitor was not refused everywhere, or a family can read the accounts"; fail=1; }
+  echo "$out" | grep -q "A16" && { echo "FAIL ($mode): a signed-in family can read the table of accounts"; fail=1; }
+  [ "$fail" = 0 ] && echo "ok ($mode): migrations apply (twice); each family sees only its own rows and photos; visitors get nothing; nothing can be added once an account is deleted"
 done
 exit $fail

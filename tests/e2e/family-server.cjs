@@ -10,7 +10,9 @@
 //   server.revoke()          ... and cannot be renewed either
 //   server.setDown(true)     nobody answers
 //   server.setConfirm(true)  new accounts must confirm their email address first
-//   server.failOnce(/re/)    the next request whose "METHOD /path" matches is answered with a 500
+//   server.failOnce(/re/, [status, body])   the next request whose "METHOD /path" matches is answered
+//                            with that (default: a plain 500). The real picture service wraps most
+//                            trouble in HTTP 400 with the true status inside: [400, { statusCode: '503', ... }]
 
 const http = require('node:http');
 const crypto = require('node:crypto');
@@ -30,6 +32,7 @@ function startFamilyServer() {
   let down = false;
   let confirm = false;
   let failing = null;
+  let failWith = null;
   let tick = 0; // makes created_at strictly increasing even within one millisecond
 
   const session = (user) => {
@@ -64,11 +67,18 @@ function startFamilyServer() {
       ? big(row.data) >= 400000 || String(row.player_device || '').length > 80
       : big(row.payload) >= 20000 || typeof row.type !== 'string' || row.type.length > 40 || String(row.device).length > 80 || String(row.outcome || '').length > 200 || !UUID.test(row.id);
     if (bad) throw Object.assign(new Error('check'), { status: 400, body: { code: '23514', message: `new row for relation "${table}" violates check constraint` } });
+    // as the real column type (jsonb) does: half an emoji or a zero byte cannot be stored
+    const text = JSON.stringify(table === 'family_state' ? row.data : row.payload) || '';
+    if (/\\ud[89ab][0-9a-f]{2}(?!\\ud[c-f][0-9a-f]{2})|(?<!\\ud[89ab][0-9a-f]{2})\\ud[c-f][0-9a-f]{2}|\\u0000/i.test(text)) {
+      throw Object.assign(new Error('unicode'), { status: 400, body: { code: '22P05', message: 'unsupported Unicode escape sequence' } });
+    }
   }
 
-  function rest(req, user, table, params, body) {
+  function rest(req, user, table, params, body, exists) {
     const T = TABLES[table];
     if (!T) return [404, { code: 'PGRST205', message: `Could not find the table 'public.${table}' in the schema cache` }];
+    // a row points to its account: once that is deleted nothing can be added (the rows themselves went with it)
+    if (req.method === 'POST' && !exists) return [409, { code: '23503', message: `insert or update on table "${table}" violates foreign key constraint "${table}_owner_fkey"` }];
     const mine = (row) => row.owner === user; // row level security
     const prefer = String(req.headers.prefer || '');
     const back = /return=representation/.test(prefer);
@@ -117,7 +127,7 @@ function startFamilyServer() {
 
   // ---- the folder of pictures -----------------------------------------------
   const denied = [400, { statusCode: '403', error: 'Unauthorized', message: 'new row violates row-level security policy' }];
-  function storage(req, user, parts, body, bytes) {
+  function storage(req, user, parts, body, bytes, exists) {
     if (parts[0] === 'list' && parts[1] === 'photos' && req.method === 'POST') {
       const prefix = `${String(body?.prefix || '').replace(/\/$/, '')}/`;
       if (prefix !== `${user}/`) return [200, []]; // another family's folder looks empty
@@ -133,7 +143,7 @@ function startFamilyServer() {
     const key = parts.slice(1).map(decodeURIComponent).join('/');
     const own = key.startsWith(`${user}/`) && key.split('/').length === 2;
     if (req.method === 'POST') {
-      if (!own) return denied;
+      if (!own || !exists) return denied; // (not into another family's folder; nothing at all once the account is deleted)
       const type = String(req.headers['content-type'] || '').split(';')[0];
       if (!MIME.includes(type)) return [400, { statusCode: '415', error: 'invalid_mime_type', message: `mime type ${type} is not supported` }];
       if (bytes.length > 3145728) return [400, { statusCode: '413', error: 'Payload too large', message: 'The object exceeded the maximum allowed size' }];
@@ -198,7 +208,7 @@ function startFamilyServer() {
       const url = new URL(req.url, 'http://x');
       const line = `${req.method} ${url.pathname}`;
       requests.push(line);
-      if (failing && failing.test(line)) { failing = null; return answer([500, { message: 'the test asked for this failure' }]); }
+      if (failing && failing.test(line)) { const with_ = failWith; failing = failWith = null; return answer(with_ || [500, { message: 'the test asked for this failure' }]); }
       const bytes = Buffer.concat(chunks);
       const isJson = /json/.test(String(req.headers['content-type'] || ''));
       let body = null;
@@ -207,8 +217,10 @@ function startFamilyServer() {
         if (!req.headers.apikey) return answer([401, { message: 'No API key found in request' }]);
         const seg = url.pathname.split('/').filter(Boolean); // e.g. ['rest', 'v1', 'commands']
         if (seg[0] === 'auth' && seg[1] === 'v1') return answer(auth(req, seg[2], url.searchParams, body));
+        // A sign-in is good until it runs out - also when its account has been deleted meanwhile (as in the real thing).
         const known = tokens.get(String(req.headers.authorization || '').replace(/^Bearer /, ''));
-        const user = known && !known.dead && db.users.some((u) => u.id === known.user) ? known.user : null;
+        const user = known && !known.dead ? known.user : null;
+        const exists = db.users.some((u) => u.id === user);
         if (seg[0] === 'rest' && seg[1] === 'v1') {
           if (!user) return answer([401, { code: 'PGRST301', message: 'JWT expired' }]);
           if (seg[2] === 'rpc') {
@@ -217,11 +229,17 @@ function startFamilyServer() {
             for (const t of Object.keys(TABLES)) db[t] = db[t].filter((r) => r.owner !== user);
             return answer([204, null]);
           }
-          return answer(rest(req, user, seg[2], url.searchParams, body));
+          return answer(rest(req, user, seg[2], url.searchParams, body, exists));
         }
         if (seg[0] === 'storage' && seg[1] === 'v1' && seg[2] === 'object') {
-          if (!user) return answer([400, { statusCode: '403', error: 'Unauthorized', message: 'jwt expired' }]);
-          return answer(storage(req, user, seg.slice(3), body, bytes));
+          if (!user) {
+            // The real picture service: a sign-in it does not accept is refused in these words - except on the
+            // plain download address, where it just counts as "not signed in" and a private folder is "not found".
+            const plainGet = req.method === 'GET' && seg[3] === 'photos';
+            return answer(plainGet ? [400, { statusCode: '404', error: 'Bucket not found', message: 'Bucket not found' }]
+              : [400, { statusCode: '403', error: 'Unauthorized', message: '"exp" claim timestamp check failed' }]);
+          }
+          return answer(storage(req, user, seg.slice(3), body, bytes, exists));
         }
         return answer([404, { message: 'not found' }]);
       } catch (e) {
@@ -240,7 +258,7 @@ function startFamilyServer() {
       setDown: (v) => { down = !!v; },
       setConfirm: (v) => { confirm = !!v; },
       confirmAll: () => { for (const u of db.users) u.confirmed = true; },
-      failOnce: (re) => { failing = re; },
+      failOnce: (re, answer = null) => { failing = re; failWith = answer; },
       close: () => new Promise((done) => { server.closeAllConnections?.(); server.close(done); }),
     }));
   });

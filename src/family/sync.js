@@ -20,11 +20,12 @@
 import { todayKey } from '../core/dom.js';
 import { act } from '../rewards/actions.js';
 import { uid } from '../rewards/logic.js';
-import { snapshot, sameNews, viewOf } from './shape.js';
+import { snapshot, sameNews, viewOf, plain } from './shape.js';
 
 const KEY = 'lwm.family.v1';
 const PHOTO = /^[a-z0-9]{6,40}$/;
 const HOUR = 3600000;
+const DAY = 24 * HOUR;
 const rows = (v) => (Array.isArray(v) ? v : []);
 
 export function newId() {
@@ -47,10 +48,11 @@ const blank = () => ({
   role: '', // 'player' = he plays here; 'manager' = a grown-up's own device; '' = not chosen yet
   moved: false, // another device took over as the one he plays on
   // the device he plays on:
+  since: 0, // since when this has been the device he plays on
   applied: [], // commands carried out (so that none is ever carried out twice)
   uploaded: [], // pictures known to be in the family's folder
   trash: [], // pictures to delete from the folder
-  tidied: 0, // when the folder and the old commands were last tidied
+  tidied: 0, // when the old commands and the folder were last tidied
   // a grown-up's device:
   snap: null, // { data, at, player }: his state as last heard
   outbox: [], // [{ id, type, payload, sent }]: what was done here and his device has not carried out yet
@@ -185,6 +187,16 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
     }
   }
 
+  /**
+   * A grown-up's device gives up changes that never left it (signing out, refused for good): the
+   * pictures that went up for them would stay in the folder with nothing pointing to them.
+   */
+  async function release(commands) {
+    const ids = commands.filter((c) => !c.sent).map((c) => c.payload?.item?.photo).filter((id) => typeof id === 'string' && PHOTO.test(id));
+    for (const id of ids) seen.delete(id);
+    if (ids.length) await api.remove(ids).catch(() => {});
+  }
+
   /** The pictures his state points to: the rewards in the mine, and chore photos waiting for a check. */
   const wanted = (s) => [...s.rewards.tiers.map((t) => t.photo), ...s.chores.log.filter((e) => e.status === 'pending').map((e) => e.photo)].filter((id) => PHOTO.test(id || ''));
 
@@ -202,20 +214,20 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
       try {
         here = await shelf.has(id);
         if (here && up.has(id)) continue;
+        if (!mayAsk(id, here ? 3 : 2)) continue; // refused a few times just now: left alone for five minutes
         if (here) {
           const blob = await shelf.load(id);
           if (blob) await api.upload(id, blob);
         } else {
-          if (!mayAsk(id, 2)) continue;
           await fetchPicture(id); // it came from a grown-up's device, or this device has lost it
-          tried.delete(id);
         }
+        tried.delete(id);
         up.add(id);
       } catch (e) {
         if (e.code === 'auth') throw e;
         if (passing(e)) trouble ||= e;
-        else if (here) up.add(id); // refused for good (too big, not a picture): the other devices show the emoji instead
-        else missed(id); // not in the folder (yet)
+        else if (here && (e.status === 413 || e.status === 415)) up.add(id); // too big, or not a picture: it will never be taken - the other devices show the emoji instead
+        else missed(id); // refused for now, or not in the folder (yet): asked again later
       }
     }
     const listed = [...new Set(B().trash)];
@@ -234,16 +246,26 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
     if (trouble) throw trouble;
   }
 
-  /** Now and then: old commands go, and so do pictures in the folder that nothing points to. */
-  async function tidy() {
+  /**
+   * Now and then: commands carried out long ago go, and the folder is looked through.
+   * Pictures are normally deleted exactly when they are let go of (drop, release). The sweep here
+   * only catches what slipped through, and it is deliberately slow to act - a picture in the folder
+   * may be the only copy: it leaves alone whatever is younger than a month, whatever a waiting
+   * command names (`named`), and everything while this device has been "his" for less than a
+   * month (a new iPad that signs in before its backup is restored points to nothing yet).
+   * `more`: commands are still waiting - no sweep now.
+   */
+  async function tidy(named = [], more = false) {
     if (clock() - (B().tidied || 0) < 12 * HOUR) return;
     try {
-      await api.del('commands', `applied_at=lt.${new Date(clock() - 7 * 24 * HOUR).toISOString()}`);
-      const keep = new Set(wanted(store.get()));
+      await api.del('commands', `applied_at=lt.${new Date(clock() - 7 * DAY).toISOString()}`);
       const folder = await api.list();
-      const stale = folder.filter((o) => !keep.has(o.name) && Date.parse(o.created_at) < clock() - HOUR).map((o) => o.name);
-      if (stale.length) await api.remove(stale);
-      // a picture we believe is in the folder but is not (another device tidied it away) is sent again
+      if (!more && clock() - (B().since || clock()) > 30 * DAY) {
+        const keep = new Set([...wanted(store.get()), ...named]);
+        const stale = folder.filter((o) => !keep.has(o.name) && Date.parse(o.created_at) < clock() - 30 * DAY).map((o) => o.name);
+        if (stale.length) await api.remove(stale);
+      }
+      // a picture we believe is in the folder but is not (another device cleared it away) is sent again
       const there = new Set(folder.map((o) => o.name));
       box.set((b) => { b.tidied = clock(); b.uploaded = b.uploaded.filter((id) => there.has(id)); });
     } catch { /* next time */ }
@@ -261,6 +283,7 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
       return managerRound();
     }
     const waiting = rows(await api.get('commands', 'select=id,type,payload&applied_at=is.null&order=created_at.asc,id.asc&limit=100'));
+    const named = waiting.map((c) => c.payload?.item?.photo).filter((id) => typeof id === 'string' && PHOTO.test(id)); // pictures the waiting commands bring
     const outcome = new Map();
     let carried = 0;
     for (const c of waiting) {
@@ -307,7 +330,7 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
     }
     const at = now().toISOString();
     for (const [word, ids] of outcome) await api.patch('commands', `id=in.(${ids.join(',')})`, { applied_at: at, outcome: word });
-    await tidy();
+    await tidy(named, carried < waiting.length || waiting.length >= 100);
     return carried > 0;
   }
 
@@ -323,6 +346,7 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
       } catch (e) {
         if (e.code !== 'server' || !(e.status >= 400 && e.status < 500)) throw e; // could not be reached: try again next round
         box.set((b) => { b.outbox = b.outbox.filter((x) => x.id !== c.id); }); // refused for good: it must not hold up the ones behind it
+        await release([c]);
         continue;
       }
       box.set((b) => { const mine = b.outbox.find((x) => x.id === c.id); if (mine) mine.sent = true; });
@@ -410,7 +434,7 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
     remote: true,
     state: () => (view ||= viewOf(B().snap?.data, B().outbox, now())),
     run(type, payload) {
-      const p = JSON.parse(JSON.stringify(payload || {}));
+      const p = plain(payload || {}); // (a copy in which every text can be stored - no half characters)
       const s = remote.state();
       if (type === 'add' && p.item && !p.item.id) p.item.id = uid(); // both devices call the new thing by the same id
       if (type === 'given') {
@@ -493,6 +517,7 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
           const his = [...store.get().chores.log.filter((e) => e.status === 'pending').map((e) => e.photo), ...B().trash].filter((id) => PHOTO.test(id || ''));
           if (his.length) await api.remove(his).catch(() => {});
         }
+        if (role() === 'manager') await release(B().outbox);
         await api.signOut();
         box.set(forgetAccount);
         view = null;
@@ -522,7 +547,8 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
           // Starting (again) as the device he plays on: every picture is sent afresh - another device may
           // have cleared the folder meanwhile - and the folder is not tidied for a while, so that a
           // device made "his" by mistake cannot clear away the real one's pictures at once.
-          box.set((b) => Object.assign(b, { role: 'player', moved: false, snap: null, outbox: [], uploaded: [], tidied: clock() }));
+          if (B().role === 'manager') await release(B().outbox);
+          box.set((b) => Object.assign(b, { role: 'player', since: clock(), moved: false, snap: null, outbox: [], uploaded: [], tidied: clock() }));
           sent = null;
         } else {
           if (row?.player_device === dev) await api.patch('family_state', me, { player_device: null });

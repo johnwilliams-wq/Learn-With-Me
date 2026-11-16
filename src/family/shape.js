@@ -6,10 +6,13 @@
 // few totals. His detailed play history (every turn, every slip) never leaves the device.
 
 import { todayKey } from '../core/dom.js';
-import { countedToday } from '../rewards/logic.js';
+import { countedToday, wellFormed } from '../rewards/logic.js';
 import { act } from '../rewards/actions.js';
 
-const copy = (v) => JSON.parse(JSON.stringify(v));
+// A copy as plain data. Every text in it is made storable on the way (wellFormed): a name that was
+// cut in the middle of an emoji long ago must not stop his device from reporting.
+const copy = (v) => JSON.parse(JSON.stringify(v), (key, value) => (typeof value === 'string' ? wellFormed(value) : value));
+export const plain = copy;
 const rows = (v) => (Array.isArray(v) ? v.filter((x) => x && typeof x === 'object' && typeof x.id === 'string') : []);
 const thing = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
 
