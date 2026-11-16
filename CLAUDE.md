@@ -5,8 +5,11 @@ Phase 1 is **Listening Quest**: a recorded voice gives instructions, the child c
 by tapping, and the game checks that he listened *and* understood. English, math, science,
 history and social studies sections are planned as later phases.
 
-**This repository is public.** Never commit anything personal: no names, ages, schools,
-photos, or descriptions of the child. The app itself stores progress only on the device.
+**This repository is public.** Never commit anything personal: no ages, schools, photos,
+surnames or descriptions of the child. The one exception, at the owner's explicit request: the
+player's first name, set as `NAME` in `tools/content/voice.mjs`, so the guide can greet him and
+call him by name (it is in the generated voice clips; set it to `''` for a game that names nobody).
+The app itself stores progress only on the device.
 
 ## What must stay true (design rules)
 
@@ -16,7 +19,8 @@ These came from the parent's brief; do not trade them away for features.
    -> he responds -> feedback. Audio always starts from his own tap.
 2. **Nothing punishing**: no buzzers, red crosses, lives, timers or lost progress. First miss =
    hear it again a little slower with support; second miss = the guide shows the answer.
-   Every finished mission earns a card. Tapping early is counted, never penalised.
+   Every finished mission earns a card. Tapping early is counted and (unless the parent turns it
+   off) answered with a calm spoken reminder before he starts the instruction again; nothing is lost.
 3. **Listening and understanding, not just memory**: every word that is spoken must matter.
    Scenes contain look-alikes so each detail word is needed; sound-alike words never share a scene.
 4. **One new difficulty per level**; a level opens at 2 stars on the one before (or after three

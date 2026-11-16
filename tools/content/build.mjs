@@ -13,7 +13,7 @@ import { makeRng } from '../../src/core/rng.js';
 import { SKILLS } from '../../src/listening/insights.js';
 import { OBJECT_KINDS, CHARACTER_KINDS, PALETTE } from '../../src/art/sprites.js';
 import { WORLDS } from './levels.mjs';
-import { VOICE, UI_SPEED, LINES, POOLS } from './voice.mjs';
+import { VOICE, UI_SPEED, NAME, LINES, POOLS } from './voice.mjs';
 import { finish, clipName } from './lib.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -134,7 +134,7 @@ for (const [pool, texts] of Object.entries(POOLS)) {
     return id;
   });
 }
-writeFileSync(join(DATA, 'voice.json'), `${JSON.stringify({ voice: VOICE, lines, pools }, null, 1)}\n`);
+writeFileSync(join(DATA, 'voice.json'), `${JSON.stringify({ voice: VOICE, name: NAME, lines, pools }, null, 1)}\n`);
 
 // ---- what needs a voice clip ---------------------------------------------------------------
 mkdirSync(join(ROOT, 'tools', 'tts'), { recursive: true });

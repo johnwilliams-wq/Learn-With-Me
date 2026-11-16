@@ -43,6 +43,7 @@ export function titleScreen(ctx) {
       h('div', { class: 'guide hero', html: guideSVG('happy') }),
       h('h1', { class: 'logo' }, 'Learn With Me'),
       h('p', { class: 'tagline' }, 'Listening Quest'),
+      voice.name ? h('p', { class: 'hello' }, `Hi, ${voice.name}!`) : null,
       play),
     hint);
   return { el };

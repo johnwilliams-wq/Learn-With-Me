@@ -105,6 +105,7 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
       section('Settings',
         toggle('Sound effects', (st) => st.settings.sfx, (st, v) => { st.settings.sfx = v; }),
         toggle('Slower voice', (st) => st.settings.slowVoice, (st, v) => { st.settings.slowVoice = v; }, 'Plays every instruction about 12% slower.'),
+        toggle('Remind him to wait', (st) => st.settings.earlyReminder !== false, (st, v) => { st.settings.earlyReminder = v; }, 'If he touches something before the voice has finished, it stops and asks him to listen until it is finished; then he taps the ear again. Off: it only shows a “wait” sign and carries on.'),
         h('label', { class: 'setting' }, daily, h('span', {}, h('b', {}, 'Suggest stopping after'), h('small', {}, 'Short, regular practice works better than long sessions. If a daily reward needs more missions than this, the suggestion waits until he has won it.'))),
         toggle('Lock for the day after that', (st) => st.settings.hardStop, (st, v) => { st.settings.hardStop = v; }, 'Otherwise it is only a friendly suggestion.'),
         toggle('Unlock every level', (st) => st.flags.unlockAll, (st, v) => { st.flags.unlockAll = v; }, 'Lets you jump anywhere. Leave off for normal step-by-step progress.'),

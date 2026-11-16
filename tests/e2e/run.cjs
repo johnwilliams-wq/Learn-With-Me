@@ -268,7 +268,7 @@ scenario('08 hidden-cards level (w2l4): covered while listening, uncovered to an
 });
 
 // ---------------------------------------------------------------------------------------------
-scenario('09 early taps with real audio: counted, never submitted; leaving mid-sentence resumes the trial', async (t) => {
+scenario('09 early taps with real audio: a spoken reminder, nothing submitted; leaving mid-sentence resumes the trial', async (t) => {
   const have = H.loadItems('w1l1').filter(H.clipExists).length;
   if (have < 6) return t.skip(`only ${have} of the level-1 clips exist yet`);
   const { page } = await t.open({ query: 'nosw=1', state: { ...OPEN, seen: H.seenExcept('w1l1', H.clipExists) } });
@@ -281,15 +281,32 @@ scenario('09 early taps with real audio: counted, never submitted; leaving mid-s
   await page.click(`.obj[data-id="${item.expect[0][0]}"]`, { force: true });
   const mid = await page.evaluate(() => ({ phase: document.querySelector('.mission').dataset.phase, trials: globalThis.__lwm.store.get().trials.length,
     mood: document.querySelector('.guide-col .guide').dataset.mood }));
-  t.check(mid.phase === 'listening', `the early tap should land while the voice is talking (phase was ${mid.phase}; test timing)`);
+  t.check(mid.phase === 'feedback', `the early tap should stop the instruction for the reminder (phase was ${mid.phase})`);
   t.check(mid.trials === 0, 'an early tap must not submit an answer');
   t.check(mid.mood === 'wait', `the guide should calmly show "wait" (mood was ${mid.mood})`);
-  await waitPhase(page, 'respond');
-  t.check((await getState(page)).trials.length === 0 && (await badges(page)) === 0, 'after the voice finished nothing should be answered or marked yet');
+  // the reminder is a real clip of a few seconds; afterwards he is back at the ear, nothing answered or marked
+  await sleep(1200);
+  t.check((await page.evaluate(() => document.querySelector('.mission').dataset.phase)) === 'feedback', 'the reminder should take a moment to say (it is spoken, not skipped)');
+  await waitPhase(page, 'ready', 15000);
+  t.check((await getState(page)).trials.length === 0 && (await badges(page)) === 0, 'after the reminder nothing should be answered or marked');
+  await listen(page);
   await answer(page);
   await waitTrials(page, 1);
   const tr = await lastTrial(page);
-  t.check(tr.et === 1 && tr.c1 === 1, `expected et=1 and c1=1 in the stored trial, got et=${tr.et} c1=${tr.c1}`);
+  t.check(tr.et === 1 && tr.c1 === 1 && tr.rp === 0, `expected et=1, c1=1 and no replay counted, got et=${tr.et} c1=${tr.c1} rp=${tr.rp}`);
+
+  // with the reminder switched off the voice just carries on
+  await page.evaluate(() => globalThis.__lwm.store.update((s) => { s.settings.earlyReminder = false; }));
+  await waitPhase(page, 'ready', 30000);
+  const quiet = await curItem(page);
+  await page.click('.btn-listen', { force: true });
+  await waitPhase(page, 'listening', 3000);
+  await page.click(`.obj[data-id="${quiet.scene.objects[0].id}"]`, { force: true });
+  t.check((await page.evaluate(() => document.querySelector('.mission').dataset.phase)) === 'listening', 'with the reminder off, an early tap should not stop the voice');
+  await waitPhase(page, 'respond');
+  await answer(page);
+  await waitTrials(page, 2);
+  await page.evaluate(() => globalThis.__lwm.store.update((s) => { s.settings.earlyReminder = true; }));
 
   // trial 2: leave while the voice is talking, then keep playing
   await waitPhase(page, 'ready', 30000);
@@ -304,7 +321,7 @@ scenario('09 early taps with real audio: counted, never submitted; leaving mid-s
   t.check(back.id === second.id && back.phase === 'ready', `after "Keep playing" mid-sentence expected the same trial waiting at the ear, got ${JSON.stringify(back)}`);
   await listen(page);
   await answer(page);
-  await waitTrials(page, 2);
+  await waitTrials(page, 3);
   t.check((await lastTrial(page)).i === second.id, 'the resumed trial should be the one that was interrupted');
 });
 

@@ -1,5 +1,6 @@
 {
  "voice": "af_heart",
+ "name": "John",
  "lines": {
   "tip-w1l1": {
    "text": "Welcome to Rookie Camp! Here is how it works. Tap the ear when you are ready to listen. Wait until I finish talking. Then tap what I said.",
@@ -178,8 +179,12 @@
    "file": "90cb2c98c40f.mp3"
   },
   "hello-first": {
-   "text": "Hi! I am Blip, your guide. Let’s train your super listening. Tap the glowing level to start.",
-   "file": "e50cfd84952f.mp3"
+   "text": "Hi John! I am Blip, your guide. Let’s train your super listening. Tap the glowing level to start.",
+   "file": "0db2f5e4ffff.mp3"
+  },
+  "wait-please": {
+   "text": "John, please try your best to listen until I am finished talking.",
+   "file": "47a6ae3142c4.mp3"
   },
   "reward-won": {
    "text": "You earned a reward! Go and show a grown-up.",
@@ -190,8 +195,8 @@
    "file": "5893eac01a71.mp3"
   },
   "expect-done": {
-   "text": "All done! Your rewards are unlocked.",
-   "file": "455bff3312da.mp3"
+   "text": "All done, John! Your rewards are unlocked.",
+   "file": "b1a12a6b3cc9.mp3"
   },
   "rewards-locked": {
    "text": "First, finish your expectations. Then your rewards will open.",
@@ -202,16 +207,16 @@
    "file": "e7781db9c5d7.mp3"
   },
   "hello-back-1": {
-   "text": "Welcome back, hero!",
-   "file": "b2f07f348035.mp3"
+   "text": "Welcome back, John!",
+   "file": "935a9f61a14c.mp3"
   },
   "hello-back-2": {
-   "text": "Good to see you! Ready to train?",
-   "file": "0f371bf87999.mp3"
+   "text": "Good to see you, John! Ready to train?",
+   "file": "7b6c5a0d6dfc.mp3"
   },
   "hello-back-3": {
-   "text": "Blip here. Let’s go!",
-   "file": "2c4f0f632840.mp3"
+   "text": "Blip here. Let’s go, John!",
+   "file": "a67f8f824d5c.mp3"
   },
   "good-1": {
    "text": "Yes!",
@@ -237,6 +242,10 @@
    "text": "Perfect.",
    "file": "ed92c60823c4.mp3"
   },
+  "good-7": {
+   "text": "Nice one, John!",
+   "file": "2b07c0f44d5d.mp3"
+  },
   "goodEnd-1": {
    "text": "Nice! You listened to every word.",
    "file": "57d76ecaed17.mp3"
@@ -248,6 +257,10 @@
   "goodEnd-3": {
    "text": "You waited until I finished. Nice!",
    "file": "b305ae2df038.mp3"
+  },
+  "goodEnd-4": {
+   "text": "Great listening, John!",
+   "file": "62b83b9873f0.mp3"
   },
   "goodWait-1": {
    "text": "Great waiting!",
@@ -302,32 +315,32 @@
    "file": "5930e0ce0445.mp3"
   },
   "result3-1": {
-   "text": "Perfect listening! Three stars!",
-   "file": "894a9f36e71a.mp3"
+   "text": "Perfect listening, John! Three stars!",
+   "file": "9733d850d658.mp3"
   },
   "result3-2": {
    "text": "Wow! Every single one on the first try!",
    "file": "ee1e81fb2240.mp3"
   },
   "result2-1": {
-   "text": "Great listening! Two stars!",
-   "file": "d3d4423b7cea.mp3"
+   "text": "Great listening, John! Two stars!",
+   "file": "5fdb78e07b6f.mp3"
   },
   "result2-2": {
    "text": "Awesome job. You earned two stars!",
    "file": "8e092f990e2f.mp3"
   },
   "result1-1": {
-   "text": "Mission complete! Every mission makes your listening stronger.",
-   "file": "47a8ca2f78da.mp3"
+   "text": "Mission complete, John! Every mission makes your listening stronger.",
+   "file": "0a5fc95754f9.mp3"
   },
   "result1-2": {
    "text": "You finished the mission! Want to try for two stars?",
    "file": "e3948c66a621.mp3"
   },
   "enough-1": {
-   "text": "Great training today! This is a good place to stop. See you next time!",
-   "file": "691424cb5f7d.mp3"
+   "text": "Great training today, John! This is a good place to stop. See you next time!",
+   "file": "878992232ce7.mp3"
   }
  },
  "pools": {
@@ -342,12 +355,14 @@
    "good-3",
    "good-4",
    "good-5",
-   "good-6"
+   "good-6",
+   "good-7"
   ],
   "goodEnd": [
    "goodEnd-1",
    "goodEnd-2",
-   "goodEnd-3"
+   "goodEnd-3",
+   "goodEnd-4"
   ],
   "goodWait": [
    "goodWait-1",

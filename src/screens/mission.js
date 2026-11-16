@@ -172,11 +172,13 @@ export async function missionScreen(ctx, { levelId }) {
 
   function onTap(id) {
     if (phase === 'listening') {
-      // Jumped in early. Stay calm: count it, show "wait", carry on talking.
+      // Jumped in early. Stay calm: count it and show "wait". Then either carry on talking, or
+      // (the default) stop, ask him to listen to the end, and let him start the instruction again.
       earlyTaps = Math.min(earlyTaps + 1, 9);
       board.nudge(id);
       setGuide('wait');
-      setTimeout(() => { if (alive && phase === 'listening') setGuide('talk'); }, 900);
+      if (store.get().settings.earlyReminder !== false && voice.has('wait-please')) remind();
+      else setTimeout(() => { if (alive && phase === 'listening') setGuide('talk'); }, 900);
       return;
     }
     if (phase === 'ready') return void pulse(btnListen, 'hint', 700);
@@ -193,6 +195,21 @@ export async function missionScreen(ctx, { levelId }) {
     board.mark(actions, item.mode);
     refresh();
     if (item.auto) submit();
+  }
+
+  /** "Please try your best to listen until I am finished talking" - then back to the ear. Nothing is lost. */
+  async function remind() {
+    const my = ++token; // the instruction that was playing stops here, quietly
+    setPhase('feedback');
+    await voice.say('wait-please');
+    if (!alive || my !== token) return;
+    actions = [];
+    board.mark(actions, item.mode);
+    board.setLocked(true);
+    board.setCovered(!!item.hide && attempt === 1);
+    setGuide('idle');
+    setPhase('ready');
+    pulse(btnListen, 'hint', 700);
   }
 
   function onUndo() {
@@ -341,7 +358,7 @@ export async function missionScreen(ctx, { levelId }) {
     refresh(); // hides Done / Undo until a turn needs them
 
     const ready = Promise.race([
-      Promise.all([audio.preload(itemUrls), voice.preload(['good', 'goodEnd', 'goodWait', 'gotIt', 'retry', 'watch', 'result1', 'result2', 'result3', 'enough', level.tip].filter(Boolean))]),
+      Promise.all([audio.preload(itemUrls), voice.preload(['wait-please', 'good', 'goodEnd', 'goodWait', 'gotIt', 'retry', 'watch', 'result1', 'result2', 'result3', 'enough', level.tip].filter(Boolean))]),
       wait(8000),
     ]);
     ready.then(() => {

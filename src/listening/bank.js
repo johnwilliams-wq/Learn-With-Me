@@ -35,6 +35,7 @@ export function createVoice(audio, catalog) {
   };
   return {
     say,
+    name: catalog.name || '', // the player's first name, if the game has been given one
     text: (id) => line(id)?.text || '',
     has: (id) => !!line(id),
     /** Say a random line from a pool, never the same one twice running. */

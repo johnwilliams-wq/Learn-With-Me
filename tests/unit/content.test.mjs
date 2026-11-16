@@ -253,6 +253,9 @@ test('the guide has every line the game asks for, and every clip exists', () => 
     for (const id of voice.pools[pool]) assert.ok(voice.lines[id], id);
   }
   assert.ok(voice.lines['hello-first']);
+  // the reminder for touching too soon, in the parent's own words (with the player's name when one is set)
+  const lead = voice.name ? `${voice.name}, please` : 'Please';
+  assert.equal(voice.lines['wait-please'].text, `${lead} try your best to listen until I am finished talking.`);
   const manifest = read('tools/tts/manifest.json');
   const wanted = new Set(manifest.map((c) => c.file));
   for (const line of Object.values(voice.lines)) assert.ok(wanted.has(`assets/audio/ui/${line.file}`), line.text);
