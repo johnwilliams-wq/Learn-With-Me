@@ -64,6 +64,7 @@ tools/content/              worlds/ (one module per world), types/ (content rule
 tools/tts/                  setup.sh, synth.py (make clips), verify.py (speech-recognition check), retake.py (second takes),
                             manifest.json, verified.json, report.json, tweaks.json, accepted.json
 tools/build-precache.mjs    regenerates the service-worker file list in sw.js
+tools/icons/                the owner's picture (source.png) and make.py, which makes assets/icons/ from it
 tests/unit/                 node:test - logic, sprites, shell, and an independent check of every item
 tests/e2e/                  Playwright (Chromium): run.cjs (scenarios), all-items.cjs (plays every item), robots/ (one per activity type),
                             family-server.cjs (a stand-in for the family database), live-family.mjs (a try-out on the real one)
@@ -140,6 +141,12 @@ in `tools/tts/accepted.json`, with the reason. In Claude Code cloud sessions use
   "WON!". With `confirm` on, his tick is only `pending` until a grown-up presses OK.
 - **Points are XP.** Missions add XP; an approved chore adds its points to the same total. Lifetime tiers
   are thresholds on that total; daily rewards count missions finished today.
+- **The two kinds of reward have a section each** (the owner asked for that after typing long-term rewards
+  into the daily list): the *reward mine* - long-term, each unlocked once by points - and the *daily rewards* -
+  won again every day. In the parent area the Rewards tab keeps "To hand out" on top and has a switch between
+  the two sections (`rewardsPart` in `src/screens/admin.js`; it opens on the mine), each saying what the other
+  one is for. His Rewards screen has two big buttons, Mine and Today (`src/screens/rewards.js`; they stay in
+  sight while he scrolls, and only appear when he has rewards of both kinds). Never list the two together again.
 - **The reward mine** is how he sees the lifetime tiers (`ladder(state)` in `src/rewards/logic.js`,
   drawn by `src/screens/mine.js` inside `src/screens/rewards.js`, styles in `css/mine.css`, art in
   `src/art/mine.js`): a side view of the ground. He starts on the grass and his shaft goes down as his

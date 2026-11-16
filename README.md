@@ -44,12 +44,14 @@ choose a PIN; after that it always asks for the PIN. Inside:
 
 - **Progress** - what he has practised, which kinds of instruction go well, what tends to go wrong,
   and ideas for practising the same skills away from the screen.
-- **Rewards** - set daily rewards ("3 missions today = 15 minutes of game time") and the **reward mine**:
+- **Rewards** - two separate sections with a switch between them: the **reward mine** (long-term) and
+  **daily rewards** ("3 missions today = 15 minutes of game time", won again every day). The reward mine:
   rewards at the points you choose (400, 800, 2000...), each with a name, an optional description and
   an optional picture. He sees them as a mine he digs down into: he starts on the grass, and every
   reward waits at an ore - coal first, then red crystal, copper, iron, gold, emerald, lapis, diamond
   and star ore. He can scroll down to look ahead, and tap any reward to see it large and hear it.
-  When he wins one it waits under "To hand out" until you mark it given.
+  When he wins one it waits under "To hand out" until you mark it given. On his Rewards screen the two
+  kinds have a place each, with two big buttons: Mine and Today.
 - **Chores** - add chores with points. He taps Done and takes a photo; you approve it or send it back.
   Approved chores add to the same points total as missions. Without a family account (below) photos
   never leave the iPad.

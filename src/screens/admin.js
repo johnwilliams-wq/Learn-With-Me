@@ -272,6 +272,14 @@ function itemRow(ctx, kind, item, about, redraw, { before = [], dataset = {} } =
 
 // ------------------------------------------------------------------ Rewards tab
 
+/**
+ * Which of the two kinds of reward the Rewards tab is showing. They have a section each, with a
+ * switch between them, because they are easy to mix up when they sit one under the other:
+ *   'mine'   the reward mine - long-term rewards, each unlocked once when his points reach it
+ *   'daily'  daily rewards - won again every day he does that many missions
+ */
+let rewardsPart = 'mine';
+
 export function rewardsTab(ctx, refresh) {
   const desk = ctx.family.desk();
   const s = desk.state();
@@ -283,6 +291,36 @@ export function rewardsTab(ctx, refresh) {
   const repeat = h('input', { type: 'checkbox' });
   repeat.checked = !!R.countPerfected;
   repeat.addEventListener('change', () => desk.run('option', { name: 'countPerfected', on: repeat.checked }));
+
+  const part = rewardsPart === 'daily' ? 'daily' : 'mine';
+  const choose = (id, title, about, count) => h('button', { class: `part${part === id ? ' on' : ''}`, type: 'button', role: 'tab', 'aria-selected': String(part === id), dataset: { part: id },
+    onclick: () => {
+      if (rewardsPart === id) return;
+      rewardsPart = id;
+      editing = null; // a row left open in the other section does not come back
+      refresh();
+    } },
+    h('b', {}, title, h('span', { class: 'part-count' }, String(count))), h('small', {}, about));
+
+  const mine = () => h('section', { class: 'panel', dataset: { section: 'mine' } },
+    h('h2', {}, 'Reward mine - long-term rewards'),
+    h('p', { class: 'fine' }, `Each reward is won once, when his total points reach its number. He sees them as a mine he digs down into: the first reward is in the coal, each next one in a deeper, rarer ore (red crystal, copper, iron, gold, emerald, lapis, diamond, star ore). He can scroll down to look at what is still ahead, with your pictures. He has ${s.xp} points now. A mission earns roughly 40 to 95 points; a chore earns what you give it.`),
+    h('p', { class: 'fine' }, 'For a small reward he can win again every day, use Daily rewards instead.'),
+    h('div', { class: 'admin-list' }, R.tiers.slice().sort((a, b) => a.points - b.points).map((t) => {
+      const e = R.earned.find((x) => x.src === 'tier' && x.ref === t.id);
+      const has = e ? (e.given ? ' - he has had this one (for a new reward, add a new one)' : ' - won, waiting to be handed out') : '';
+      return itemRow(ctx, 'tier', t, `at ${t.points} points${s.xp >= t.points ? ' (reached)' : ''}${has}`, refresh);
+    })),
+    itemForm(ctx, 'tier', null, refresh));
+  const daily = () => h('section', { class: 'panel', dataset: { section: 'daily' } },
+    h('h2', {}, 'Daily rewards - every day'),
+    h('p', { class: 'fine' }, 'He wins one of these each day he finishes that many missions - and can win it again the next day. A mission is 6 instructions, about 3 to 5 minutes.'),
+    h('p', { class: 'fine' }, 'For a bigger reward he works towards over days or weeks, use the Reward mine instead.'),
+    h('div', { class: 'admin-list' }, R.daily.slice().sort((a, b) => a.missions - b.missions).map((r) =>
+      itemRow(ctx, 'daily', r, `${r.missions} ${r.missions === 1 ? 'mission' : 'missions'} in a day`, refresh))),
+    itemForm(ctx, 'daily', null, refresh),
+    h('label', { class: 'setting' }, repeat, h('span', {}, h('b', {}, 'Count easy and repeated missions too'),
+      h('small', {}, 'Off: only levels below 3 stars count - so replaying something he has already mastered does not earn rewards.'))));
 
   const ex = expectationsToday(s);
   return [
@@ -299,21 +337,10 @@ export function rewardsTab(ctx, refresh) {
               refresh();
             } }, 'Given'))))
         : h('p', { class: 'fine' }, 'Nothing waiting. When he wins a reward it appears here until you mark it as given.')),
-    section('Daily rewards',
-      h('p', { class: 'fine' }, 'He wins one of these each day he finishes that many missions. A mission is 6 instructions, about 3 to 5 minutes.'),
-      h('div', { class: 'admin-list' }, R.daily.slice().sort((a, b) => a.missions - b.missions).map((r) =>
-        itemRow(ctx, 'daily', r, `${r.missions} ${r.missions === 1 ? 'mission' : 'missions'} in a day`, refresh))),
-      itemForm(ctx, 'daily', null, refresh),
-      h('label', { class: 'setting' }, repeat, h('span', {}, h('b', {}, 'Count easy and repeated missions too'),
-        h('small', {}, 'Off: only levels below 3 stars count - so replaying something he has already mastered does not earn rewards.')))),
-    section('Reward mine',
-      h('p', { class: 'fine' }, `Each reward is won once, when his total points reach its number. He sees them as a mine he digs down into: the first reward is in the coal, each next one in a deeper, rarer ore (red crystal, copper, iron, gold, emerald, lapis, diamond, star ore). He can scroll down to look at what is still ahead, with your pictures. He has ${s.xp} points now. A mission earns roughly 40 to 95 points; a chore earns what you give it.`),
-      h('div', { class: 'admin-list' }, R.tiers.slice().sort((a, b) => a.points - b.points).map((t) => {
-        const e = R.earned.find((x) => x.src === 'tier' && x.ref === t.id);
-        const has = e ? (e.given ? ' - he has had this one (for a new reward, add a new one)' : ' - won, waiting to be handed out') : '';
-        return itemRow(ctx, 'tier', t, `at ${t.points} points${s.xp >= t.points ? ' (reached)' : ''}${has}`, refresh);
-      })),
-      itemForm(ctx, 'tier', null, refresh)),
+    h('nav', { class: 'parts', role: 'tablist', 'aria-label': 'The two kinds of reward' },
+      choose('mine', 'Reward mine', 'Long-term: unlocked once, when his points reach it', R.tiers.length),
+      choose('daily', 'Daily rewards', 'Every day: won again each day he does his missions', R.daily.length)),
+    part === 'mine' ? mine() : daily(),
   ];
 }
 

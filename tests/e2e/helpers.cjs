@@ -170,6 +170,10 @@ async function openParent(page, pin = '246810') {
   await page.waitForSelector('.tabs:not([hidden])', { timeout: 5000 });
 }
 const openTab = async (page, tab) => { await page.click(`.tab[data-tab="${tab}"]`); await page.waitForSelector(`.tab.on[data-tab="${tab}"]`); };
+/** On the parent area's Rewards tab: show one of its two sections - 'mine' (long-term rewards, the one it opens with) or 'daily'. */
+const rewardsPart = async (page, part) => { await page.click(`.parts [data-part="${part}"]`); await page.waitForSelector(`[data-section="${part}"]`); };
+/** On his Rewards screen: show one of its two places - 'mine' or 'today' (the buttons are only there when he has rewards of both kinds). */
+const rewardsPlace = async (page, place) => { if (await page.locator(`.reward-tab[data-tab="${place}"]`).count()) await page.click(`.reward-tab[data-tab="${place}"]`); };
 const curItem = (page) => page.evaluate(() => globalThis.__lwm.debug.item);
 const getState = (page) => page.evaluate(() => JSON.parse(JSON.stringify(globalThis.__lwm.store.get())));
 const waitTrials = (page, n) => page.waitForFunction((k) => globalThis.__lwm.store.get().trials.length >= k, n, { timeout: 20000 });
@@ -223,7 +227,7 @@ function seenExcept(levelId, pred) {
 
 module.exports = {
   robotFor,
-  typePin, openParent, openTab,
+  typePin, openParent, openTab, rewardsPart, rewardsPlace,
   ROOT, STATE_KEY, startServer, phase, waitPhase, answer, playMission,
   watchErrors, openPage, toMap, openLevel, begin, listen, curItem, getState, waitTrials, gotoItem,
   recordPhases, phaseLog, loadLevels, loadItems, clipExists, seenExcept,

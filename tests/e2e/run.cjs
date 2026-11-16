@@ -762,9 +762,11 @@ scenario('18 rewards and chores: set up by a grown-up, earned by him, checked an
   // --- the grown-up sets up a daily reward, a lifetime reward and a chore
   await H.openParent(page);
   await H.openTab(page, 'rewards');
+  await H.rewardsPart(page, 'daily');
   await page.fill('[data-form="daily"] input[type="text"]', 'Game time');
   await page.fill('[data-form="daily"] input[type="number"]', '1');
   await page.click('[data-form="daily"] button[type="submit"]');
+  await H.rewardsPart(page, 'mine');
   await page.fill('[data-form="tier"] input[type="text"]', 'Pizza night');
   await page.fill('[data-form="tier"] input[type="number"]', '100');
   await page.click('[data-form="tier"] button[type="submit"]');
@@ -851,9 +853,11 @@ scenario('19 expectations: set by a grown-up, ticked by him, rewards locked unti
 
   await H.openParent(page);
   await H.openTab(page, 'rewards');
+  await H.rewardsPart(page, 'daily');
   await page.fill('[data-form="daily"] input[type="text"]', 'Game time');
   await page.fill('[data-form="daily"] input[type="number"]', '1');
   await page.click('[data-form="daily"] button[type="submit"]');
+  await H.rewardsPart(page, 'mine');
   for (const [title, points] of [['Sticker', 10], ['Trampoline park', 5000]]) { // two rewards in his mine: one he reaches with his first mission, one far ahead
     await page.fill('[data-form="tier"] input[type="text"]', title);
     await page.fill('[data-form="tier"] input[type="number"]', String(points));
@@ -1096,7 +1100,7 @@ scenario('22 a grown-up edits rewards, chores and expectations (name, descriptio
   await page.click('[data-form="tier"] button[type="submit"]');
   await rowOf('New mount').waitFor();
   let s = await getState(page);
-  const order = () => page.locator('section.panel:has(h2:text-is("Reward mine")) .admin-row b').allTextContents();
+  const order = () => page.locator('[data-section="mine"] .admin-row b').allTextContents();
   t.check((await order()).join() === 'New skin pack,New mount,Coins', `the steps should be listed in order of points (got ${await order()})`);
   t.check(s.rewards.tiers.find((x) => x.title === 'New skin pack').note === 'Any pack you like', 'the description should be saved');
   const mount = s.rewards.tiers.find((x) => x.title === 'New mount');
@@ -1121,6 +1125,11 @@ scenario('22 a grown-up edits rewards, chores and expectations (name, descriptio
   await page.fill('[data-edit="tier"] input[type="text"]', 'Something else');
   await page.click('[data-edit="tier"] [data-act="cancel"]');
   t.check((await rowOf('Coins').count()) === 1 && (await page.locator('[data-edit]').count()) === 0, 'Cancel should leave the step as it was');
+  // the two kinds of reward have a section each: the mine's rewards are not listed with the daily ones, and the other way round
+  t.check((await page.locator('[data-section="mine"]').count()) === 1 && (await page.locator('[data-section="daily"], [data-form="daily"]').count()) === 0, 'the Rewards tab should open on the reward mine, without the daily rewards');
+  await H.rewardsPart(page, 'daily');
+  t.check((await page.locator('[data-section="daily"]').count()) === 1 && (await page.locator('[data-section="mine"], [data-form="tier"]').count()) === 0 && (await rowOf('Coins').count()) === 0, 'the daily section should not show the mine or its rewards');
+  t.check(((await page.textContent('.parts [data-part="mine"] .part-count')) || '') === '3' && ((await page.textContent('.parts [data-part="daily"] .part-count')) || '') === '0', 'the switch should say how many rewards each kind has');
   // a daily reward with a description, then edited
   await page.fill('[data-form="daily"] input[type="text"]', 'Game time');
   await page.fill('[data-form="daily"] textarea', 'Fifteen minutes');
@@ -1161,9 +1170,25 @@ scenario('22 a grown-up edits rewards, chores and expectations (name, descriptio
   await page.click('.expect-row [data-act="tick"]');
   await page.click('.sub-head .icon-btn');
 
-  // --- the reward mine: he digs down; every reward is an ore
+  // --- his Rewards screen has a place for each kind: Mine (long-term) and Today (daily)
   await page.click('[data-open="rewards"]');
   await page.waitForSelector('.mine .rung');
+  const places = () => page.evaluate(() => ({ on: document.querySelector('.reward-tab.on')?.dataset.tab, mine: !document.querySelector('[data-part="mine"]').hidden, today: !document.querySelector('[data-part="today"]').hidden }));
+  t.check((await page.locator('.reward-tab').count()) === 2, 'with rewards of both kinds he should have two buttons: Mine and Today');
+  t.check(JSON.stringify(await places()) === JSON.stringify({ on: 'mine', mine: true, today: false }), `it should open on his mine, with today's rewards out of sight (${JSON.stringify(await places())})`);
+  t.check(!(await page.locator('.reward-row[data-reward]').first().isVisible()), 'the daily rewards must not be mixed in with the mine');
+  const tabBox = await page.locator('.reward-tab').first().boundingBox();
+  t.check(tabBox.height >= 60, `the two buttons should be big enough for him (${Math.round(tabBox.height)}px high)`);
+  await H.rewardsPlace(page, 'today');
+  t.check(JSON.stringify(await places()) === JSON.stringify({ on: 'today', mine: false, today: true }), 'Today should show the daily rewards and put the mine away');
+  t.check(await page.locator('.reward-row[data-reward]').first().isVisible() && !(await page.locator('.mine').isVisible()), 'Today should show the daily rewards only');
+  await page.click('.sub-head .icon-btn');
+  await page.click('[data-open="rewards"]');
+  await page.waitForSelector('.reward-tab.on');
+  t.check((await places()).on === 'today', 'coming back, he should find the place he looked at last');
+  await H.rewardsPlace(page, 'mine');
+
+  // --- the reward mine: he digs down; every reward is an ore
   await page.waitForSelector('.rung .rung-pic.has-photo img');
   await sleep(700); // (the screen rides down to where he is digging)
   const lad = await page.evaluate(() => {
@@ -1220,6 +1245,7 @@ scenario('22 a grown-up edits rewards, chores and expectations (name, descriptio
   await page.click('.sub-head .icon-btn');
   await H.openParent(page);
   await H.openTab(page, 'rewards');
+  await H.rewardsPart(page, 'mine');
   await rowOf('New mount').locator('[data-act="delete"]').click();
   await page.waitForFunction(() => globalThis.__lwm.store.get().rewards.tiers.length === 2);
   const left = await page.evaluate((id) => new Promise((resolve) => {
@@ -1297,8 +1323,10 @@ scenario('23 family account: a grown-up signs in on their own device and manages
   await H.openTab(phone, 'rewards');
   await phone.waitForSelector('[data-note="family"]');
   await rowOf(phone, 'Trampoline park').waitFor();
-  t.check((await rowOf(phone, 'Game time').count()) === 1 && (await rowOf(phone, 'Typed on the phone').count()) === 0, 'the phone should show HIS rewards, not the ones typed into its own game');
   t.check(/463 points/.test(await phone.textContent('.parent-body')), 'the phone should show his points');
+  await H.rewardsPart(phone, 'daily');
+  t.check((await rowOf(phone, 'Game time').count()) === 1 && (await rowOf(phone, 'Typed on the phone').count()) === 0, 'the phone should show HIS rewards, not the ones typed into its own game');
+  await H.rewardsPart(phone, 'mine');
 
   // a new reward with a picture, typed on the phone
   await phone.fill('[data-form="tier"] input[type="text"]', 'New mount');
@@ -1310,6 +1338,7 @@ scenario('23 family account: a grown-up signs in on their own device and manages
   await rowOf(phone, 'New mount').locator('.emoji.has-photo img').waitFor();
   t.check((await phone.locator('[data-earned]').count()) === 1, 'he has the points for it already: it should wait under "To hand out" at once');
   // a change, a new chore, and one of today's expectations ticked for him
+  await H.rewardsPart(phone, 'daily');
   await rowOf(phone, 'Game time').locator('[data-act="edit"]').click();
   await phone.fill('[data-edit="daily"] input[type="text"]', 'Thirty minutes of game time');
   await phone.click('[data-edit="daily"] button[type="submit"]');
@@ -1370,6 +1399,7 @@ scenario('23 family account: a grown-up signs in on their own device and manages
 
   // --- handing out, from the phone; news arrives in the open parent area by itself
   await H.openTab(phone, 'rewards');
+  await H.rewardsPart(phone, 'mine');
   await phone.waitForSelector('[data-earned] [data-act="given"]');
   await phone.click('[data-earned] [data-act="given"]');
   await round(phone);
@@ -1425,8 +1455,9 @@ scenario('23 family account: a grown-up signs in on their own device and manages
   await phone.click('[data-act="sign-out"]');
   await phone.waitForSelector('[data-family="out"]');
   await H.openTab(phone, 'rewards');
-  t.check((await rowOf(phone, 'Typed on the phone').count()) === 1 && (await rowOf(phone, 'New mount').count()) === 0 && (await phone.locator('[data-note="family"]').count()) === 0,
-    'signed out, the phone should show its own game again');
+  t.check((await rowOf(phone, 'New mount').count()) === 0 && (await phone.locator('[data-note="family"]').count()) === 0, 'signed out, the phone should no longer show his mine');
+  await H.rewardsPart(phone, 'daily');
+  t.check((await rowOf(phone, 'Typed on the phone').count()) === 1, 'signed out, the phone should show its own game again');
   await ipad.reload();
   await ipad.waitForSelector('.screen.title .btn-huge');
   t.check((await status(ipad)).role === 'player', 'his device should still be signed in after the app is opened again');

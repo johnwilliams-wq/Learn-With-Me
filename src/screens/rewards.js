@@ -7,13 +7,19 @@
 // Expectations come first: until today's list is done he cannot collect anything - what he has
 // won waits. But he can always LOOK at his mine (the owner asked for that): where he is, what he
 // has found, what lies ahead. Looking ahead is what makes him want to get there.
+//
+// The two kinds of reward have a place each (the owner asked for that too, after mixing them up):
+// MINE - the long-term rewards he unlocks once, by points - and TODAY - the rewards for today's
+// missions. Two big buttons switch between them; what he has won and is owed stays on top.
 
 import { h, todayKey } from '../core/dom.js';
 import { countedToday, owed, expectationsToday, ladder, collectRewards } from '../rewards/logic.js';
 import { showPhoto } from '../core/photos.js';
 import { iconSVG, guideSVG } from '../art/sprites.js';
-import { findSVG, oreBlockSVG } from '../art/mine.js';
+import { findSVG, oreBlockSVG, pickSVG } from '../art/mine.js';
 import { buildMine } from './mine.js';
+
+let lastPart = ''; // which of the two places he looked at last, for as long as the app stays open
 
 export function rewardsScreen(ctx) {
   const { store, audio, voice, sfx } = ctx;
@@ -105,7 +111,7 @@ export function rewardsScreen(ctx) {
     found(step) ? badge(step)
       : h('span', { class: 'reward-need' }, step.state === 'ahead' ? h('span', { class: 'need-lock', html: iconSVG('lock') }) : null, `${Math.min(L.xp, step.points)} / ${step.points} XP`));
   const mine = L.steps.length ? buildMine(L, card) : null;
-  const minePanel = mine ? h('section', { class: 'panel mine-panel' },
+  const minePanel = mine ? h('section', { class: 'panel mine-panel', dataset: { part: 'mine' } },
     h('div', { class: 'mine-head' },
       h('h2', {}, 'Reward mine'),
       L.next
@@ -141,6 +147,38 @@ export function rewardsScreen(ctx) {
   const waiting = owed(s);
   const empty = !R.daily.length && !R.tiers.length && !waiting.length;
 
+  // The two places. With rewards of both kinds there are two big buttons to switch between them;
+  // with only one kind, that one is simply shown.
+  const todayPanel = daily.length ? h('section', { class: 'panel', dataset: { part: 'today' } }, h('h2', {}, 'Today'), daily) : null;
+  const both = !!(minePanel && todayPanel);
+  let part = both ? (lastPart === 'today' ? 'today' : 'mine') : minePanel ? 'mine' : 'today';
+  const tabs = both
+    ? h('nav', { class: 'reward-tabs', role: 'tablist' }, [['mine', 'Mine', pickSVG()], ['today', 'Today', iconSVG('gift')]].map(([id, label, icon]) =>
+        h('button', { class: 'reward-tab', type: 'button', role: 'tab', dataset: { tab: id }, onclick: () => { sfx.tap(); open(id); toDigger(); } },
+          h('span', { class: 'btn-icon', html: icon }), h('span', {}, label))))
+    : null;
+  function open(which) {
+    part = which;
+    if (both) lastPart = which;
+    if (minePanel) minePanel.hidden = both && part !== 'mine';
+    if (todayPanel) todayPanel.hidden = both && part !== 'today';
+    for (const b of tabs ? tabs.children : []) {
+      b.classList.toggle('on', b.dataset.tab === part);
+      b.setAttribute('aria-selected', String(b.dataset.tab === part));
+    }
+  }
+  /** In the mine: ride down to where he is digging, when that is further down than the screen shows. */
+  function toDigger() {
+    const me = el.querySelector('.mine-me');
+    const body = el.querySelector('.list-body');
+    if (part !== 'mine' || !me || !body) return void (body && part !== 'mine' && (body.scrollTop = 0));
+    const top = me.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop;
+    if (top > body.clientHeight * 0.7) {
+      const calm = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      body.scrollTo({ top: Math.max(0, top - body.clientHeight * 0.45), behavior: calm ? 'auto' : 'smooth' });
+    }
+  }
+
   el = h('div', { class: 'screen rewards' },
     head,
     h('main', { class: 'list-body' },
@@ -153,22 +191,15 @@ export function rewardsScreen(ctx) {
           picture({ icon: e.icon, photo: tierOf(e)?.photo }, '🎁'),
           h('div', { class: 'reward-main' }, h('div', { class: 'reward-title' }, e.title)),
           say(`You won ${e.title}. Show a grown-up.`)))) : null,
-      daily.length ? h('section', { class: 'panel' }, h('h2', {}, 'Today'), daily) : null,
-      minePanel));
+      tabs,
+      minePanel,
+      todayPanel));
+  open(part);
 
   return {
     el,
     shown() {
-      // Ride down to where he is digging, when that is further down than the screen shows.
-      const me = el.querySelector('.mine-me');
-      const body = el.querySelector('.list-body');
-      if (me && body) {
-        const top = me.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop;
-        if (top > body.clientHeight * 0.7) {
-          const calm = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-          body.scrollTo({ top: Math.max(0, top - body.clientHeight * 0.45), behavior: calm ? 'auto' : 'smooth' });
-        }
-      }
+      toDigger();
       if (fresh) sfx.fanfare?.();
     },
     destroy: leave,
