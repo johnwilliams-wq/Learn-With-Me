@@ -81,6 +81,10 @@ their photos (kept in a private folder and deleted once you approve the chore or
 play history, the PIN and the settings never leave his device. *Delete the family account* (under
 More) removes everything that is stored online.
 
+If the family account suddenly cannot be reached on any device: a free Supabase project is paused
+after a week in which nobody used it. Open the project in the Supabase dashboard and restore it;
+nothing is lost, and his game works without it in the meantime.
+
 Forgot the password? In the database's dashboard delete the user (Authentication, Users) and empty
 its folder (Storage, photos), then create the account again on his device and sign in on yours.
 Nothing on the devices is lost: his device simply reports everything afresh.
