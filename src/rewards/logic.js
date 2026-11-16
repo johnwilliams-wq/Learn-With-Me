@@ -21,10 +21,10 @@ export function weekKey(d = new Date()) {
 
 /**
  * Does a finished mission count toward today's reward goal? Repeating a level he has
- * already perfected (3 stars) does not, unless the grown-up turns that on - otherwise
- * the quickest way to a reward would be to replay the easiest level.
+ * already perfected (3 stars) does not, and neither do the easy Starter levels, unless the
+ * grown-up turns that on - otherwise the quickest way to a reward would be the easiest level.
  */
-export const missionCounts = (starsBefore, rewards) => starsBefore < 3 || !!rewards.countPerfected;
+export const missionCounts = (starsBefore, rewards, level = {}) => (starsBefore < 3 && !level.starter) || !!rewards.countPerfected;
 
 export const countedToday = (state, now = new Date()) => state.days[todayKey(now)]?.counted || 0;
 

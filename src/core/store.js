@@ -46,7 +46,7 @@ export function defaultState() {
   };
 }
 
-function memoryBackend() {
+export function memoryBackend() {
   const m = new Map();
   return {
     getItem: (k) => (m.has(k) ? m.get(k) : null),

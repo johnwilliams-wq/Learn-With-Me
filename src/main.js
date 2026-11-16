@@ -1,7 +1,7 @@
 // App start-up and screen switching.
 
 import { h, mount } from './core/dom.js';
-import { createStore } from './core/store.js';
+import { createStore, memoryBackend } from './core/store.js';
 import { createAudio } from './core/audio.js';
 import { createSfx } from './core/sfx.js';
 import { loadWorlds, loadVoiceCatalog, createVoice } from './listening/bank.js';
@@ -20,7 +20,10 @@ export const VERSION = '1.0.0';
 
 const app = document.getElementById('app');
 const params = new URLSearchParams(location.search);
-const store = createStore();
+// ?sandbox=<path to a JSON file> plays one made-up level ({ level, items }) straight away, saving nothing.
+// It is how new activity types are previewed and tested before they are part of the game.
+const sandbox = params.get('sandbox');
+const store = createStore(sandbox ? memoryBackend() : undefined);
 const audio = createAudio();
 const sfx = createSfx();
 if (params.has('fast')) audio.setFast(true); // automated tests only: skip real playback
@@ -95,6 +98,12 @@ async function boot() {
     ctx.worlds = worldsFile.worlds;
     ctx.levels = flattenLevels(ctx.worlds);
     ctx.voice = createVoice(audio, catalog);
+    if (sandbox) {
+      const box = await (await fetch(sandbox, { cache: 'no-store' })).json();
+      const level = { world: 'sandbox', worldName: 'Preview', tipText: '', trials: box.items.length, ...box.level, id: box.level?.id || 'sandbox' };
+      ctx.levels = [...ctx.levels, level];
+      return void (await go('mission', { levelId: level.id, items: box.items.slice(0, level.trials) }));
+    }
     await go('title');
   } catch (err) {
     showError(err, boot);

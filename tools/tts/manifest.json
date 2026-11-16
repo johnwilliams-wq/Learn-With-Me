@@ -4986,6 +4986,12 @@
   "speed": 0.97
  },
  {
+  "file": "assets/audio/ui/2dfde880c5ae.mp3",
+  "text": "Only do it if it is a real order. If it is not, tap the hand.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
   "file": "assets/audio/ui/32d380db03aa.mp3",
   "text": "Hero’s Trial, part two. Wait for the real order, and remember every step.",
   "voice": "af_heart",
@@ -5220,8 +5226,20 @@
   "speed": 0.97
  },
  {
+  "file": "assets/audio/ui/a7f7685b8cc1.mp3",
+  "text": "Listen for the tricky words: not, all, except, next to, left, and right.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
   "file": "assets/audio/ui/abc6e9c464b0.mp3",
   "text": "Hero’s Trial, part one. Clues, steps, and tricky words.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/adb0131514be.mp3",
+  "text": "Welcome to Training Camp! Tap the ear when you are ready. Wait until I finish talking. Then do what I said.",
   "voice": "af_heart",
   "speed": 0.97
  },
@@ -5274,6 +5292,12 @@
   "speed": 0.97
  },
  {
+  "file": "assets/audio/ui/c8434da63a5f.mp3",
+  "text": "Before and after. Sometimes I say it backwards. Think: what comes first?",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
   "file": "assets/audio/ui/c8698630f28f.mp3",
   "text": "Cave boss! Stories and clues. Make a movie in your mind.",
   "voice": "af_heart",
@@ -5282,6 +5306,12 @@
  {
   "file": "assets/audio/ui/cdb9f4cad89f.mp3",
   "text": "Left and right. Here is a trick: hold up both hands with your thumbs sticking out. The hand that makes an L is your left.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/d2c9356359cf.mp3",
+  "text": "Camp Boss! Three and four steps, tricky words, and changes of plan. Beat me to open every world.",
   "voice": "af_heart",
   "speed": 0.97
  },

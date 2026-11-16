@@ -1,6 +1,30 @@
 {
  "voice": "af_heart",
  "lines": {
+  "tip-camp1": {
+   "text": "Welcome to Training Camp! Tap the ear when you are ready. Wait until I finish talking. Then do what I said.",
+   "file": "adb0131514be.mp3"
+  },
+  "tip-camp2": {
+   "text": "Two things to do now. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.",
+   "file": "442d65b202db.mp3"
+  },
+  "tip-camp3": {
+   "text": "Listen for the tricky words: not, all, except, next to, left, and right.",
+   "file": "a7f7685b8cc1.mp3"
+  },
+  "tip-camp4": {
+   "text": "Before and after. Sometimes I say it backwards. Think: what comes first?",
+   "file": "c8434da63a5f.mp3"
+  },
+  "tip-camp5": {
+   "text": "Only do it if it is a real order. If it is not, tap the hand.",
+   "file": "2dfde880c5ae.mp3"
+  },
+  "tip-camp-boss": {
+   "text": "Camp Boss! Three and four steps, tricky words, and changes of plan. Beat me to open every world.",
+   "file": "d2c9356359cf.mp3"
+  },
   "tip-w1l1": {
    "text": "Welcome to Rookie Camp! Here is how it works. Tap the ear when you are ready to listen. Wait until I finish talking. Then tap what I said.",
    "file": "71d41226547f.mp3"

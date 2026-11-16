@@ -10,34 +10,32 @@
 
 import { h, wait, pulse, mount } from '../core/dom.js';
 import { makeRng } from '../core/rng.js';
-import { check, demoOrder } from '../listening/checker.js';
-import { pickItems, summarize, isUnlocked } from '../listening/progress.js';
+import { pickItems, summarize, openCount } from '../listening/progress.js';
 import { missionCounts, collectRewards } from '../rewards/logic.js';
-import { createBoard } from '../listening/board.js';
+import { sceneFor } from '../listening/scenes/index.js';
 import { loadBank, itemAudioUrl } from '../listening/bank.js';
 import { nextCard } from '../listening/cards.js';
 import { guideSVG, iconSVG } from '../art/sprites.js';
 
 const MAX_REPLAYS = 2;
-const MAX_ACTIONS = 12;
 
-export async function missionScreen(ctx, { levelId }) {
+export async function missionScreen(ctx, { levelId, items: given = null }) {
   const { store, audio, sfx, voice } = ctx;
   const level = ctx.levels.find((l) => l.id === levelId);
   const rng = makeRng();
   let alive = true;
   let token = 0; // bumps whenever a new step starts, so stale async steps stop quietly
 
-  const bank = await loadBank(level);
-  const items = pickItems(bank.items, store.get().seen, level, rng);
+  // `given` lets the preview sandbox and the tests hand in the exact items to play.
+  const items = given || pickItems((await loadBank(level)).items, store.get().seen, level, rng);
   const itemUrls = items.map((it) => itemAudioUrl(it));
 
   // --- trial state -----------------------------------------------------------
   let phase = 'intro';
   let index = -1;
   let item = null;
-  let board = null;
-  let actions = [];
+  let plugin = null; // the activity type of the current item (see src/listening/scenes)
+  let view = null; // its play area
   let attempt = 1;
   let earlyTaps = 0;
   let replays = 0;
@@ -67,7 +65,7 @@ export async function missionScreen(ctx, { levelId }) {
     h('span', { class: 'btn-icon', html: iconSVG('hand') }), h('span', { class: 'btn-label' }, 'Not this time'));
   if (!level.allowNone) btnHand.hidden = true;
 
-  const root = h('div', { class: 'screen mission', dataset: { phase, world: level.world, level: level.id } },
+  const root = h('div', { class: 'screen mission', dataset: { phase, world: level.world, level: level.id }, style: { '--world': level.color || '' } },
     h('header', { class: 'hud' }, btnQuit, pips, h('div', { class: 'hud-title' }, level.title)),
     h('main', { class: 'stage' },
       h('div', { class: 'guide-col' }, guideEl, steps),
@@ -86,10 +84,11 @@ export async function missionScreen(ctx, { levelId }) {
     btnListen.querySelector('.btn-label').textContent = phase === 'ready' ? 'Listen' : phase === 'listening' ? 'Listening' : 'Again';
     btnDone.hidden = !item || !!item.auto;
     btnUndo.hidden = !item || !!item.auto;
-    btnDone.disabled = !(responding && actions.length > 0);
-    btnUndo.disabled = !(responding && actions.length > 0);
+    const done = view ? view.size() : 0; // how much he has done so far in this turn
+    btnDone.disabled = !(responding && done > 0);
+    btnUndo.disabled = !(responding && done > 0);
     btnHand.disabled = !responding;
-    [...steps.children].forEach((d, i) => d.classList.toggle('on', i < actions.length));
+    [...steps.children].forEach((d, i) => d.classList.toggle('on', i < done));
   }
   function renderPips() {
     mount(pips, items.map((_, i) => {
@@ -103,8 +102,9 @@ export async function missionScreen(ctx, { levelId }) {
     caption.hidden = !text;
   }
   function showSteps(n) {
-    mount(steps, Array.from({ length: n }, () => h('i')));
-    steps.hidden = n < 1;
+    const dots = n >= 1 && n <= 8 ? n : 0; // only when the number of things to do is small and countable
+    mount(steps, Array.from({ length: dots }, () => h('i')));
+    steps.hidden = dots < 1;
   }
 
   // --- trial flow ------------------------------------------------------------
@@ -112,16 +112,18 @@ export async function missionScreen(ctx, { levelId }) {
     index++;
     if (index >= items.length) return finish();
     item = items[index];
-    actions = [];
     attempt = 1;
     earlyTaps = 0;
     replays = 0;
     firstError = '';
-    board = createBoard(item.scene, { onTap });
-    mount(boardWrap, board.el);
-    board.fit(boardWrap);
-    board.setLocked(true);
-    board.setCovered(!!item.hide);
+    view?.destroy?.();
+    plugin = sceneFor(item);
+    view = plugin.create(item, host);
+    root.dataset.type = item.t || 'tap';
+    mount(boardWrap, view.el);
+    view.fit(boardWrap);
+    view.setMode('ready');
+    view.setCovered(!!item.hide);
     showCaption('');
     showSteps(0);
     setGuide('idle');
@@ -134,10 +136,9 @@ export async function missionScreen(ctx, { levelId }) {
     const my = ++token;
     await gate; // if the "leave?" box is open, wait for his answer before talking
     if (!alive || my !== token) return;
-    actions = [];
-    board.mark(actions, item.mode);
-    board.setLocked(true);
-    board.setCovered(!!item.hide && !support);
+    view.reset();
+    view.setMode('listening');
+    view.setCovered(!!item.hide && !support);
     showCaption('');
     setGuide('talk');
     setPhase('listening');
@@ -153,8 +154,8 @@ export async function missionScreen(ctx, { levelId }) {
     await wait(level.holdMs ?? 300);
     if (!alive || my !== token) return;
     sfx.go();
-    board.setCovered(false);
-    board.setLocked(false);
+    view.setCovered(false);
+    view.setMode('respond');
     setGuide('idle');
     answerStart = Date.now();
     setPhase('respond');
@@ -170,43 +171,30 @@ export async function missionScreen(ctx, { levelId }) {
     }
   }
 
-  function onTap(id) {
-    if (phase === 'listening') {
-      // Jumped in early. Stay calm: count it, show "wait", carry on talking.
+  // What the play area tells us (every activity type uses the same four signals).
+  const host = {
+    sfx,
+    onChange: () => refresh(), // his answer changed
+    onSubmit: () => submit(), // a one-tap answer: check it straight away
+    onIdle: () => pulse(btnListen, 'hint', 700), // he touched it before pressing the ear
+    onEarly() {
+      // Jumped in while the voice was still talking. Stay calm: count it, show "wait", carry on.
       earlyTaps = Math.min(earlyTaps + 1, 9);
-      board.nudge(id);
       setGuide('wait');
       setTimeout(() => { if (alive && phase === 'listening') setGuide('talk'); }, 900);
-      return;
-    }
-    if (phase === 'ready') return void pulse(btnListen, 'hint', 700);
-    if (phase !== 'respond') return;
-    if (item.mode === 'pick') {
-      const i = actions.indexOf(id);
-      if (i >= 0) actions.splice(i, 1);
-      else actions.push(id);
-    } else {
-      if (actions.length >= MAX_ACTIONS) return;
-      actions.push(id);
-    }
-    sfx.tap();
-    board.mark(actions, item.mode);
-    refresh();
-    if (item.auto) submit();
-  }
+    },
+  };
 
   function onUndo() {
-    if (phase !== 'respond' || !actions.length) return;
-    actions.pop();
+    if (phase !== 'respond' || !view.size()) return;
+    view.undo();
     sfx.undo();
-    board.mark(actions, item.mode);
     refresh();
   }
 
   function onHand() {
     if (phase !== 'respond') return;
-    actions = [];
-    board.mark(actions, item.mode);
+    view.reset();
     submit();
   }
 
@@ -220,15 +208,16 @@ export async function missionScreen(ctx, { levelId }) {
   async function submit() {
     if (phase !== 'respond') return;
     const my = ++token;
+    view.setMode('off');
     setPhase('feedback');
-    const res = check(actions, item.expect, item.scene.objects);
+    const res = plugin.check(view.answer(), item);
     const ms = Date.now() - answerStart;
 
     if (res.correct) {
       const first = attempt === 1;
       sfx.good();
       setGuide('happy');
-      board.celebrate(item.expect.flat());
+      view.celebrate();
       record(first, !first, ms);
       if (first && (index === 0 || Math.random() < 0.34)) {
         // Only praise the waiting / whole-sentence listening when that is what really happened.
@@ -243,15 +232,14 @@ export async function missionScreen(ctx, { levelId }) {
       attempt = 2;
       sfx.soft();
       setGuide('oops');
-      board.shake();
+      view.shake();
       await voice.sayPool('retry');
       if (!alive || my !== token) return;
       // Back to the start of the routine: he taps the ear again when he is ready. This time it is
       // a little slower, hidden cards stay face-up, and the dots show how many taps are needed.
-      actions = [];
-      board.mark(actions, item.mode);
-      board.setLocked(true);
-      board.setCovered(false);
+      view.reset();
+      view.setMode('ready');
+      view.setCovered(false);
       showSteps(res.total);
       setGuide('idle');
       setPhase('ready');
@@ -273,18 +261,17 @@ export async function missionScreen(ctx, { levelId }) {
 
   /** Second miss: say it once more and show the answer, so every trial ends with the right thing. */
   async function demo(my) {
-    board.setLocked(true);
-    board.mark([], item.mode);
+    view.reset();
+    view.setMode('off');
     setGuide('talk');
     await audio.play(itemAudioUrl(item), { rate: 0.92, text: item.say });
     if (!alive || my !== token) return;
     setGuide('idle');
-    const order = demoOrder(item.expect);
-    if (!order.length) {
-      pulse(btnHand, 'glow', 1800);
+    if (plugin.isNone(item)) {
+      pulse(btnHand, 'glow', 1800); // the right thing was to do nothing
       await wait(1800);
     } else {
-      await board.demo(order, item.mode, () => sfx.tap());
+      await view.demo(() => sfx.tap());
     }
   }
 
@@ -293,15 +280,14 @@ export async function missionScreen(ctx, { levelId }) {
     const before = store.get();
     const prevStars = before.levels[levelId]?.stars || 0;
     const card = nextCard(before.cards);
-    const next = ctx.levels[ctx.levels.findIndex((l) => l.id === levelId) + 1];
-    const nextWasOpen = !!next && isUnlocked(next.id, ctx.levels, before);
-    store.recordMission({ level: levelId, ...sum, ms: Date.now() - startedAt, counted: missionCounts(prevStars, before.rewards) });
+    const openBefore = openCount(ctx.levels, before);
+    store.recordMission({ level: levelId, ...sum, ms: Date.now() - startedAt, counted: missionCounts(prevStars, before.rewards, level) });
     let won = [];
     store.update((s) => {
       if (card) s.cards.push(card.id);
       won = collectRewards(s); // any daily or lifetime reward this mission has just earned
     });
-    ctx.go('results', { levelId, sum, card, prevStars, nextWasOpen, won });
+    ctx.go('results', { levelId, sum, card, prevStars, openBefore, won });
   }
 
   // --- leaving ---------------------------------------------------------------
@@ -320,7 +306,7 @@ export async function missionScreen(ctx, { levelId }) {
     root.append(overlay);
   }
   const onHide = () => { if (document.hidden) audio.stop(); };
-  const onResize = () => board?.fit(boardWrap);
+  const onResize = () => view?.fit(boardWrap);
   document.addEventListener('visibilitychange', onHide);
   window.addEventListener('resize', onResize);
 
@@ -384,6 +370,7 @@ export async function missionScreen(ctx, { levelId }) {
       token++;
       audio.stop();
       audio.release(itemUrls);
+      view?.destroy?.();
       document.removeEventListener('visibilitychange', onHide);
       window.removeEventListener('resize', onResize);
     },

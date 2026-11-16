@@ -1,0 +1,15 @@
+/* Activity "truth": a picture to look at and two big answer buttons. */
+.truth-scene { display: grid; grid-template-rows: 1fr auto; gap: 12px; width: 100%; height: 100%; justify-items: center; }
+.truth-picture { width: 100%; display: grid; place-items: center; min-height: 0; }
+.truth-picture .obj { cursor: default; }
+.truth-buttons { display: flex; gap: 28px; justify-content: center; }
+.truth-btn {
+  appearance: none; cursor: pointer; width: 132px; height: 112px; border-radius: 28px; border: 5px solid transparent; padding: 20px;
+  display: grid; place-items: center; box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35); transition: transform 0.08s, opacity 0.2s;
+}
+.truth-btn:active { transform: translateY(4px); }
+.truth-yes { background: var(--good); color: #05301e; }
+.truth-no { background: #ff8a7a; color: #4a0d06; }
+.truth-icon { width: 64px; height: 64px; }
+.truth-btn.chosen { border-color: #fff; }
+.truth-scene.locked .truth-btn { opacity: 0.45; }

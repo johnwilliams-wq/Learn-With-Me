@@ -724,4 +724,7 @@ const w8 = {
   ],
 };
 
-export const WORLDS = [w1, w2, w3, w4, w5, w6, w7, w8];
+// These eight worlds are the "Starter levels": the gentle path that adds one difficulty at a
+// time. They are always open (shown in a drawer on the map) and Training Camp borrows from them.
+const COLOURS = ['#3d8bff', '#18b99a', '#9b6bff', '#ff8a3d', '#e0508f', '#2aa9d8', '#6fbf3b', '#d9a520'];
+export const STARTER = [w1, w2, w3, w4, w5, w6, w7, w8].map((w, i) => ({ ...w, color: COLOURS[i], starter: true }));

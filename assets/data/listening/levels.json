@@ -1,10 +1,105 @@
 {
- "version": 1,
+ "version": 2,
  "worlds": [
+  {
+   "id": "camp",
+   "name": "Training Camp",
+   "blurb": "Warm up. Beat the boss to open every world.",
+   "color": "#3d8bff",
+   "levels": [
+    {
+     "id": "camp1",
+     "title": "Every Clue",
+     "tip": "tip-camp1",
+     "tipText": "Welcome to Training Camp! Tap the ear when you are ready. Wait until I finish talking. Then do what I said.",
+     "trials": 6,
+     "mix": [
+      "w1l4",
+      "w1l5",
+      "w1l6"
+     ]
+    },
+    {
+     "id": "camp2",
+     "title": "Two Steps",
+     "tip": "tip-camp2",
+     "tipText": "Two things to do now. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.",
+     "trials": 6,
+     "holdMs": 700,
+     "mix": [
+      "w2l2",
+      "w2l3",
+      "w2l5"
+     ]
+    },
+    {
+     "id": "camp3",
+     "title": "Tricky Words",
+     "tip": "tip-camp3",
+     "tipText": "Listen for the tricky words: not, all, except, next to, left, and right.",
+     "trials": 6,
+     "mix": [
+      "w3l1",
+      "w3l2",
+      "w3l3",
+      "w3l4",
+      "w3l5"
+     ]
+    },
+    {
+     "id": "camp4",
+     "title": "Before and After",
+     "tip": "tip-camp4",
+     "tipText": "Before and after. Sometimes I say it backwards. Think: what comes first?",
+     "trials": 6,
+     "mix": [
+      "w4l2",
+      "w4l3",
+      "w4l4",
+      "w4l5"
+     ]
+    },
+    {
+     "id": "camp5",
+     "title": "Captain's Orders",
+     "tip": "tip-camp5",
+     "tipText": "Only do it if it is a real order. If it is not, tap the hand.",
+     "trials": 6,
+     "allowNone": true,
+     "mix": [
+      "w5l1",
+      "w5l3",
+      "w5l4",
+      "w5l5"
+     ]
+    },
+    {
+     "id": "camp-boss",
+     "title": "Camp Boss",
+     "tip": "tip-camp-boss",
+     "tipText": "Camp Boss! Three and four steps, tricky words, and changes of plan. Beat me to open every world.",
+     "trials": 6,
+     "allowNone": true,
+     "holdMs": 800,
+     "boss": true,
+     "mix": [
+      "w3l3",
+      "w4l4",
+      "w4l5",
+      "w5l5",
+      "w6l2",
+      "w6l3",
+      "w6l4"
+     ]
+    }
+   ]
+  },
   {
    "id": "w1",
    "name": "Rookie Camp",
    "blurb": "One thing at a time. Listen for every clue.",
+   "color": "#3d8bff",
+   "starter": true,
    "levels": [
     {
      "id": "w1l1",
@@ -69,6 +164,8 @@
    "id": "w2",
    "name": "Two-Step Trail",
    "blurb": "Two things to do, in the right order.",
+   "color": "#18b99a",
+   "starter": true,
    "levels": [
     {
      "id": "w2l1",
@@ -129,6 +226,8 @@
    "id": "w3",
    "name": "Word Woods",
    "blurb": "Tricky words: not, all, except, next to.",
+   "color": "#9b6bff",
+   "starter": true,
    "levels": [
     {
      "id": "w3l1",
@@ -186,6 +285,8 @@
    "id": "w4",
    "name": "Time Tower",
    "blurb": "First, then, before, after.",
+   "color": "#ff8a3d",
+   "starter": true,
    "levels": [
     {
      "id": "w4l1",
@@ -243,6 +344,8 @@
    "id": "w5",
    "name": "Captain's Deck",
    "blurb": "Wait for the real order.",
+   "color": "#e0508f",
+   "starter": true,
    "levels": [
     {
      "id": "w5l1",
@@ -322,6 +425,8 @@
    "id": "w6",
    "name": "Memory Mountain",
    "blurb": "Three and four steps.",
+   "color": "#2aa9d8",
+   "starter": true,
    "levels": [
     {
      "id": "w6l1",
@@ -373,6 +478,8 @@
    "id": "w7",
    "name": "Story Cave",
    "blurb": "Listen to a story, then answer.",
+   "color": "#6fbf3b",
+   "starter": true,
    "levels": [
     {
      "id": "w7l1",
@@ -422,6 +529,8 @@
    "id": "w8",
    "name": "Hero's Trial",
    "blurb": "Everything, mixed up.",
+   "color": "#d9a520",
+   "starter": true,
    "levels": [
     {
      "id": "w8l1",

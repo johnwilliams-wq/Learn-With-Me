@@ -36,43 +36,84 @@ export function missionXp({ correctFirst, correctSecond, total, earlyTaps }) {
   return xp;
 }
 
-/** Flat ordered list of levels from the worlds file. */
+/** Flat ordered list of levels from the worlds file, each carrying what it needs to know about its world. */
 export function flattenLevels(worlds) {
   const out = [];
-  for (const w of worlds) for (const l of w.levels) out.push({ ...l, world: w.id, worldName: w.name });
+  for (const w of worlds) {
+    for (const l of w.levels) {
+      out.push({ ...l, world: w.id, worldName: w.name, color: w.color, needs: w.needs || [], needsCount: w.needsCount ?? (w.needs || []).length, starter: !!w.starter });
+    }
+  }
   return out;
 }
 
-/**
- * A level opens when the one before it has 2+ stars. So that he can never get stuck, it
- * also opens after three finished tries with most right - or after five tries, whatever happened.
- */
-export function isUnlocked(levelId, levels, state) {
-  if (state.flags && state.flags.unlockAll) return true;
-  const i = levels.findIndex((l) => l.id === levelId);
-  if (i <= 0) return i === 0;
-  const prev = state.levels[levels[i - 1].id];
-  if (!prev) return false;
-  const need = Math.ceil((levels[i - 1].trials || 6) * 0.66);
-  return prev.stars >= 2 || (prev.plays >= 3 && prev.best >= need) || prev.plays >= 5;
+const inWorld = (worldId, levels) => levels.filter((l) => l.world === worldId);
+
+/** Has he got past this level? Two stars - or, so that he can never be stuck, three finished
+ *  tries with most right, or five tries whatever happened. */
+export function passed(level, state) {
+  const p = state.levels[level.id];
+  if (!p) return false;
+  const need = Math.ceil((level.trials || 6) * 0.66);
+  return p.stars >= 2 || (p.plays >= 3 && p.best >= need) || p.plays >= 5;
+}
+
+/** A world is cleared by beating its boss (2 stars) - the skip-ahead - or by passing every level in it. */
+export function worldCleared(worldId, levels, state) {
+  const ls = inWorld(worldId, levels);
+  if (!ls.length) return false;
+  const boss = ls.find((l) => l.boss);
+  return (!!boss && (state.levels[boss.id]?.stars || 0) >= 2) || ls.every((l) => passed(l, state));
+}
+
+/** A world opens when enough of the worlds it needs are cleared (Starter worlds are always open). */
+export function worldOpen(worldId, levels, state) {
+  if (state.flags?.unlockAll) return true;
+  const first = levels.find((l) => l.world === worldId);
+  if (!first) return false;
+  if (first.starter || !first.needs.length) return true;
+  return first.needs.filter((w) => worldCleared(w, levels, state)).length >= first.needsCount;
 }
 
 /**
- * The level the big "Play" button should start: the first open level he has not passed
- * (2 stars) - unless the level after it has already opened, in which case move on with him
- * rather than sending him back to the one he struggled with.
+ * Inside an open world: the first level and the boss are always open (the boss is the way to
+ * skip ahead); every other level opens when the one before it is passed, or once the world is cleared.
+ */
+export function isUnlocked(levelId, levels, state) {
+  if (state.flags?.unlockAll) return true;
+  const level = levels.find((l) => l.id === levelId);
+  if (!level) return false;
+  if (level.starter) return true;
+  if (!worldOpen(level.world, levels, state)) return false;
+  const ls = inWorld(level.world, levels);
+  const i = ls.indexOf(level);
+  if (i === 0 || level.boss) return true;
+  return passed(ls[i - 1], state) || worldCleared(level.world, levels, state);
+}
+
+/**
+ * What the big Play button starts. Among the open worlds he has not cleared, take the one he
+ * has played least recently (so the activities rotate), and in it the first level he has not passed.
  */
 export function nextLevel(levels, state) {
-  let pick = levels[0];
-  for (let i = 0; i < levels.length; i++) {
-    if (!isUnlocked(levels[i].id, levels, state)) break;
-    pick = levels[i];
-    const passed = (state.levels[pick.id]?.stars || 0) >= 2;
-    const nextOpen = !state.flags?.unlockAll && i + 1 < levels.length && isUnlocked(levels[i + 1].id, levels, state);
-    if (!passed && !nextOpen) break;
+  const candidates = [];
+  for (const worldId of new Set(levels.filter((l) => !l.starter).map((l) => l.world))) {
+    if (!worldOpen(worldId, levels, state) || worldCleared(worldId, levels, state)) continue;
+    const ls = inWorld(worldId, levels);
+    const level = ls.find((l) => !passed(l, state) && isUnlocked(l.id, levels, state) && !l.boss) || ls.find((l) => l.boss) || ls[0];
+    candidates.push({ level, last: Math.max(0, ...ls.map((l) => state.levels[l.id]?.last || 0)) });
   }
-  return pick;
+  if (!candidates.length) {
+    // everything is cleared (or only Starter levels exist): offer the last thing in the game
+    const main = levels.filter((l) => !l.starter);
+    return (main.length ? main : levels).at(-1);
+  }
+  candidates.sort((a, b) => a.last - b.last); // stable: worlds never played keep their map order
+  return candidates[0].level;
 }
+
+/** How many levels are open right now (the results screen compares before and after a mission). */
+export const openCount = (levels, state) => levels.filter((l) => !l.starter && isUnlocked(l.id, levels, state)).length;
 
 /**
  * Choose the items for one mission: least-recently-used first (so he cannot

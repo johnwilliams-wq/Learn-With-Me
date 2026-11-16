@@ -2,18 +2,19 @@
 // and any reward from a grown-up that this mission has just earned.
 
 import { h, wait, todayKey } from '../core/dom.js';
-import { rankFor, isUnlocked } from '../listening/progress.js';
+import { rankFor, nextLevel, openCount } from '../listening/progress.js';
 import { countedToday, rewardsLocked } from '../rewards/logic.js';
 import { spriteSVG, chestOpenSVG, iconSVG, guideSVG } from '../art/sprites.js';
 
-export function resultsScreen(ctx, { levelId, sum, card, prevStars, nextWasOpen = false, won = [] }) {
+export function resultsScreen(ctx, { levelId, sum, card, prevStars, openBefore = null, won = [] }) {
   const { store, sfx, voice, audio } = ctx;
   const s = store.get();
   const levels = ctx.levels;
-  const i = levels.findIndex((l) => l.id === levelId);
-  const next = levels[i + 1] || null;
-  const nextOpen = next && isUnlocked(next.id, levels, s);
-  const justOpened = nextOpen && !nextWasOpen;
+  // "Next" follows the same suggestion as the Play button on the map (it rotates the activities).
+  const suggestion = nextLevel(levels, s);
+  const next = suggestion && suggestion.id !== levelId ? suggestion : null;
+  const nextOpen = !!next;
+  const justOpened = openBefore !== null && openCount(levels, s) > openBefore;
   const rank = rankFor(s.xp);
   const rankedUp = rankFor(s.xp - sum.xp).index < rank.index;
   const today = s.days[todayKey()]?.missions || 0;
@@ -55,7 +56,7 @@ export function resultsScreen(ctx, { levelId, sum, card, prevStars, nextWasOpen 
   const btn = (cls, act, icon, label, fn) => h('button', { class: cls, type: 'button', dataset: { act }, onclick: fn },
     h('span', { class: 'btn-icon', html: iconSVG(icon) }), h('span', { class: 'btn-label' }, label));
   const buttons = h('div', { class: 'row result-buttons' },
-    !locked && nextOpen ? btn('btn btn-primary btn-big', 'next', 'play', 'Next level', () => go('mission', { levelId: next.id })) : null,
+    !locked && nextOpen ? btn('btn btn-primary btn-big', 'next', 'play', 'Next mission', () => go('mission', { levelId: next.id })) : null,
     !locked ? btn(`btn${nextOpen ? '' : ' btn-primary btn-big'}`, 'again', 'replay', sum.stars < 2 ? 'Try for 2 stars' : 'Play again', () => go('mission', { levelId })) : null,
     btn('btn', 'map', 'home', 'Map', () => go('map')));
 
@@ -69,7 +70,7 @@ export function resultsScreen(ctx, { levelId, sum, card, prevStars, nextWasOpen 
         h('span', { class: 'tag xp' }, `+${sum.xp} XP`),
         sum.earlyTaps === 0 ? h('span', { class: 'tag' }, 'Patient listener bonus') : null,
         rankedUp ? h('span', { class: 'tag gold' }, `New rank: ${rank.name}!`) : null,
-        justOpened ? h('span', { class: 'tag gold' }, 'New level unlocked!') : null,
+        justOpened ? h('span', { class: 'tag gold' }, 'New levels unlocked!') : null,
         !won.length && chasing && !locked ? h('span', { class: 'tag', dataset: { chasing: chasing.id } }, `${chasing.icon || '🎁'} ${chasing.missions - counted} more today`) : null),
       won.length ? h('div', { class: 'won-box', dataset: { won: String(won.length) } },
         h('b', {}, rewardsShut ? 'You won a reward! Finish your expectations to unlock it' : 'You won a reward! Show a grown-up'),
