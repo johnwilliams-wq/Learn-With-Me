@@ -218,7 +218,12 @@ test('a save that cannot be read is kept under another name, never thrown away',
 test('what a grown-up types is tidied and kept within limits', () => {
   assert.deepEqual(cleanItem('daily', { title: '  Game \n  time  ', icon: '🎮', note: ' fifteen   minutes ', missions: '99' }), { title: 'Game time', icon: '🎮', note: 'fifteen minutes', missions: 20 });
   assert.deepEqual(cleanItem('tier', { title: 'Bike', points: '3' }), { title: 'Bike', icon: '', note: '', points: 10, photo: null });
-  assert.deepEqual(cleanItem('tier', { title: 'Bike', points: 'abc', photo: 'p1' }), { title: 'Bike', icon: '', note: '', points: 10, photo: 'p1' });
+  assert.deepEqual(cleanItem('tier', { title: 'Bike', points: 'abc', photo: 'p1' }), { title: 'Bike', icon: '', note: '', points: 1000, photo: 'p1' });
+  // a number box that was left empty never turns into the smallest number (a reward at 10 points would be won at once)
+  assert.equal(cleanItem('tier', { title: 'Bike', points: '' }).points, 1000);
+  assert.equal(cleanItem('tier', { title: 'Bike', points: '  ' }).points, 1000);
+  assert.equal(cleanItem('daily', { title: 'Game time', missions: '' }).missions, 3);
+  assert.equal(cleanItem('chore', { title: 'Bed', points: null }).points, 20);
   assert.deepEqual(cleanItem('chore', { title: 'Bed', points: -5, repeat: 'hourly', reward: ' $1 ' }), { title: 'Bed', icon: '', note: '', points: 0, repeat: 'daily', reward: '$1' });
   assert.deepEqual(cleanItem('expect', { title: 'Teeth' }), { title: 'Teeth', icon: '', note: '' });
   assert.equal(cleanItem('expect', { title: 'x'.repeat(500), note: 'y'.repeat(500) }).title.length, TITLE_MAX);
@@ -312,4 +317,32 @@ test('the reward ladder: every points reward in order, where he stands, and what
   removeItem(s2, 'tier', far.id);
   assert.deepEqual(owed(s2).map((e) => e.title), ['Sticker', 'Bike']);
   assert.deepEqual(ladder(s2).steps.map((x) => x.title), ['Sticker']);
+});
+
+test('an emptied number box changes nothing; a chore made "one time only" starts afresh', () => {
+  const s = defaultState();
+  s.xp = 150;
+  const bike = addItem(s, 'tier', { title: 'Bike', points: 5000 }, MON);
+  editItem(s, 'tier', bike.id, { title: 'Bike', points: '' }, MON);
+  assert.equal(s.rewards.tiers[0].points, 5000, 'the points stay as they were');
+  assert.equal(owed(s).length, 0, 'and he has not won it by accident');
+  const game = addItem(s, 'daily', { title: 'Game time', missions: 4 }, MON);
+  editItem(s, 'daily', game.id, { missions: '' }, MON);
+  assert.equal(s.rewards.daily[0].missions, 4);
+
+  // "Feed the dog" every day, approved yesterday; today it is open again
+  const dog = addItem(s, 'chore', { title: 'Feed the dog', points: 10, repeat: 'daily' });
+  const e = submitChore(s, dog, null, MON);
+  decideChore(s, e.id, true, '', MON);
+  assert.equal(choreStatus(s.chores.list[0], s.chores.log, TUE).state, 'open');
+  // the grown-up makes it a one-time chore on Tuesday: it must still be there for him to do once
+  editItem(s, 'chore', dog.id, { repeat: 'once' }, TUE);
+  assert.equal(choreStatus(s.chores.list[0], s.chores.log, TUE).state, 'open', 'what was approved while it still repeated does not finish it');
+  const again = submitChore(s, s.chores.list[0], null, at(2026, 11, 17, 15));
+  assert.equal(choreStatus(s.chores.list[0], s.chores.log, at(2026, 11, 17, 16)).state, 'pending');
+  decideChore(s, again.id, true, '', at(2026, 11, 17, 17));
+  assert.equal(choreStatus(s.chores.list[0], s.chores.log, NEXT_MON).state, 'finished', 'done once, it is finished for good');
+  // changing something else on a one-time chore does not start it afresh again
+  editItem(s, 'chore', dog.id, { title: 'Feed Rex' }, NEXT_MON);
+  assert.equal(choreStatus(s.chores.list[0], s.chores.log, NEXT_MON).state, 'finished');
 });

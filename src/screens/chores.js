@@ -49,7 +49,7 @@ export function choresScreen(ctx) {
           h('div', { class: 'reward-title' }, c.title),
           c.note ? h('div', { class: 'reward-note' }, c.note) : null,
           h('div', { class: 'chore-sub' },
-            h('span', { class: 'tag xp' }, `+${c.points} XP`),
+            h('span', { class: 'tag xp' }, `+${st.state === 'pending' ? st.entry.points : c.points} XP`),
             c.reward ? h('span', { class: 'tag gold' }, c.reward) : null,
             st.state === 'rejected' ? h('span', { class: 'tag' }, st.entry.note ? `Try again: ${st.entry.note}` : 'Try again') : null)),
         st.state === 'pending' ? h('div', { class: 'chore-wait' }, thumb, h('span', {}, 'Waiting for a grown-up')) : null,

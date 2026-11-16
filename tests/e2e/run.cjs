@@ -1054,14 +1054,14 @@ scenario('21 small things: Undo puts down what he holds, the "leave?" box holds 
 });
 
 // ---------------------------------------------------------------------------------------------
-scenario('22 a grown-up edits rewards, chores and expectations (name, description, picture); he sees the reward ladder and can look ahead', async (t) => {
+scenario('22 a grown-up edits rewards, chores and expectations (name, description, picture); he sees the reward mine and can look ahead', async (t) => {
   const { page } = await t.open({ state: { flags: { welcomed: true }, xp: 463 } });
   await toMap(page);
   await H.openParent(page);
   const png = fs.readFileSync(path.join(H.ROOT, 'assets', 'icons', 'icon-192.png'));
   const rowOf = (title) => page.locator(`.admin-row:not([data-earned]):has(b:text-is("${title}"))`);
 
-  // --- the reward ladder: three steps, one with a description, one with a picture
+  // --- the reward mine: three rewards, one with a description, one with a picture
   await H.openTab(page, 'rewards');
   const addTier = async (title, points, note) => {
     await page.fill('[data-form="tier"] input[type="text"]', title);
@@ -1080,7 +1080,7 @@ scenario('22 a grown-up edits rewards, chores and expectations (name, descriptio
   await page.click('[data-form="tier"] button[type="submit"]');
   await rowOf('New mount').waitFor();
   let s = await getState(page);
-  const order = () => page.locator('section.panel:has(h2:text-is("Reward ladder")) .admin-row b').allTextContents();
+  const order = () => page.locator('section.panel:has(h2:text-is("Reward mine")) .admin-row b').allTextContents();
   t.check((await order()).join() === 'New skin pack,New mount,Coins', `the steps should be listed in order of points (got ${await order()})`);
   t.check(s.rewards.tiers.find((x) => x.title === 'New skin pack').note === 'Any pack you like', 'the description should be saved');
   const mount = s.rewards.tiers.find((x) => x.title === 'New mount');
@@ -1145,43 +1145,59 @@ scenario('22 a grown-up edits rewards, chores and expectations (name, descriptio
   await page.click('.expect-row [data-act="tick"]');
   await page.click('.sub-head .icon-btn');
 
-  // --- the ladder
+  // --- the reward mine: he digs down; every reward is an ore
   await page.click('[data-open="rewards"]');
-  await page.waitForSelector('.ladder .rung');
+  await page.waitForSelector('.mine .rung');
   await page.waitForSelector('.rung .rung-pic.has-photo img');
-  const lad = await page.evaluate(() => ({
-    rungs: [...document.querySelectorAll('.ladder .rung')].map((r) => ({ title: r.querySelector('.reward-title').textContent, state: [...r.classList].find((c) => c.startsWith('is-')).slice(3),
-      shows: (r.querySelector('.stamp') || r.querySelector('.reward-need')).textContent.trim(), photo: !!r.querySelector('.rung-pic img'), w: r.getBoundingClientRect().width, h: r.getBoundingClientRect().height })),
-    points: [...document.querySelectorAll('.ladder-slot:not(.is-start) .ladder-points')].map((n) => n.textContent),
-    at: getComputedStyle(document.querySelector('.ladder-track')).getPropertyValue('--at').trim(),
-    nextInView: (() => { const r = document.querySelector('.rung.is-next').getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth; })(),
-    owed: [...document.querySelectorAll('.glow-panel [data-earned] .reward-title')].map((n) => n.textContent),
-  }));
-  t.check(lad.rungs.map((r) => `${r.title}:${r.state}`).join() === 'Skin pack of your choice:won,New mount:next,Coins:ahead', `the ladder should show what he has, what is next and what is ahead (${JSON.stringify(lad.rungs.map((r) => [r.title, r.state]))})`);
-  t.check(lad.points.join() === '400,800,2000' && lad.rungs[0].shows === 'WON!' && lad.rungs[1].shows === '463 / 800 XP' && lad.rungs[2].shows === '463 / 2000 XP', `each step should show its points and where he stands (${JSON.stringify(lad)})`);
-  t.check(lad.rungs[1].photo && !lad.rungs[0].photo, 'the step with a picture should show the picture, the others their emoji');
-  t.check(Math.abs(Number(lad.at) - (1 + 63 / 400)) < 0.01, `his marker should stand between the first and the second step (at ${lad.at})`);
-  t.check(lad.nextInView, 'the step he is working towards should be in view when the screen opens');
-  t.check(lad.rungs.every((r) => r.w >= 60 && r.h >= 60), 'every step must be big enough to tap');
+  await sleep(700); // (the screen rides down to where he is digging)
+  const lad = await page.evaluate(() => {
+    const box = (el) => el.getBoundingClientRect();
+    const ores = [...document.querySelectorAll('.mine-step .mine-ore')];
+    const me = box(document.querySelector('.mine-me'));
+    return {
+      rungs: [...document.querySelectorAll('.mine .rung')].map((r) => ({ title: r.querySelector('.reward-title').textContent, state: [...r.classList].find((c) => c.startsWith('is-')).slice(3),
+        shows: (r.querySelector('.stamp') || r.querySelector('.reward-need')).textContent.trim(), photo: !!r.querySelector('.rung-pic img'), w: box(r).width, h: box(r).height, top: box(r).top })),
+      points: [...document.querySelectorAll('.mine .rung .rung-points')].map((n) => n.textContent),
+      ores: [...document.querySelectorAll('.mine-step')].map((st) => `${st.dataset.ore}${st.querySelector('.mine-ore').classList.contains('is-found') ? ':found' : ''}`),
+      at: document.querySelector('.mine').dataset.at,
+      // his feet stand between the floor of the first ore and the floor of the second, 63/400 of the way down
+      share: (me.bottom - box(ores[0]).bottom) / (box(ores[1]).bottom - box(ores[0]).bottom),
+      grassAboveFirst: box(document.querySelector('.mine-grass')).top < box(ores[0]).top,
+      shaftReachesHim: Math.abs(box(document.querySelector('.mine-shaft')).bottom - me.bottom) < 3,
+      meInView: me.top >= 0 && me.bottom <= innerHeight,
+      nextInView: (() => { const r = box(document.querySelector('.rung.is-next')); return r.top >= 0 && r.bottom <= innerHeight; })(),
+      overlap: [...document.querySelectorAll('.mine .rung')].some((r, i, all) => i > 0 && box(r).top < box(all[i - 1]).bottom),
+      owed: [...document.querySelectorAll('.glow-panel [data-earned] .reward-title')].map((n) => n.textContent),
+    };
+  });
+  t.check(lad.rungs.map((r) => `${r.title}:${r.state}`).join() === 'Skin pack of your choice:won,New mount:next,Coins:ahead', `the mine should show what he has, what is next and what is ahead, from the top down (${JSON.stringify(lad.rungs.map((r) => [r.title, r.state]))})`);
+  t.check(lad.rungs.every((r, i, all) => i === 0 || r.top > all[i - 1].top) && !lad.overlap, 'each reward should lie deeper than the one before, without overlapping');
+  t.check(lad.ores.join() === 'coal:found,ruby,copper', `the ores should run coal, red crystal, copper... and the one he has reached should be found (${lad.ores})`);
+  t.check(lad.points.join() === '400,800,2000' && lad.rungs[0].shows === 'WON!' && lad.rungs[1].shows === '463 / 800 XP' && lad.rungs[2].shows === '463 / 2000 XP', `each reward should show its points and where he stands (${JSON.stringify(lad)})`);
+  t.check(lad.rungs[1].photo && !lad.rungs[0].photo, 'the reward with a picture should show the picture, the others their emoji');
+  t.check(Math.abs(Number(lad.at) - (1 + 63 / 400)) < 0.01 && Math.abs(lad.share - 63 / 400) < 0.03, `he should be digging between the first and the second ore, as far down as his points say (at ${lad.at}, share ${lad.share.toFixed(3)})`);
+  t.check(lad.grassAboveFirst && lad.shaftReachesHim, 'the shaft should run from the grass down to where he stands');
+  t.check(lad.meInView && lad.nextInView, 'he and the reward he is working towards should be in view when the screen opens');
+  t.check(lad.rungs.every((r) => r.w >= 60 && r.h >= 60), 'every reward must be big enough to tap');
   t.check(lad.owed.join() === 'Skin pack of your choice', 'what he has won should be under "You won! Show a grown-up"');
-  await page.screenshot({ path: path.join(OUT, 'ladder-landscape.png') });
+  await page.screenshot({ path: path.join(OUT, 'mine-landscape.png') });
   // look ahead: tap a step that is still far away
   await page.click('.rung.is-ahead');
   await page.waitForSelector('.rung-detail');
   const detail = (await page.textContent('.rung-detail')).replace(/\s+/g, ' ');
   t.check(/Coins/.test(detail) && /463 \/ 2000 XP/.test(detail) && /1537 XP to go/.test(detail), `looking ahead should show the reward, where he stands and how far it is (${detail})`);
-  await page.screenshot({ path: path.join(OUT, 'ladder-look-ahead.png') });
+  await page.screenshot({ path: path.join(OUT, 'mine-look-ahead.png') });
   await page.click('.rung-detail [data-act="close"]');
   t.check((await page.locator('.rung-detail').count()) === 0, 'OK should close it');
   await page.click('.rung.is-next');
   await page.waitForSelector('.rung-detail .rung-pic.big img');
-  await page.screenshot({ path: path.join(OUT, 'ladder-next-detail.png') });
+  await page.screenshot({ path: path.join(OUT, 'mine-next-detail.png') });
   await page.click('.rung-detail [data-act="close"]');
   await page.setViewportSize({ width: 820, height: 1180 });
   await page.waitForTimeout(200);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
   t.check(overflow <= 0, `the page must not scroll sideways in portrait (${overflow}px over)`);
-  await page.screenshot({ path: path.join(OUT, 'ladder-portrait.png') });
+  await page.screenshot({ path: path.join(OUT, 'mine-portrait.png') });
   await page.setViewportSize({ width: 1180, height: 820 });
 
   // --- removing a step takes its picture with it

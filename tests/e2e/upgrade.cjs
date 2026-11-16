@@ -349,7 +349,7 @@ async function readScreens(page, opts = {}) {
       lockedByExpectations: document.querySelector('.screen.rewards').classList.contains('locked'),
       xp: document.querySelector('.sub-head .count')?.textContent.trim() ?? null,
       waiting: [...document.querySelectorAll('.glow-panel [data-earned] .reward-title')].map((n) => n.textContent.trim()),
-      rows: [...document.querySelectorAll('.reward-row[data-reward]'), ...document.querySelectorAll('.ladder .rung[data-reward]')].map((r) => ({
+      rows: [...document.querySelectorAll('.reward-row[data-reward]'), ...document.querySelectorAll('.mine .rung[data-reward]')].map((r) => ({
         title: r.querySelector('.reward-title').textContent.trim(),
         won: r.classList.contains('won'),
         shows: (r.querySelector('.stamp') || r.querySelector('.reward-need'))?.textContent.trim() ?? null,
@@ -403,9 +403,9 @@ async function readScreens(page, opts = {}) {
       const rows = (s) => [...(s?.querySelectorAll('.admin-row') || [])].map((r) => `${r.querySelector('.emoji').textContent} ${r.querySelector('b').textContent} | ${r.querySelector('small').textContent}`);
       return {
         heading: sec('To hand out')?.querySelector('h2').textContent ?? null,
-        toHandOut: [...document.querySelectorAll('[data-earned]')].map((r) => `${r.querySelector('.emoji').textContent} ${r.querySelector('b').textContent} | ${r.querySelector('small').textContent}`),
+        toHandOut: [...document.querySelectorAll('[data-earned]')].map((r) => `${r.querySelector('.emoji').textContent} ${r.querySelector('b').textContent} | ${r.querySelector('small').textContent.replace(/^(lifetime|ladder|mine) reward/, 'points reward')}`),
         daily: rows(sec('Daily rewards')),
-        lifetime: rows(sec('Lifetime rewards') || sec('Reward ladder')),
+        lifetime: rows(sec('Lifetime rewards') || sec('Reward mine')).map((line) => line.replace(/ - (won, waiting to be handed out|he has had this one.*)$/, '')),
         countRepeats: sec('Daily rewards')?.querySelector('label.setting input')?.checked ?? null,
       };
     });

@@ -71,7 +71,7 @@ export const owed = (state) => state.rewards.earned.filter((e) => !e.given);
 export function choreStatus(chore, log, now = new Date()) {
   const day = todayKey(now);
   const week = weekKey(now);
-  const mine = log.filter((e) => e.chore === chore.id && (chore.repeat === 'daily' ? e.day === day : chore.repeat === 'weekly' ? e.week === week : true));
+  const mine = log.filter((e) => e.chore === chore.id && (chore.repeat === 'daily' ? e.day === day : chore.repeat === 'weekly' ? e.week === week : e.t >= (chore.since || 0)));
   const last = mine[mine.length - 1] || null;
   if (!last) return { state: 'open', entry: null };
   if (last.status === 'pending') return { state: 'pending', entry: last };
@@ -159,27 +159,28 @@ export function setExpectation(state, id, done, now = new Date()) {
 export const tidy = (text, max = 60) => String(text ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 export const TITLE_MAX = 60;
 export const NOTE_MAX = 200;
+const blank = (value) => value == null || String(value).trim() === '';
 const whole = (value, min, max, fallback) => {
-  const n = Math.round(Number(value));
+  const n = blank(value) ? NaN : Math.round(Number(value));
   return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
 };
 const LISTS = {
   daily: (state) => state.rewards.daily, // { id, title, icon, note, missions }
   tier: (state) => state.rewards.tiers, // { id, title, icon, note, points, photo }   photo = id of a stored picture, or null
-  chore: (state) => state.chores.list, // { id, title, icon, note, points, repeat, reward }
+  chore: (state) => state.chores.list, // { id, title, icon, note, points, repeat, reward, since? }  since: when it became "one time only"
   expect: (state) => state.expectations.list, // { id, title, icon, note }
 };
 
 /** The fields a grown-up may set for each kind of thing, tidied and kept within limits. */
 export function cleanItem(kind, raw = {}) {
   const out = { title: tidy(raw.title, TITLE_MAX), icon: String(raw.icon || '').slice(0, 8), note: tidy(raw.note, NOTE_MAX) };
-  if (kind === 'daily') out.missions = whole(raw.missions, 1, 20, 1);
+  if (kind === 'daily') out.missions = whole(raw.missions, 1, 20, 3);
   if (kind === 'tier') {
-    out.points = whole(raw.points, 10, 1000000, 10);
+    out.points = whole(raw.points, 10, 1000000, 1000);
     out.photo = raw.photo ? String(raw.photo) : null;
   }
   if (kind === 'chore') {
-    out.points = whole(raw.points, 0, 10000, 0);
+    out.points = whole(raw.points, 0, 10000, 20);
     out.repeat = ['daily', 'weekly', 'once'].includes(raw.repeat) ? raw.repeat : 'daily';
     out.reward = tidy(raw.reward, 40);
   }
@@ -203,9 +204,13 @@ export function addItem(state, kind, raw, now = new Date()) {
 export function editItem(state, kind, id, changes, now = new Date()) {
   const item = LISTS[kind](state).find((x) => x.id === id);
   if (!item) return null;
-  const next = cleanItem(kind, { ...item, ...changes });
+  const given = { ...changes };
+  for (const key of ['missions', 'points']) if (key in given && blank(given[key])) delete given[key]; // an emptied number box changes nothing
+  const next = cleanItem(kind, { ...item, ...given });
   if (!next.title) return null;
   const oldPhoto = item.photo && item.photo !== next.photo ? item.photo : null;
+  // A chore that becomes "one time only" starts afresh: what was approved while it still repeated does not finish it.
+  if (kind === 'chore' && next.repeat === 'once' && item.repeat !== 'once') next.since = +now;
   Object.assign(item, next);
   if (kind === 'daily' || kind === 'tier') {
     // A reward he has won and is still owed follows the new wording (a spelling fix must reach it too);

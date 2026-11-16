@@ -128,10 +128,15 @@ in `tools/tts/accepted.json`, with the reason. In Claude Code cloud sessions use
   still recorded and wait. With `confirm` on, his tick is only `pending` until a grown-up presses OK.
 - **Points are XP.** Missions add XP; an approved chore adds its points to the same total. Lifetime tiers
   are thresholds on that total; daily rewards count missions finished today.
-- **The reward ladder** is how he sees the lifetime tiers (`ladder(state)` in `src/rewards/logic.js`,
-  drawn by `src/screens/rewards.js`): every tier in order of points, his marker, what he has, what is
-  next and what is ahead; tapping a step shows it large and reads it aloud. A tier he has already
-  reached when it is added or changed is won at once; raising it later never takes it back.
+- **The reward mine** is how he sees the lifetime tiers (`ladder(state)` in `src/rewards/logic.js`,
+  drawn by `src/screens/mine.js` inside `src/screens/rewards.js`, styles in `css/mine.css`, art in
+  `src/art/mine.js`): a side view of the ground. He starts on the grass and his shaft goes down as his
+  points grow; every tier, in order of points, waits at an ore - coal, red crystal, copper, iron, gold,
+  emerald, lapis, diamond, star ore (the owner's order; further tiers are all star ore). An ore he has
+  reached is shown as found. He scrolls down to look ahead; tapping a reward shows it large and reads
+  it aloud. The art is our own: do not copy the blocks, characters or names of any existing game.
+  A tier he has already reached when it is added or changed is won at once; raising it later never
+  takes it back.
 - **Everything a grown-up types goes through `addItem` / `editItem` / `removeItem`** (same file): daily
   rewards, tiers, chores and expectations each have `title`, `icon` and an optional `note` (the
   description, shown to him and read by the speaker button); a tier may have a `photo` (the id of a

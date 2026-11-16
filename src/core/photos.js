@@ -55,6 +55,15 @@ export async function deletePhoto(id) {
   } catch { /* nothing to clean up */ }
 }
 
+/** Delete every stored picture that is not in `keep` (after a backup is restored: pictures nothing points to any more). */
+export async function keepOnlyPhotos(keep) {
+  try {
+    const wanted = new Set(keep.filter(Boolean));
+    const all = await run('readonly', (s) => s.getAllKeys());
+    for (const id of all || []) if (!wanted.has(id)) await deletePhoto(id);
+  } catch { /* nothing to tidy */ }
+}
+
 /** Shrink a camera picture to at most `max` pixels on its long side, as a JPEG. */
 export function shrinkImage(file, max = 1280, quality = 0.8) {
   return new Promise((resolve, reject) => {
@@ -65,7 +74,10 @@ export function shrinkImage(file, max = 1280, quality = 0.8) {
       const canvas = document.createElement('canvas');
       canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
       canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const pen = canvas.getContext('2d');
+      pen.fillStyle = '#ffffff'; // a see-through picture would otherwise come out on black
+      pen.fillRect(0, 0, canvas.width, canvas.height);
+      pen.drawImage(img, 0, 0, canvas.width, canvas.height);
       URL.revokeObjectURL(url);
       canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('could not read the picture'))), 'image/jpeg', quality);
     };

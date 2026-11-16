@@ -113,3 +113,22 @@ test('icons render with currentColor only', () => {
   }
   assert.equal(seen.size, ICONS.length);
 });
+
+// ---- the reward mine (src/art/mine.js) ----
+import { ORES, oreFor, oreBlockSVG, findSVG, pickSVG } from '../../src/art/mine.js';
+
+test('the mine: the ores run in the order the owner chose, and every one has its art', () => {
+  assert.deepEqual(ORES, ['coal', 'ruby', 'copper', 'iron', 'gold', 'emerald', 'lapis', 'diamond', 'star']);
+  assert.deepEqual([0, 1, 2, 8, 9, 40, -3].map(oreFor), ['coal', 'ruby', 'copper', 'star', 'star', 'star', 'coal'], 'the first reward is coal; past the last ore everything is star ore');
+  const seen = new Set();
+  for (const ore of ORES) {
+    for (const svg of [oreBlockSVG(ore), oreBlockSVG(ore, true), findSVG(ore)]) {
+      checkSVG(svg, '0 0 64 64', 'mine-art');
+      assert.ok(!seen.has(svg), `${ore}: every picture is different`);
+      seen.add(svg);
+    }
+  }
+  checkSVG(pickSVG(), '0 0 64 64', 'mine-art');
+  assert.throws(() => oreBlockSVG('nope'));
+  assert.throws(() => findSVG('nope'));
+});

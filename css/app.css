@@ -373,26 +373,9 @@ svg { display: block; width: 100%; height: 100%; }
 }
 .map-actions .btn, .map-actions .icon-btn { position: relative; }
 
-/* ---------- the reward ladder: a track he slides along; his marker rides on the line ---------- */
-.ladder { --slot: 196px; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scroll-snap-type: x proximity; padding: 4px 0 10px; margin: 0 -6px; }
-.ladder-track { position: relative; display: flex; width: max-content; padding-top: 66px; }
-.ladder-slot { width: var(--slot); flex: none; display: grid; justify-items: center; align-content: start; gap: 6px; scroll-snap-align: center; }
-.ladder-line { position: absolute; left: calc(var(--slot) / 2); top: 74px; width: calc(var(--n) * var(--slot)); height: 12px; border-radius: 6px; background: rgba(255, 255, 255, 0.16); }
-.ladder-line i { display: block; height: 100%; width: calc(var(--at) / var(--n) * 100%); background: var(--gold); border-radius: 6px; }
-.ladder-me { position: absolute; top: 0; left: calc(var(--slot) / 2 + var(--at) * var(--slot)); width: 62px; height: 62px; transform: translateX(-50%); filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35)); z-index: 2; }
-.ladder-me svg { width: 100%; height: 100%; display: block; }
-.ladder-post { position: relative; z-index: 1; width: 28px; height: 28px; border-radius: 50%; background: #2a3270; border: 4px solid rgba(255, 255, 255, 0.3); display: grid; place-items: center; color: var(--gold-ink); }
-.ladder-post.start { width: 20px; height: 20px; margin: 4px 0; background: var(--gold); border-color: var(--gold); }
-.is-won > .ladder-post, .is-given > .ladder-post { background: var(--gold); border-color: var(--gold); }
-.is-next > .ladder-post { border-color: var(--gold); }
-.post-icon svg { width: 16px; height: 16px; display: block; }
-.ladder-points { font-weight: 800; font-size: 20px; color: var(--ink-dim); }
-.is-won > .ladder-points, .is-given > .ladder-points, .is-next > .ladder-points { color: var(--gold); }
-.ladder-you { display: grid; justify-items: center; gap: 2px; margin-top: 34px; padding: 14px 18px; border-radius: 20px; background: rgba(255, 210, 63, 0.12); color: var(--gold); font-size: 15px; font-weight: 800; }
-.ladder-you .btn-icon { width: 34px; height: 34px; }
-.ladder-you b { font-size: 30px; color: var(--ink); line-height: 1; }
+/* ---------- reward cards and the big view of one reward (the mine itself: css/mine.css) ---------- */
 .rung {
-  appearance: none; font: inherit; color: var(--ink); cursor: pointer; width: calc(var(--slot) - 20px); min-height: 216px;
+  appearance: none; font: inherit; color: var(--ink); cursor: pointer; min-height: 104px;
   display: grid; justify-items: center; align-content: start; gap: 8px; padding: 12px 10px;
   background: rgba(10, 14, 36, 0.55); border: 3px solid transparent; border-radius: 20px; text-align: center;
 }
@@ -418,10 +401,6 @@ svg { display: block; width: 100%; height: 100%; }
 .rung-count { font-weight: 800; color: var(--ink-dim); }
 .rung-left { font-size: 20px; font-weight: 700; color: var(--ink-dim); }
 .rung-left b { font-size: 34px; color: var(--gold); }
-@media (max-width: 560px) {
-  .ladder { --slot: 168px; }
-  .rung-pic { width: 96px; height: 96px; font-size: 58px; }
-}
 
 /* ---------- parent area: PIN, tabs, rewards and chores ---------- */
 .pin-dots { display: flex; gap: 12px; justify-content: center; min-height: 20px; }
@@ -433,9 +412,9 @@ svg { display: block; width: 100%; height: 100%; }
 .tab { appearance: none; border: 0; cursor: pointer; background: var(--panel); color: var(--ink-dim); font: inherit; font-weight: 800; padding: 12px 18px; border-radius: 14px; position: relative; }
 .tab.on { background: var(--gold); color: var(--gold-ink); }
 .admin-list { display: grid; gap: 8px; }
-.admin-row { display: flex; align-items: center; gap: 12px; background: rgba(10, 14, 36, 0.5); border-radius: 14px; padding: 10px 12px; }
+.admin-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: rgba(10, 14, 36, 0.5); border-radius: 14px; padding: 10px 12px; }
 .admin-row .emoji { font-size: 30px; width: 40px; }
-.grow { flex: 1; min-width: 0; display: grid; }
+.grow { flex: 1; min-width: 150px; display: grid; }
 .grow small { color: var(--ink-dim); font-size: 14px; }
 .admin-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; padding-top: 6px; border-top: 2px solid var(--line); }
 .field { display: grid; gap: 4px; font-size: 14px; color: var(--ink-dim); flex: 1; min-width: 130px; }

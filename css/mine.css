@@ -1,0 +1,82 @@
+/* The reward mine (src/screens/mine.js): a side view of the ground, on his Rewards screen.
+   Everything hangs on a few numbers: --tile (one block), --band (how far apart the rewards lie),
+   --n rewards, --at how many bands down he is, --deep from which band the rock is the dark kind. */
+.mine {
+  --tile: 44px; --band: calc(var(--tile) * 4); --ore: 64px;
+  --shaft-x: var(--tile); --shaft-w: calc(var(--tile) * 2);
+  position: relative; border-radius: 20px; overflow: hidden; border: 3px solid var(--line); background: #10142e;
+}
+.mine-ore svg, .mine-guide svg, .mine-pick svg { width: 100%; height: 100%; display: block; }
+
+/* above ground */
+.mine-sky { position: relative; height: 116px; background: linear-gradient(#2a4a9c, #5f97e3); }
+.mine-sun { position: absolute; right: 12%; top: 22px; width: 44px; height: 44px; border-radius: 50%; background: #ffe066; box-shadow: 0 0 0 10px rgba(255, 224, 102, 0.22); }
+.mine-cloud { position: absolute; height: 18px; border-radius: 9px; background: rgba(255, 255, 255, 0.85); }
+.mine-cloud.one { left: 44%; top: 30px; width: 84px; }
+.mine-cloud.two { left: 60%; top: 64px; width: 54px; opacity: 0.7; }
+
+/* the ground: blocks drawn as a grid over three kinds of earth - soil, rock, deep rock */
+.mine-ground {
+  position: relative; height: calc(var(--n) * var(--band) + var(--tile) * 2);
+  background:
+    linear-gradient(rgba(10, 14, 36, 0.2) 2px, transparent 2px) 0 0 / var(--tile) var(--tile),
+    linear-gradient(90deg, rgba(10, 14, 36, 0.2) 2px, transparent 2px) 0 0 / var(--tile) var(--tile),
+    linear-gradient(to bottom, #8f5d38 0, #8f5d38 calc(var(--tile) * 2), #79809a calc(var(--tile) * 2), #79809a calc(var(--deep) * var(--band)), #4d526c calc(var(--deep) * var(--band)), #4d526c 100%);
+}
+.mine-grass { position: absolute; left: 0; right: 0; top: 0; height: 16px; background: #49c26b; box-shadow: inset 0 -5px 0 #359a52; }
+
+/* the shaft he has dug, with its ladder */
+.mine-shaft {
+  position: absolute; left: var(--shaft-x); top: 0; width: var(--shaft-w); height: max(calc(var(--at) * var(--band)), 12px);
+  background:
+    linear-gradient(#b9773d, #b9773d) 28% 0 / 6px 100% no-repeat,
+    linear-gradient(#b9773d, #b9773d) 72% 0 / 6px 100% no-repeat,
+    linear-gradient(to bottom, transparent 0, transparent 16px, #a8672f 16px, #a8672f 21px, transparent 21px) 50% 0 / 44% 22px repeat-y,
+    #10142e;
+  box-shadow: inset 5px 0 0 rgba(0, 0, 0, 0.4), inset -5px 0 0 rgba(0, 0, 0, 0.4);
+  border-radius: 0 0 8px 8px;
+}
+.mine-me { position: absolute; left: calc(var(--shaft-x) + var(--shaft-w) / 2); top: calc(var(--at) * var(--band)); width: 72px; height: 72px; transform: translate(-50%, -100%); z-index: 3; }
+.mine-me::before { content: ''; position: absolute; left: 50%; top: 55%; width: 190px; height: 190px; transform: translate(-50%, -50%); background: radial-gradient(rgba(255, 224, 102, 0.26), rgba(255, 224, 102, 0) 62%); z-index: -1; pointer-events: none; }
+.mine-guide { display: block; width: 100%; height: 100%; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.4)); }
+.mine-pick { position: absolute; right: -16px; top: 2px; width: 36px; height: 36px; transform: rotate(14deg); }
+
+/* a reward: its ore beside the shaft, its card beside the ore */
+.mine-step {
+  position: absolute; left: calc(var(--shaft-x) + var(--shaft-w)); right: 10px; top: calc(var(--i) * var(--band) - var(--ore) / 2);
+  transform: translateY(-50%); display: flex; align-items: center; gap: 10px; z-index: 2;
+}
+.mine-ore { width: var(--ore); height: var(--ore); flex: none; }
+.mine-ore.is-found { background: #10142e; border-radius: 0 16px 16px 0; padding: 7px; box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.35); }
+.mine-step.is-next .mine-ore { animation: ore-glint 1.8s ease-in-out infinite; }
+@keyframes ore-glint { 50% { filter: drop-shadow(0 0 10px rgba(255, 224, 102, 0.9)); } }
+
+.mine .rung {
+  position: relative; flex: 1; width: auto; min-width: 0; max-width: 540px; min-height: 104px;
+  display: grid; grid-template-columns: auto 1fr; grid-template-areas: 'pic title' 'pic need'; column-gap: 12px; row-gap: 4px;
+  justify-items: start; align-content: center; text-align: left; padding: 10px 12px; background: rgba(13, 18, 48, 0.92);
+}
+.mine .rung .rung-pic { grid-area: pic; width: 84px; height: 84px; font-size: 54px; align-self: center; }
+.mine .rung .reward-title { grid-area: title; align-self: end; padding-right: 58px; font-size: 19px; }
+.mine .rung .stamp, .mine .rung .reward-need { grid-area: need; align-self: start; }
+.mine .rung.is-ahead { opacity: 1; background: rgba(13, 18, 48, 0.78); }
+.mine .rung.is-next { background: rgba(38, 34, 60, 0.95); }
+.mine .rung.is-won { background: rgba(58, 50, 40, 0.95); }
+.rung-points { position: absolute; top: 8px; right: 10px; font-weight: 800; font-size: 16px; color: var(--gold-ink); background: var(--gold); border-radius: 999px; padding: 2px 10px; }
+.rung.is-ahead .rung-points { background: rgba(255, 255, 255, 0.18); color: var(--ink); }
+
+.mine-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.mine-head .ladder-next { justify-content: flex-end; }
+.rung-ore { width: 54px; height: 54px; flex: none; }
+.rung-ore svg { width: 100%; height: 100%; display: block; }
+.rung-found { display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+@media (max-width: 620px) {
+  .mine { --tile: 34px; --ore: 46px; --shaft-x: 8px; }
+  .mine-me { width: 58px; height: 58px; }
+  .mine-pick { width: 28px; height: 28px; right: -10px; }
+  .mine .rung { min-height: 92px; padding: 8px; column-gap: 8px; }
+  .mine .rung .rung-pic { width: 56px; height: 56px; font-size: 36px; }
+  .mine .rung .reward-title { font-size: 16px; padding-right: 0; padding-top: 22px; }
+  .mine .rung .reward-need { font-size: 13px; white-space: normal; text-align: left; }
+}

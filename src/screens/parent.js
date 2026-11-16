@@ -10,7 +10,8 @@ import { overview, observations, skillStats, errorStats } from '../listening/ins
 import { rankFor } from '../listening/progress.js';
 import { badges } from '../rewards/logic.js';
 import { iconSVG } from '../art/sprites.js';
-import { pinGate, changePinButton, rewardsTab, choresTab, expectationsTab } from './admin.js';
+import { pinGate, changePinButton, rewardsTab, choresTab, expectationsTab, closeForms } from './admin.js';
+import { keepOnlyPhotos } from '../core/photos.js';
 
 const TIPS = [
   'Get his eyes first. Say his name, wait until he looks at you, then give the instruction.',
@@ -38,6 +39,7 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
     tabs, body);
 
   function show(which) {
+    if (which !== tab) closeForms(); // a form left open on another tab does not come back
     tab = which;
     const b = badges(store.get());
     mount(tabs, [['progress', 'Progress', 0], ['rewards', 'Rewards', b.rewardsOwed], ['chores', 'Chores', b.toCheck], ['expectations', 'Expectations', b.toConfirm], ['settings', 'Settings', 0]].map(([id, label, n]) =>
@@ -111,7 +113,7 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
         toggle('Unlock every level', (st) => st.flags.unlockAll, (st, v) => { st.flags.unlockAll = v; }, 'Lets you jump anywhere. Leave off for normal step-by-step progress.'),
         h('div', { class: 'row', style: { justifyContent: 'flex-start' } }, changePinButton(ctx, body, () => show('settings')))),
       section('Backup',
-        h('p', { class: 'fine' }, 'Everything is stored only on this device. Copy a backup if you want to move it or keep it safe. (Chore photos are not part of a backup.)'),
+        h('p', { class: 'fine' }, 'Everything is stored only on this device. Copy a backup if you want to move it or keep it safe. (Chore photos and reward pictures are not part of a backup.)'),
         h('div', { class: 'row' },
           h('button', { class: 'btn', type: 'button', onclick: async () => {
             backup.value = backupText = store.exportJSON();
@@ -119,7 +121,13 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
             catch { backupMsg.textContent = 'Backup is in the box below - select it and copy.'; }
           } }, 'Make backup'),
           h('button', { class: 'btn', type: 'button', onclick: () => {
-            try { store.importJSON(backup.value); ctx.applySettings(); refresh(); }
+            try {
+              store.importJSON(backup.value);
+              const st = store.get(); // pictures that the restored save does not point to are of no use any more
+              keepOnlyPhotos([...st.rewards.tiers.map((t) => t.photo), ...st.chores.log.map((e) => e.photo)]);
+              ctx.applySettings();
+              refresh();
+            }
             catch { backupMsg.textContent = 'That does not look like a backup.'; }
           } }, 'Restore'),
           h('button', { class: 'btn btn-danger', type: 'button', dataset: { act: 'erase' }, onclick: (e) => {
@@ -137,6 +145,7 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
     ];
   }
 
+  closeForms();
   pinGate(ctx, body, () => show(tab));
-  return { el };
+  return { el, destroy: closeForms };
 }

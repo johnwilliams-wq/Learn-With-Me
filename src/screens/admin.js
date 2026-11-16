@@ -104,7 +104,7 @@ function text(placeholder, max = TITLE_MAX, value = '') {
   input.value = value;
   return input;
 }
-const number = (value, min = 1, max = 100000) => h('input', { type: 'number', inputmode: 'numeric', min, max, value });
+const number = (value, min = 1, max = 100000) => h('input', { type: 'number', inputmode: 'numeric', min, max, value, required: true });
 function noteBox(value = '') {
   const box = h('textarea', { rows: 2, maxlength: NOTE_MAX, placeholder: 'optional - a few more words. He sees them, and the speaker button reads them to him.' });
   box.value = value;
@@ -141,6 +141,8 @@ const KINDS = {
 let editing = null; // 'kind:id' of the row that is open for changes (one at a time)
 let showing = []; // pictures on screen: each entry frees one of them again
 const freePictures = () => { for (const free of showing.splice(0)) free(); };
+/** Leaving the parent area or changing tab: no form stays open, no picture stays in memory. */
+export const closeForms = () => { editing = null; freePictures(); };
 
 /**
  * The form for one reward, chore or expectation: the same for a new one (item = null) and for
@@ -156,9 +158,11 @@ function itemForm(ctx, kind, item, redraw) {
   const more = K.fields(item);
   const msg = h('p', { class: 'form-msg', role: 'status' });
 
-  // The picture (steps of the reward ladder): undefined = leave as it is, null = none, a Blob = a new one.
+  // The picture (rewards in the mine): undefined = leave as it is, null = none, a Blob = a new one.
   let picture;
   let preview = null;
+  let busy = false; // a picture is being read or the form is being saved: no second press
+  showing.push(() => { if (preview) URL.revokeObjectURL(preview); });
   const show = h('span', { class: 'pic-preview' });
   const drawPicture = () => {
     if (preview) URL.revokeObjectURL(preview);
@@ -178,18 +182,20 @@ function itemForm(ctx, kind, item, redraw) {
   file.addEventListener('change', async () => {
     const chosen = file.files && file.files[0];
     file.value = '';
-    if (!chosen) return;
+    if (!chosen || busy) return;
+    busy = true;
     try {
       picture = await shrinkImage(chosen, 900, 0.82);
       msg.textContent = '';
     } catch {
       msg.textContent = 'That picture could not be read. Try another one.';
     }
+    busy = false;
     drawPicture();
   });
   const removeBtn = h('button', { class: 'btn btn-chip', type: 'button', dataset: { act: 'no-picture' }, onclick: () => { picture = null; drawPicture(); } }, 'Remove picture');
   const pictureRow = K.picture
-    ? h('div', { class: 'field wide pic-field' }, h('span', {}, 'Picture of the reward (optional) - he sees it on his ladder'),
+    ? h('div', { class: 'field wide pic-field' }, h('span', {}, 'Picture of the reward (optional) - he sees it in his mine'),
         h('div', { class: 'pic-row' }, show,
           h('button', { class: 'btn btn-chip', type: 'button', dataset: { act: 'picture' }, onclick: () => file.click() }, 'Choose a picture'), removeBtn, file))
     : null;
@@ -204,21 +210,30 @@ function itemForm(ctx, kind, item, redraw) {
       h('button', { class: 'btn btn-primary', type: 'submit' }, item ? 'Save' : 'Add'),
       item ? h('button', { class: 'btn', type: 'button', dataset: { act: 'cancel' }, onclick: () => { editing = null; redraw(); } }, 'Cancel') : null),
     msg);
+  // He has won this reward and it has not been handed over: a new name changes what he is owed.
+  if (item && (kind === 'daily' || kind === 'tier') && owed(store.get()).some((e) => e.src === kind && e.ref === item.id)) {
+    msg.textContent = 'He has won this one and it is waiting to be handed out. A new name changes what you owe him - for a new reward, add a new one instead.';
+  }
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
+    if (busy) return;
     if (!tidy(title.value)) {
       msg.textContent = 'It needs a name.';
       return void title.focus();
     }
     const raw = { icon: icon.value, title: title.value, note: note.value };
     for (const [key, [, control]] of Object.entries(more)) raw[key] = control.value;
+    busy = true;
     if (picture !== undefined) {
       raw.photo = null;
       if (picture) {
         try {
           raw.photo = await savePhoto(picture);
         } catch {
-          msg.textContent = 'The picture could not be saved on this device. Saved without it.';
+          // nothing is changed (his old picture stays too): the grown-up decides what to do
+          msg.textContent = 'The picture could not be saved on this device. Remove it or try another one.';
+          busy = false;
+          return;
         }
       }
     }
@@ -259,7 +274,7 @@ export function rewardsTab(ctx, refresh) {
   const s = store.get();
   const R = s.rewards;
   const waiting = owed(s);
-  const sourceName = { daily: 'daily reward', tier: 'ladder reward', chore: 'chore reward' };
+  const sourceName = { daily: 'daily reward', tier: 'mine reward', chore: 'chore reward' };
   freePictures();
 
   const repeat = h('input', { type: 'checkbox' });
@@ -288,10 +303,13 @@ export function rewardsTab(ctx, refresh) {
       itemForm(ctx, 'daily', null, refresh),
       h('label', { class: 'setting' }, repeat, h('span', {}, h('b', {}, 'Count easy and repeated missions too'),
         h('small', {}, 'Off: only levels below 3 stars count - so replaying something he has already mastered does not earn rewards.')))),
-    section('Reward ladder',
-      h('p', { class: 'fine' }, `Each step is won once, when his total points reach its number. He sees the whole ladder - what he has, and what is still ahead - with your pictures. He has ${s.xp} points now. A mission earns roughly 40 to 95 points; a chore earns what you give it.`),
-      h('div', { class: 'admin-list' }, R.tiers.slice().sort((a, b) => a.points - b.points).map((t) =>
-        itemRow(ctx, 'tier', t, `at ${t.points} points${s.xp >= t.points ? ' (reached)' : ''}`, refresh))),
+    section('Reward mine',
+      h('p', { class: 'fine' }, `Each reward is won once, when his total points reach its number. He sees them as a mine he digs down into: the first reward is in the coal, each next one in a deeper, rarer ore (red crystal, copper, iron, gold, emerald, lapis, diamond, star ore). He can scroll down to look at what is still ahead, with your pictures. He has ${s.xp} points now. A mission earns roughly 40 to 95 points; a chore earns what you give it.`),
+      h('div', { class: 'admin-list' }, R.tiers.slice().sort((a, b) => a.points - b.points).map((t) => {
+        const e = R.earned.find((x) => x.src === 'tier' && x.ref === t.id);
+        const has = e ? (e.given ? ' - he has had this one (for a new reward, add a new one)' : ' - won, waiting to be handed out') : '';
+        return itemRow(ctx, 'tier', t, `at ${t.points} points${s.xp >= t.points ? ' (reached)' : ''}${has}`, refresh);
+      })),
       itemForm(ctx, 'tier', null, refresh)),
   ];
 }
