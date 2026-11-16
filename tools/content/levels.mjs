@@ -540,7 +540,7 @@ const THREE = [
 ];
 
 const w6 = {
-  id: 'w6', name: 'Memory Mountain', blurb: 'Three and four steps.', speed: 0.92,
+  id: 'w6', name: 'Three-Step Hill', blurb: 'Three and four steps.', speed: 0.92,
   levels: [
     { id: 'w6l1', title: 'Three Steps', n: 24, tip: 'Three steps now. Here is a trick: count them on your fingers as you listen.', gen: chain(3, THREE, ['steps3'], 'three') },
     {
@@ -614,7 +614,7 @@ const CLUES = [
 ];
 
 const w7 = {
-  id: 'w7', name: 'Story Cave', blurb: 'Listen to a story, then answer.', speed: 0.95,
+  id: 'w7', name: 'Story Corner', blurb: 'Listen to a story, then answer.', speed: 0.95,
   levels: [
     {
       id: 'w7l1', title: 'Who and What', n: 24,

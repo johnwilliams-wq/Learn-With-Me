@@ -130,4 +130,5 @@ export default {
     return { correct, error: correct ? '' : typeof answer === 'boolean' ? 'choice' : 'no-response', at: correct ? -1 : 0, prefix: correct ? 1 : 0, total: 0 };
   },
   isNone: () => false,
+  retry: false, // with only two buttons a second try proves nothing: after a miss the guide shows the answer
 };

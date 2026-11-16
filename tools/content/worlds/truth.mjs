@@ -383,7 +383,7 @@ function master(rng, i) {
 
 // -----------------------------------------------------------------------------
 
-const quota = { yes: 3, no: 3 }; // every mission: three true, three not true, in a random order
+const quota = { yes: 2, no: 2 }; // every mission: at least two true and two not true; the other two turns are left to chance
 
 export default {
   id: 'truth', name: 'Truth Detector', blurb: 'True, or not true? Look, listen and decide.', color: '#e8507a', speed: 0.93, allowNone: false,

@@ -33,8 +33,10 @@ SAME = [
     {"colors", "colours"}, {"ok", "okay"}, {"oh", "o"}, {"hi", "high", "hey"}, {"its", "it's"},
     {"lets", "let's"}, {"captains", "captain's"}, {"heros", "hero's", "heroes"}, {"camp", "camps"},
     {"campfire", "camp"}, {"bell", "belle"}, {"gem", "jem", "gym", "jam"}, {"boot", "boots"},
-    {"wait", "weight"}, {"except", "accept"}, {"listened", "listen"}, {"ate", "eight"}, {"tap", "tapped"},
+    {"wait", "weight"}, {"except", "accept"}, {"listened", "listen"}, {"ate", "eight", "8"}, {"tap", "tapped"},
+    {"zero", "0"}, {"five", "5"}, {"six", "6"}, {"seven", "7"}, {"nine", "9"},
 ]
+ORDINALS = {"1st": "first", "2nd": "second", "3rd": "third", "4th": "fourth", "5th": "fifth", "6th": "sixth"}
 CANON = {}
 for group in SAME:
     first = sorted(group)[0]
@@ -48,6 +50,9 @@ def words(text):
                         ("i am", "im"), ("do not", "dont"), ("you are", "youre"), ("what is", "whats"), ("let us", "lets")):
         text = text.replace(long, short)
     text = re.sub(r"[^a-z0-9' ]+", " ", text).replace("'", "")
+    for short, long in ORDINALS.items():
+        text = re.sub(rf"\b{short}\b", long, text)
+    text = re.sub(r"(?<=\d)(?=\d)", " ", text)  # a code written "472" is the words four seven two
     return [CANON.get(w, w) for w in text.split()]
 
 

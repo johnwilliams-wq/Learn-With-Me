@@ -95,6 +95,801 @@
    ]
   },
   {
+   "id": "memory",
+   "name": "Memory Mountain",
+   "blurb": "Long orders. Hold every step in your head.",
+   "color": "#9b6bff",
+   "needs": [
+    "camp"
+   ],
+   "levels": [
+    {
+     "id": "memory1",
+     "title": "Three Colors",
+     "tip": "tip-memory1",
+     "tipText": "Welcome to Memory Mountain! Three things to tap, and the colors matter. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.",
+     "trials": 6
+    },
+    {
+     "id": "memory2",
+     "title": "Four Steps",
+     "tip": "tip-memory2",
+     "tipText": "Four steps now. Here is a trick: count them on your fingers while I talk. Then tap one thing for each finger.",
+     "trials": 6
+    },
+    {
+     "id": "memory3",
+     "title": "Three From Memory",
+     "tip": "tip-memory3",
+     "tipText": "Three steps with colors again. But now the cards are hidden while I talk. Listen first. Make a picture of each one in your mind. Then look.",
+     "trials": 6,
+     "holdMs": 900
+    },
+    {
+     "id": "memory4",
+     "title": "Five Steps",
+     "tip": "tip-memory4",
+     "tipText": "Five steps! Take a breath. Say the list back in your head, like a little song. Then tap them one at a time.",
+     "trials": 6
+    },
+    {
+     "id": "memory5",
+     "title": "Backwards",
+     "tip": "tip-memory5",
+     "tipText": "Opposite order means backwards. If I say the key, the gem, and the star, you tap the star first, then the gem, then the key. Start with the last thing I said.",
+     "trials": 6
+    },
+    {
+     "id": "memory6",
+     "title": "Skip and Count",
+     "tip": "tip-memory6",
+     "tipText": "Two new tricks. If I say, skip the second one, leave out the second thing I said. And listen for how many times to tap each thing. Once, two times, or three times.",
+     "trials": 6
+    },
+    {
+     "id": "memory7",
+     "title": "The Summit",
+     "tip": "tip-memory7",
+     "tipText": "The top of the mountain! Six steps in a row. And sometimes four hidden things, with a size and a color for each one. Breathe, listen to the end, and picture them.",
+     "trials": 6,
+     "holdMs": 900
+    },
+    {
+     "id": "memory-boss",
+     "title": "Summit Boss",
+     "tip": "tip-memory-boss",
+     "tipText": "Summit boss! Backwards lists, skipping, counting, and six steps. Listen all the way to the end. Then go one step at a time.",
+     "trials": 6,
+     "holdMs": 900,
+     "boss": true,
+     "mix": [
+      "memory5",
+      "memory6",
+      "memory7"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "logic",
+   "name": "Logic Lab",
+   "blurb": "Think it through: count, compare, unless, only if.",
+   "color": "#2aa9d8",
+   "needs": [
+    "camp"
+   ],
+   "levels": [
+    {
+     "id": "logic1",
+     "title": "Count the Places",
+     "tip": "tip-logic1",
+     "tipText": "Welcome to the Logic Lab! Everything is in one row. Count along the row to find the right one. Listen for which side to start from: the left, or the right.",
+     "trials": 6
+    },
+    {
+     "id": "logic2",
+     "title": "Neighbors",
+     "tip": "tip-logic2",
+     "tipText": "Now some things look the same. Listen for what is beside each one. Next to. Between. To the left of. Only one of them fits.",
+     "trials": 6
+    },
+    {
+     "id": "logic3",
+     "title": "Groups",
+     "tip": "tip-logic3",
+     "tipText": "Now think about groups. Things you can wear, like a hat or a ring. Animals, like a cat. Things that can fly. Tap every one that fits. Then press the green check mark.",
+     "trials": 6
+    },
+    {
+     "id": "logic4",
+     "title": "Two Clues at Once",
+     "tip": "tip-logic4",
+     "tipText": "Two clues at once. Red and small means it must be both. Neither blue nor big means it is not blue, and it is not big. Tap all that fit. Then the green check mark.",
+     "trials": 6
+    },
+    {
+     "id": "logic5",
+     "title": "Count and Compare",
+     "tip": "tip-logic5",
+     "tipText": "Time to count and compare. Count each kind first. Are there more, or fewer, or just as many? Then decide what to tap.",
+     "trials": 6
+    },
+    {
+     "id": "logic6",
+     "title": "Unless and Only If",
+     "tip": "tip-logic6",
+     "tipText": "Tricky words: unless, and only if. Tap the star, unless there is a dragon. So if you see a dragon, do not tap anything. Press the hand instead.",
+     "trials": 6,
+     "allowNone": true,
+     "quota": {
+      "go": 4,
+      "nogo": 2
+     }
+    },
+    {
+     "id": "logic7",
+     "title": "Two Orders",
+     "tip": "tip-logic7",
+     "tipText": "I will give you two orders, but only one is right. Check what is true. Then do only that one, in the right order, and press the green check mark.",
+     "trials": 6
+    },
+    {
+     "id": "logic-boss",
+     "title": "Lab Boss",
+     "tip": "tip-logic-boss",
+     "tipText": "Lab boss! Count, compare, unless, and only if. Think before you tap. If there is nothing you should do, press the hand.",
+     "trials": 6,
+     "allowNone": true,
+     "boss": true,
+     "mix": [
+      "logic5",
+      "logic6",
+      "logic7"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pack",
+   "name": "Move and Pack",
+   "blurb": "Pick things up and put them where I say.",
+   "color": "#18b99a",
+   "needs": [
+    "camp"
+   ],
+   "levels": [
+    {
+     "id": "pack1",
+     "title": "Into the Chest",
+     "tip": "tip-pack1",
+     "tipText": "Welcome to Move and Pack! Tap a thing to pick it up. Then tap the place where it goes. When you have finished, press the green check mark.",
+     "trials": 6
+    },
+    {
+     "id": "pack2",
+     "title": "Two Trips",
+     "tip": "tip-pack2",
+     "tipText": "Two things to move now. Listen for the color or the size, and for where: in, on, or under. Made a slip? Tap the thing to take it out again.",
+     "trials": 6
+    },
+    {
+     "id": "pack3",
+     "title": "Count Them",
+     "tip": "tip-pack3",
+     "tipText": "Now listen for how many. If I say three coins, move three. Not two, and not four. Count what is inside before you press the green check mark.",
+     "trials": 6
+    },
+    {
+     "id": "pack4",
+     "title": "Sort It Out",
+     "tip": "tip-pack4",
+     "tipText": "Sorting time! All means every single one. Everything red means every red thing, whatever it is. And except means that one stays on the shelf.",
+     "trials": 6
+    },
+    {
+     "id": "pack5",
+     "title": "First Things First",
+     "tip": "tip-pack5",
+     "tipText": "Now the order matters. Listen for first, then, before, and after. Sometimes I say it backwards. So stop and think: which one do I move first? The little numbers show your order.",
+     "trials": 6,
+     "holdMs": 600
+    },
+    {
+     "id": "pack6",
+     "title": "Only If",
+     "tip": "tip-pack6",
+     "tipText": "Now there is an if. Look at the shelf before you move anything. And if there is nothing you should move, tap the hand.",
+     "trials": 6,
+     "allowNone": true,
+     "holdMs": 600
+    },
+    {
+     "id": "pack7",
+     "title": "Pack from Memory",
+     "tip": "tip-pack7",
+     "tipText": "Memory time! Everything hides while I talk. Say the list back in your head. Then pack it all, and press the green check mark.",
+     "trials": 6,
+     "holdMs": 700
+    },
+    {
+     "id": "pack-boss",
+     "title": "Pack Boss",
+     "tip": "tip-pack-boss",
+     "tipText": "Pack Boss! Orders, ifs, and packing from memory, all mixed up. Stop and think before you move. Beat me to clear this world.",
+     "trials": 6,
+     "allowNone": true,
+     "holdMs": 700,
+     "boss": true,
+     "mix": [
+      "pack5",
+      "pack6",
+      "pack7"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "paint",
+   "name": "Paint Shop",
+   "blurb": "Grab a paint pot and color things just the way I say.",
+   "color": "#e0508f",
+   "needs": [
+    "camp"
+   ],
+   "levels": [
+    {
+     "id": "paint1",
+     "title": "First Coat",
+     "tip": "tip-paint1",
+     "tipText": "Welcome to the Paint Shop! Tap a paint pot, then tap the thing to paint it. When it looks right, press the green check mark.",
+     "trials": 6
+    },
+    {
+     "id": "paint2",
+     "title": "Two Colors",
+     "tip": "tip-paint2",
+     "tipText": "Two paint jobs now. Made a slip? Tap the sponge with the bubbles, then the thing, to wash it clean. Or press the arrow to take it back.",
+     "trials": 6
+    },
+    {
+     "id": "paint3",
+     "title": "Big and Small",
+     "tip": "tip-paint3",
+     "tipText": "Now listen for big or small. Two things can look the same, so the size tells you which one to paint.",
+     "trials": 6
+    },
+    {
+     "id": "paint4",
+     "title": "All But One",
+     "tip": "tip-paint4",
+     "tipText": "Tricky words: ALL and EXCEPT. All means every one that fits. Except means leave that one alone, with no paint at all.",
+     "trials": 6
+    },
+    {
+     "id": "paint5",
+     "title": "In a Row",
+     "tip": "tip-paint5",
+     "tipText": "Now they stand in one row. The row starts on the left, like reading. Listen for where: second, last, in the middle, between, next to.",
+     "trials": 6
+    },
+    {
+     "id": "paint6",
+     "title": "Not and If",
+     "tip": "tip-paint6",
+     "tipText": "Listen for NOT, IF, and UNLESS. They tell you which things get paint, and which things you must leave alone.",
+     "trials": 6
+    },
+    {
+     "id": "paint7",
+     "title": "Paint by Memory",
+     "tip": "tip-paint7",
+     "tipText": "Now the things are hidden while I talk, and there are three or four paint jobs. Say each one back in your head. Then paint.",
+     "trials": 6,
+     "holdMs": 700
+    },
+    {
+     "id": "paint-boss",
+     "title": "Paint Boss",
+     "tip": "tip-paint-boss",
+     "tipText": "Paint Boss! Rows, tricky words, and painting from memory, all mixed up. Listen all the way to the end.",
+     "trials": 6,
+     "holdMs": 700,
+     "boss": true,
+     "mix": [
+      "paint5",
+      "paint6",
+      "paint7"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "build",
+   "name": "Robot Workshop",
+   "blurb": "Build the robot I describe, part by part.",
+   "color": "#2aa9d8",
+   "needs": [
+    "camp"
+   ],
+   "levels": [
+    {
+     "id": "build1",
+     "title": "Two Parts",
+     "tip": "tip-build1",
+     "tipText": "Welcome to the Robot Workshop! I tell you what the robot looks like. Tap one picture in each row to build it. When your robot is ready, tap the green check mark.",
+     "trials": 6
+    },
+    {
+     "id": "build2",
+     "title": "Three Parts",
+     "tip": "tip-build2",
+     "tipText": "Now the robot needs three parts. Listen to all of them before you start. Picked the wrong one? Tap another picture in that row, or tap the arrow to take it back.",
+     "trials": 6
+    },
+    {
+     "id": "build3",
+     "title": "Not That One",
+     "tip": "tip-build3",
+     "tipText": "Listen for the word not. Sometimes I only tell you what the robot does not have. Then look along the row and work out which picture is left.",
+     "trials": 6
+    },
+    {
+     "id": "build4",
+     "title": "How Many",
+     "tip": "tip-build4",
+     "tipText": "Now listen for numbers. How many eyes, how many antennas, how many buttons? Each number belongs to one part, so do not mix them up.",
+     "trials": 6
+    },
+    {
+     "id": "build5",
+     "title": "Longest and Most",
+     "tip": "tip-build5",
+     "tipText": "Now you have to compare. Listen for words like longest, bigger, more and fewer. Look along the whole row before you choose.",
+     "trials": 6
+    },
+    {
+     "id": "build6",
+     "title": "Twisted Orders",
+     "tip": "tip-build6",
+     "tipText": "These are tricky. I may say the parts in a mixed up order, give you a rule to work out, or ask for the first or last picture in a row. Listen to every word, think, then build.",
+     "trials": 6
+    },
+    {
+     "id": "build7",
+     "title": "Blind Build",
+     "tip": "tip-build7",
+     "tipText": "Now the pictures stay hidden while I talk. Listen to all five parts and keep them in your head. Build the robot when the pictures turn over.",
+     "trials": 6,
+     "holdMs": 800
+    },
+    {
+     "id": "build-boss",
+     "title": "Workshop Boss",
+     "tip": "tip-build-boss",
+     "tipText": "The Workshop Boss! Hard robots, tricky words and some hidden pictures. Take your time. Listen to the very end, then build.",
+     "trials": 6,
+     "holdMs": 800,
+     "boss": true,
+     "mix": [
+      "build5",
+      "build6",
+      "build7"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "route",
+   "name": "Map Routes",
+   "blurb": "Steer the rover the way the voice says.",
+   "color": "#4caf6a",
+   "needs": [
+    "camp"
+   ],
+   "levels": [
+    {
+     "id": "route1",
+     "title": "First Drive",
+     "tip": "tip-route1",
+     "tipText": "Steer the rover with the four big arrows. Up, down, left and right mean the directions on the screen. One tap moves one square. Then press the green check mark.",
+     "trials": 6
+    },
+    {
+     "id": "route2",
+     "title": "Turn the Corner",
+     "tip": "tip-route2",
+     "tipText": "Now the route has a turn in it. Drive the first part, then turn and drive the next part. Made a slip? The arrow at the bottom of the screen takes one move back.",
+     "trials": 6
+    },
+    {
+     "id": "route3",
+     "title": "Landmarks",
+     "tip": "tip-route3",
+     "tipText": "Now I name a place on the map. Drive the rover there any way you like, and stop on its square. Then press the green check mark.",
+     "trials": 6
+    },
+    {
+     "id": "route4",
+     "title": "Road Trip",
+     "tip": "tip-route4",
+     "tipText": "Now there are stops on the way. Drive to each place in the order I say, and finish on the last one. You can see a number on every place you have been.",
+     "trials": 6
+    },
+    {
+     "id": "route5",
+     "title": "Rules of the Road",
+     "tip": "tip-route5",
+     "tipText": "Now there are rules. Do not touch means: never drive onto that square. To pick a thing up, drive over it. Listen for the words not and only.",
+     "trials": 6
+    },
+    {
+     "id": "route6",
+     "title": "Tricky Orders",
+     "tip": "tip-route6",
+     "tipText": "Tricky orders! Sometimes I say the last stop first. Sometimes the map decides where you go. Think before you drive: what comes first?",
+     "trials": 6
+    },
+    {
+     "id": "route7",
+     "title": "Memory Route",
+     "tip": "tip-route7",
+     "tipText": "Long routes from memory! The map hides while I talk. Say the route in your head, then drive it. The round arrow lets you hear it one more time.",
+     "trials": 6
+    },
+    {
+     "id": "route-boss",
+     "title": "Route Boss",
+     "tip": "tip-route-boss",
+     "tipText": "Route Boss! Rules, tricky orders and long routes from memory. Take your time, and think before you drive.",
+     "trials": 6,
+     "boss": true,
+     "mix": [
+      "route5",
+      "route6",
+      "route7"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "panel",
+   "name": "Control Room",
+   "blurb": "Buttons, switches, dials and secret codes. Work the spaceship.",
+   "color": "#2aa9d8",
+   "needs": [
+    "camp"
+   ],
+   "levels": [
+    {
+     "id": "panel1",
+     "title": "Push and Flip",
+     "tip": "tip-panel1",
+     "tipText": "Welcome to the Control Room! Round buttons are for pressing. Switches flip up and down. Listen for the color, and for button or switch. Then do it.",
+     "trials": 6
+    },
+    {
+     "id": "panel2",
+     "title": "How Many Times",
+     "tip": "tip-panel2",
+     "tipText": "Now listen for how many times, and for two things in order. Little dots count your presses. When you are done, press the green check mark. The arrow takes one back.",
+     "trials": 6
+    },
+    {
+     "id": "panel3",
+     "title": "The Dial",
+     "tip": "tip-panel3",
+     "tipText": "Here is the dial. It shows one number. The plus button makes the number go up. The minus button makes it go down. Set it to the number I say.",
+     "trials": 6
+    },
+    {
+     "id": "panel4",
+     "title": "Secret Codes",
+     "tip": "tip-panel4",
+     "tipText": "Now the number pad. I will tell you a code. Type the numbers in the same order. The little screen shows what you typed. The big rocket button is launch.",
+     "trials": 6
+    },
+    {
+     "id": "panel5",
+     "title": "Long Orders",
+     "tip": "tip-panel5",
+     "tipText": "Longer orders now. Codes with five numbers, and three things to do in a row. Say them in your head while you listen. Keep them in the same order.",
+     "trials": 6,
+     "holdMs": 600
+    },
+    {
+     "id": "panel6",
+     "title": "Tricky Talk",
+     "tip": "tip-panel6",
+     "tipText": "Tricky words now. Before and after can be said backwards. Except means leave that one out. Backwards means start with the last number. Think first, then press.",
+     "trials": 6,
+     "holdMs": 700
+    },
+    {
+     "id": "panel7",
+     "title": "Blackout",
+     "tip": "tip-panel7",
+     "tipText": "Blackout! The controls stay covered while I talk, so remember everything. Sometimes the light decides what you do. Look at it when the cover opens.",
+     "trials": 6,
+     "holdMs": 800
+    },
+    {
+     "id": "panel-boss",
+     "title": "Control Room Boss",
+     "tip": "tip-panel-boss",
+     "tipText": "Control Room Boss! Long codes, tricky words, and covered controls. Listen to every word. Then take your time and check your work before the green check mark.",
+     "trials": 6,
+     "holdMs": 800,
+     "boss": true,
+     "mix": [
+      "panel5",
+      "panel6",
+      "panel7"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "truth",
+   "name": "Truth Detector",
+   "blurb": "True, or not true? Look, listen and decide.",
+   "color": "#e8507a",
+   "needs": [
+    "camp"
+   ],
+   "levels": [
+    {
+     "id": "truth1",
+     "title": "True or Not",
+     "tip": "tip-truth1",
+     "tipText": "Look at the picture and listen to what I say about it. If it is true, tap the green check mark. If it is not true, tap the cross.",
+     "trials": 6,
+     "quota": {
+      "yes": 2,
+      "no": 2
+     }
+    },
+    {
+     "id": "truth2",
+     "title": "Count Them",
+     "tip": "tip-truth2",
+     "tipText": "Now you have to count. It is only true if the number is exactly right. When I have finished talking, you can touch the things in the picture to mark them as you count.",
+     "trials": 6,
+     "quota": {
+      "yes": 2,
+      "no": 2
+     }
+    },
+    {
+     "id": "truth3",
+     "title": "All, None, Some",
+     "tip": "tip-truth3",
+     "tipText": "Listen for three little words. All means every single one. None means not even one. Some means a few of them. Check each one in the picture.",
+     "trials": 6,
+     "quota": {
+      "yes": 2,
+      "no": 2
+     }
+    },
+    {
+     "id": "truth4",
+     "title": "More or Fewer",
+     "tip": "tip-truth4",
+     "tipText": "Now we compare. More means a bigger number. Fewer means a smaller number. As many means the very same number. Look at both groups before you choose.",
+     "trials": 6,
+     "quota": {
+      "yes": 2,
+      "no": 2
+     }
+    },
+    {
+     "id": "truth5",
+     "title": "Where Is It",
+     "tip": "tip-truth5",
+     "tipText": "Everything stands in one row now. Listen for where things are: next to, between, left, right, the end, and the middle. Find the place, then choose.",
+     "trials": 6,
+     "quota": {
+      "yes": 2,
+      "no": 2
+     }
+    },
+    {
+     "id": "truth6",
+     "title": "Two Facts",
+     "tip": "tip-truth6",
+     "tipText": "Now I say two things in one sentence. Check them both. Listen for the little words that change everything: and, but, not, either, neither, and except.",
+     "trials": 6,
+     "quota": {
+      "yes": 2,
+      "no": 2
+     }
+    },
+    {
+     "id": "truth7",
+     "title": "Master Detective",
+     "tip": "tip-truth7",
+     "tipText": "The hardest test. The picture is covered while I talk, so hold the whole sentence in your head. It has two parts, and both must be true. Then look, count and choose.",
+     "trials": 6,
+     "holdMs": 600,
+     "quota": {
+      "yes": 2,
+      "no": 2
+     }
+    },
+    {
+     "id": "truth-boss",
+     "title": "Truth Boss",
+     "tip": "tip-truth-boss",
+     "tipText": "Truth Boss! Rows, two facts at once, and covered pictures. Listen to every word, check every part, and then decide. You can do it.",
+     "trials": 6,
+     "holdMs": 600,
+     "quota": {
+      "yes": 2,
+      "no": 2
+     },
+     "boss": true,
+     "mix": [
+      "truth5",
+      "truth6",
+      "truth7"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "stories",
+   "name": "Story Cave",
+   "blurb": "Long stories. Who, when, where, and why.",
+   "color": "#c2713a",
+   "needs": [
+    "camp"
+   ],
+   "levels": [
+    {
+     "id": "stories1",
+     "title": "Who Has What",
+     "tip": "tip-stories1",
+     "tipText": "Welcome to Story Cave! Listen to the whole story. Keep track of who has what, because things get swapped. Then tap the answer to my question.",
+     "trials": 6
+    },
+    {
+     "id": "stories2",
+     "title": "What Happened When",
+     "tip": "tip-stories2",
+     "tipText": "Now listen for the order things happen in. I will ask what came right before, or right after. Tap the thing from that part of the story.",
+     "trials": 6
+    },
+    {
+     "id": "stories3",
+     "title": "Where Did It Go",
+     "tip": "tip-stories3",
+     "tipText": "In these stories, things get moved around. Follow every move, like a movie in your mind. Then tap where the thing is, or who has it.",
+     "trials": 6
+    },
+    {
+     "id": "stories4",
+     "title": "Why Did It Happen",
+     "tip": "tip-stories4",
+     "tipText": "Now I will ask why something happened. Many things are in the story, but only one of them caused it. Tap the thing that made it happen.",
+     "trials": 6
+    },
+    {
+     "id": "stories5",
+     "title": "Story Detective",
+     "tip": "tip-stories5",
+     "tipText": "Be a detective. I will never say the name of the answer. Listen to every clue, and rule out what does not fit. Then tap what it must be.",
+     "trials": 6
+    },
+    {
+     "id": "stories6",
+     "title": "In or Out",
+     "tip": "tip-stories6",
+     "tipText": "Two new jobs. Sometimes, tap the one thing that was not in the story. Sometimes, tap everything on my list, and then press the green check mark.",
+     "trials": 6
+    },
+    {
+     "id": "stories7",
+     "title": "Tell It Back",
+     "tip": "tip-stories7",
+     "tipText": "The hardest stories. Tap the things in the order they really happened. Then press the green check mark. The arrow takes back a slip. Listen to the very end. Plans can change!",
+     "trials": 6
+    },
+    {
+     "id": "stories-boss",
+     "title": "Story Boss",
+     "tip": "tip-stories-boss",
+     "tipText": "Story Boss! Clues, lists, and stories told out of order. Make a movie in your mind, and listen all the way to the end.",
+     "trials": 6,
+     "boss": true,
+     "mix": [
+      "stories5",
+      "stories6",
+      "stories7"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "legend",
+   "name": "Legend Trials",
+   "blurb": "Everything, mixed up. For true legends.",
+   "color": "#d9a520",
+   "needs": [
+    "memory",
+    "logic",
+    "pack",
+    "paint",
+    "build",
+    "route",
+    "panel",
+    "truth",
+    "stories"
+   ],
+   "needsCount": 4,
+   "levels": [
+    {
+     "id": "legend1",
+     "title": "Trial One",
+     "tip": "tip-legend1",
+     "tipText": "Legend Trial one. A different challenge every turn. Listen to every word.",
+     "trials": 6,
+     "allowNone": true,
+     "holdMs": 900,
+     "mix": [
+      "memory6",
+      "memory7",
+      "logic6",
+      "logic7",
+      "pack6",
+      "pack7",
+      "paint6",
+      "paint7",
+      "build6",
+      "build7"
+     ]
+    },
+    {
+     "id": "legend2",
+     "title": "Trial Two",
+     "tip": "tip-legend2",
+     "tipText": "Legend Trial two. Stay calm, breathe, and listen all the way to the end.",
+     "trials": 6,
+     "allowNone": true,
+     "holdMs": 900,
+     "mix": [
+      "route6",
+      "route7",
+      "panel6",
+      "panel7",
+      "truth6",
+      "truth7",
+      "stories6",
+      "stories7"
+     ]
+    },
+    {
+     "id": "legend-boss",
+     "title": "The Legend",
+     "tip": "tip-legend-boss",
+     "tipText": "The final boss. Only the hardest challenge from every world. You are ready.",
+     "trials": 6,
+     "allowNone": true,
+     "holdMs": 900,
+     "boss": true,
+     "mix": [
+      "memory7",
+      "logic7",
+      "pack7",
+      "paint7",
+      "build7",
+      "route7",
+      "panel7",
+      "truth7",
+      "stories7"
+     ]
+    }
+   ]
+  },
+  {
    "id": "w1",
    "name": "Rookie Camp",
    "blurb": "One thing at a time. Listen for every clue.",
@@ -423,7 +1218,7 @@
   },
   {
    "id": "w6",
-   "name": "Memory Mountain",
+   "name": "Three-Step Hill",
    "blurb": "Three and four steps.",
    "color": "#2aa9d8",
    "starter": true,
@@ -476,7 +1271,7 @@
   },
   {
    "id": "w7",
-   "name": "Story Cave",
+   "name": "Story Corner",
    "blurb": "Listen to a story, then answer.",
    "color": "#6fbf3b",
    "starter": true,

@@ -197,6 +197,7 @@ export default {
   },
   check(answer, item) { return { correct, error, at, prefix, total }; },   // pure, no DOM
   isNone(item) { return false; }, // true when the right response is to do nothing (he presses the hand)
+  // retry: false,               // optional: no supported second try (two-choice answers) - a miss goes straight to the demo
 };
 ```
 

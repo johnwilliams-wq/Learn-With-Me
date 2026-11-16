@@ -244,7 +244,7 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
         await wait(first ? 800 : 500);
         if (!first && alive && my === token) await voice.sayPool('gotIt');
       }
-    } else if (attempt === 1) {
+    } else if (attempt === 1 && plugin.retry !== false) {
       firstError = res.error;
       attempt = 2;
       sfx.soft();
@@ -263,6 +263,7 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
       pulse(btnListen, 'hint', 700);
       return;
     } else {
+      if (attempt === 1) firstError = res.error; // an activity without a second try
       sfx.soft();
       setGuide('oops');
       record(false, false, ms);
@@ -288,7 +289,7 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
       pulse(btnHand, 'glow', 1800); // the right thing was to do nothing
       await wait(1800);
     } else {
-      await view.demo(() => sfx.tap());
+      await view.demo(() => { sfx.tap(); refresh(); });
     }
   }
 

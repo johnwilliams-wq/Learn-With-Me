@@ -122,7 +122,7 @@ test('the Truth Detector world: seven levels and a boss, each with a spoken tip 
     assert.ok(level.title, level.id);
     assert.ok(level.tip && level.tip.length <= 200, `${level.id}: tip (${level.tip?.length} characters)`);
     assert.match(level.tip, /^[A-Za-z ,.:!]+$/, `${level.id}: the tip is spoken - plain words only`);
-    assert.deepEqual(level.quota, { yes: 3, no: 3 }, `${level.id}: three true and three not true per mission`);
+    assert.deepEqual(level.quota, { yes: 2, no: 2 }, `${level.id}: at least two true and two not true per mission`);
     assert.ok(!level.allowNone, `${level.id}: no hand button here`);
     if (level.gen) assert.equal(level.n, 18, level.id);
   }
@@ -144,7 +144,7 @@ test('every level builds: valid items, known skill tags, half true and half not'
       assert.equal(!!it.hide, level.id === 'truth7', `${it.id}: only the last level covers the picture`);
     }
     const meta = levelMeta(level);
-    assert.deepEqual(meta.quota, { yes: 3, no: 3 });
+    assert.deepEqual(meta.quota, { yes: 2, no: 2 });
     assert.equal(meta.trials, 6);
   }
 });
