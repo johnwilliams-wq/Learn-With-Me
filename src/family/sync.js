@@ -349,7 +349,7 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
 
   function sync() {
     if (running) return running;
-    if (!role()) return Promise.resolve();
+    if (hold || !role()) return Promise.resolve();
     running = (async () => {
       let news = false;
       const was = role();

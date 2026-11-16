@@ -160,7 +160,11 @@ in `tools/tts/accepted.json`, with the reason. In Claude Code cloud sessions use
   change, `savePhoto(blob)`. On the device he plays on the desk is this device's own save; on a
   grown-up's own device it is his device from afar (see the family database). A new thing a grown-up
   can do = a new action there, never a `store.update` in a screen. Actions must stay safe to carry out
-  twice and must treat their payload as untrusted (it can arrive from another device).
+  twice and must treat their payload as untrusted (it can arrive from another device). An action that
+  is about a day says which day (`expect` carries `day`): it may arrive the next morning.
+- **The PIN** is only replaced once a new one has been typed twice (`pinGate(..., { change: true })`):
+  never clear it first. News from another device redraws the open tab, but never over the PIN pad, a
+  row being edited or a form someone has touched (`typing()` in `src/screens/parent.js`).
 - A mission counts toward daily rewards only if the level was below 3 stars before it was played
   (`missionCounts`), unless the parent turns that off - otherwise replaying level 1 would farm rewards.
 - Everything a grown-up owes him sits in `rewards.earned` until marked "Given" in the Rewards tab.
@@ -212,6 +216,9 @@ his points. His detailed play history stays on the device.
   top (`viewOf`), so a change shows at once. Rounds run after a change (debounced), when the app comes
   to the front, about once a minute on his device and while a grown-up's parent area is open - never
   during a mission. Failures are silent for him; the panel in Settings says how the account is doing.
+  Trouble with a picture never holds up his state or the commands (it is reported and retried), every
+  call to the photo store inside a round has a time limit, and a change that has not left a grown-up's
+  device is retried whatever is on screen.
 - What a device remembers about the account (the sign-in, its role, the queue, which commands it has
   carried out) is its own localStorage record `lwm.family.v1` - **never inside the save**, so a backup
   never contains a sign-in. Signing out forgets it; his save is never touched by signing in or out.
