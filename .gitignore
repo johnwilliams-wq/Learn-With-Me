@@ -1,0 +1,5 @@
+node_modules/
+tests/e2e/out/
+*.part.mp3
+.DS_Store
+__pycache__/

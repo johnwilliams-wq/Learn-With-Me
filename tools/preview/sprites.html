@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sprite preview</title>
+<style>
+  body { margin: 0; padding: 12px; background: #141a3a; color: #cfd6ff; font: 12px/1.2 system-ui, sans-serif; }
+  h2 { font-size: 14px; margin: 14px 0 6px; color: #fff; }
+  .grid { display: grid; grid-template-columns: repeat(2, max-content); gap: 4px 28px; }
+  .row { display: flex; align-items: center; gap: 6px; }
+  .row .name { width: 64px; text-align: right; }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .s96 svg { width: 96px; height: 96px; display: block; }
+  .s48 svg { width: 48px; height: 48px; display: block; }
+  .s64 svg { width: 64px; height: 64px; display: block; color: #fff; }
+  .s200 svg { width: 200px; height: 200px; display: block; }
+  .wrap { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+</style>
+</head>
+<body>
+<h2>Objects, 96 px</h2><div id="objects" class="grid s96"></div>
+<h2>Characters, 96 px</h2><div id="characters" class="grid s96"></div>
+<h2>Objects in red, 48 px</h2><div id="small" class="wrap s48"></div>
+<h2>Blip the guide, 200 px</h2><div id="guide" class="wrap s200"></div>
+<h2>Chests</h2><div id="chests" class="wrap s96"></div>
+<h2>Icons, 64 px</h2><div id="icons" class="wrap s64"></div>
+<script type="module">
+  import { PALETTE, OBJECT_KINDS, CHARACTER_KINDS, spriteSVG, chestOpenSVG, guideSVG, iconSVG } from '../../src/art/sprites.js';
+  const COLORS = Object.keys(PALETTE).filter((c) => c !== 'gray');
+  const cell = (svg, name) => `<div class="cell">${svg}<span>${name}</span></div>`;
+  const rows = (kinds) => kinds.map((k) =>
+    `<div class="row"><span class="name">${k}</span>${COLORS.map((c) => spriteSVG(k, c)).join('')}</div>`).join('');
+  document.getElementById('objects').innerHTML = rows(OBJECT_KINDS);
+  document.getElementById('characters').innerHTML = rows(CHARACTER_KINDS);
+  document.getElementById('small').innerHTML = OBJECT_KINDS.map((k) => cell(spriteSVG(k, 'red'), k)).join('');
+  document.getElementById('guide').innerHTML = ['idle', 'talk', 'happy', 'oops', 'wait'].map((m) => cell(guideSVG(m), m)).join('');
+  document.getElementById('chests').innerHTML =
+    cell(spriteSVG('chest', 'yellow'), 'chest') + cell(chestOpenSVG(), 'chest open') +
+    cell(chestOpenSVG('blue'), 'open blue') + cell(spriteSVG('chest', 'gray'), 'gray') + cell(spriteSVG('gem', 'gray'), 'gray gem');
+  document.getElementById('icons').innerHTML =
+    ['ear', 'replay', 'check', 'hand', 'lock', 'play', 'home', 'back', 'gear', 'star', 'star-empty', 'speaker', 'cards', 'parent', 'close']
+      .map((n) => cell(iconSVG(n), n)).join('');
+  document.body.dataset.ready = '1';
+</script>
+</body>
+</html>
