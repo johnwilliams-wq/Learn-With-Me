@@ -42,6 +42,8 @@ function counted(phrase) {
   assert.equal(m[3] === 's', value !== 1, `singular / plural does not match the number in "${phrase}"`);
   return { part: `${m[2]}s`, value };
 }
+/** Either of the two: "a jet" or "three eyes". */
+const named = (phrase) => (/^(?:no|one|two|three|four) /.test(phrase) ? counted(phrase) : kind(phrase));
 
 // What the pictures of sized options mean (written out here, not taken from the game's code).
 const ARM_LENGTH = { short: 1, mid: 2, long: 3 };
@@ -55,23 +57,32 @@ const is = (part, value) => ({ part, test: (v) => v === value });
 const isNot = (part, values) => ({ part, test: (v) => !values.includes(v) });
 
 const PHRASES = {
+  // A change of plan, always the end of the sentence: "Wait, no. Not wheels. Give it a jet."
+  // The part he takes back must be a picture in the same row (it is what a child who stopped
+  // listening would choose), and `retracts` makes rulesOf() insist that it really was said before.
+  change: [new RegExp(`wait, no\\. not (${KIND}|${COUNT})\\. give it (${KIND}|${COUNT})\\.$`, 'g'), (m) => {
+    const old = named(m[1]);
+    const now = named(m[2]);
+    assert.equal(old.part, now.part, 'a change of plan must take back and give the same part');
+    assert.notEqual(old.value, now.value, 'a change of plan must change something');
+    return [{ part: now.part, retracts: old.value, test: (v, row) => v === now.value && row.options.includes(old.value) }];
+  }],
   // "If the robot has wheels, it gets two antennas."  (only binds when the robot really has wheels)
   if: [new RegExp(`if (?:the robot|it) has (${KIND}), it gets (${COUNT})\\.`, 'g'), (m) => {
     const when = kind(m[1]);
     const then = counted(m[2]);
     return [{ part: then.part, needs: [when.part], test: (v, row, solved) => solved[when.part] !== when.value || v === then.value, binds: (solved) => solved[when.part] === when.value }];
   }],
-  // "The robot gets three eyes, unless it has a jet. Then it gets one eye."
-  unless: [new RegExp(`the robot gets (${COUNT}), unless it has (${KIND})\\. then it gets (${COUNT})\\.`, 'g'), (m) => {
+  // "The robot gets three eyes, unless it has a jet. If it has a jet, it gets one eye instead."
+  unless: [new RegExp(`the robot gets (${COUNT}), unless it has (${KIND})\\. if it has (${KIND}), it gets (${COUNT}) instead\\.`, 'g'), (m) => {
     const usual = counted(m[1]);
     const when = kind(m[2]);
-    const instead = counted(m[3]);
+    assert.equal(m[3], m[2], 'the "if" after an "unless" must repeat the same exception');
+    const instead = counted(m[4]);
     assert.equal(usual.part, instead.part, 'both halves of an "unless" must be about the same part');
     assert.notEqual(usual.value, instead.value);
     return [{ part: usual.part, needs: [when.part], test: (v, row, solved) => v === (solved[when.part] === when.value ? instead.value : usual.value) }];
   }],
-  // "The body and the nose are both green."
-  both: [new RegExp(`the body and the nose are both (${COLOR})`, 'g'), (m) => [is('body', m[1]), is('nose', m[1])]],
   // "The head is neither round nor square." / "The robot has neither legs nor a jet."
   neither: [new RegExp(`the head is neither (${SHAPE}) nor (${SHAPE})|the robot has neither (${KIND}) nor (${KIND})`, 'g'), (m) => {
     if (m[1]) return [isNot('head', [m[1], m[2]])];
@@ -132,41 +143,47 @@ const PHRASES = {
   }],
   // simply named: "a round head", "claws", "three eyes", "no antennas"
   plain: [new RegExp(`${KIND}|${COUNT}`, 'g'), (m) => {
-    const p = /^(?:no|one|two|three|four) /.test(m[0]) ? counted(m[0]) : kind(m[0]);
-    return [is(p.part, p.value)];
+    const p = named(m[0]);
+    return [{ ...is(p.part, p.value), said: p.value }];
   }],
 };
-const ORDER = ['if', 'unless', 'both', 'neither', 'notnot', 'dont', 'not', 'place', 'twice', 'onemore', 'more', 'same', 'most', 'size', 'plain'];
+const ORDER = ['change', 'unless', 'if', 'neither', 'notnot', 'dont', 'not', 'place', 'twice', 'onemore', 'more', 'same', 'most', 'size', 'plain'];
 
 /**
  * Every sentence pattern: the kinds of phrase it may contain (`uses`), the ones it must contain
- * (`must`, default: the first of `uses`), and optionally the frame the whole sentence must have.
+ * (`must`, default: the first of `uses`), and optionally the frame the whole sentence must have
+ * (`frame`) or must not have (`never`).
+ *
+ * The workshop checks the finished robot only, never the order of his choices, so no pattern
+ * may claim an order: "before", "after" and "then" are words the oracle does not understand.
  */
 const PATTERNS = {
   'build-list': { uses: ['plain'] },
-  'build-not': { uses: ['not', 'plain'] },
+  // nothing may follow a "not ..." inside its sentence ("legs, not wheels, and a blue body" can be
+  // heard as two things the robot must not have)
+  'build-not': { uses: ['not', 'plain'], never: /, not [^.]*(?:,|\band\b)/ },
   'build-notnot': { uses: ['notnot', 'plain'] },
   'build-dont': { uses: ['dont', 'plain'] },
   'build-size': { uses: ['size', 'plain'] },
   'build-more': { uses: ['more', 'plain'] },
   'build-most': { uses: ['most', 'plain'] },
   'build-same': { uses: ['same', 'plain'] },
-  'build-before': { uses: ['plain'], frame: /^before you give the robot [^.]+, give it [^.]+\. then give it [^.]+\.$/ },
-  'build-after': { uses: ['plain'], frame: /^give the robot [^.]+ after you give it [^.]+\. it also needs [^.]+\.$/ },
-  'build-neither': { uses: ['neither', 'both', 'plain'] },
+  'build-sum': { uses: ['twice', 'onemore', 'plain'], must: [] },
+  'build-neither': { uses: ['neither', 'plain'] },
   'build-if': { uses: ['if', 'plain'] },
   'build-unless': { uses: ['unless', 'plain'] },
-  'build-place': { uses: ['place', 'twice', 'onemore', 'plain'] },
-  'build-sum': { uses: ['twice', 'onemore', 'plain'], must: [] },
+  'build-place': { uses: ['place', 'plain'] },
+  'build-change': { uses: ['change', 'plain'], frame: /^(?:give the robot|build a robot with) [^.]+\. wait, no\. not [^.]+\. give it [^.]+\.$/ },
 };
 /** Words that carry no information once every phrase has been taken out of a sentence. */
-const FILLER = new Set(['give', 'the', 'robot', 'it', 'has', 'and', 'build', 'a', 'with', 'this', 'then', 'also', 'needs', 'before', 'after', 'you', 'pick']);
+const FILLER = new Set(['give', 'the', 'robot', 'it', 'has', 'and', 'build', 'a', 'with', 'this', 'also', 'needs', 'pick']);
 
 function rulesOf(item) {
   const pattern = PATTERNS[item.v];
   assert.ok(pattern, `${item.id}: no independent rule for pattern "${item.v}" - add one to PATTERNS in tests/unit/oracle-build.test.mjs`);
   let text = item.say.toLowerCase();
   if (pattern.frame) assert.match(text, pattern.frame, `${item.id}: not the sentence frame of ${item.v}`);
+  if (pattern.never) assert.doesNotMatch(text, pattern.never, `${item.id}: a ${item.v} sentence must not be worded like this: "${item.say}"`);
   const rules = [];
   const used = new Set();
   for (const name of ORDER) {
@@ -182,6 +199,13 @@ function rulesOf(item) {
   if (item.v === 'build-sum') assert.ok(used.has('twice') || used.has('onemore'), `${item.id}: no number to work out`);
   const left = text.replace(/[#.,]/g, ' ').split(/\s+/).filter((w) => w && !FILLER.has(w));
   assert.deepEqual(left, [], `${item.id}: words the oracle did not understand in "${item.say}"`);
+  // A change of plan replaces what was said first: that part must have been named exactly once
+  // before, with the very thing that is now taken back. Only the new choice stays as a rule.
+  for (const change of rules.filter((r) => 'retracts' in r)) {
+    const before = rules.filter((r) => r.part === change.part && r !== change);
+    assert.ok(before.length === 1 && before[0].said === change.retracts, `${item.id}: "not ..." takes back something that was not said (once) before, in "${item.say}"`);
+    rules.splice(rules.indexOf(before[0]), 1);
+  }
   return rules;
 }
 
@@ -238,6 +262,13 @@ test('build: every item is well formed and fair', () => {
     assert.equal(!!it.hide, it.s.includes('hidden'), `${it.id}: "hidden" tag and hide flag must go together`);
     assert.ok(!it.auto && !it.mode, `${it.id}: build items end with the green check mark`);
     assert.ok(it.say.split(/\s+/).length <= 35, `${it.id}: more than 35 words`);
+    // Only the finished robot is checked, so nothing may be tagged or worded as an order to follow.
+    assert.ok(!it.s.some((t) => ['flip', 'before', 'after', 'order'].includes(t)), `${it.id}: the workshop does not check order (tags ${it.s})`);
+    assert.doesNotMatch(it.say, /\b(before|after|then|first give|next)\b/i, `${it.id}: the sentence claims an order`);
+    // "no antennas and wheels" could be heard as no wheels either.
+    assert.doesNotMatch(it.say, /\bno antennas(?:,| and) (?:legs|wheels|claws|short arms|long arms)\b/i, `${it.id}: "no" could be heard to cover the next part too`);
+    // A change of plan is about listening to the end; nothing else is.
+    assert.equal(it.s.includes('end'), it.v === 'build-change', `${it.id}: the "end" tag belongs to a change of plan`);
     assert.ok(!/\d/.test(it.say), `${it.id}: numbers must be written as words`);
     assert.ok(!/\ba (orange|[aeiou])/.test(it.say.toLowerCase()), `${it.id}: "a" before a vowel`);
     // Two colour rows always offer the same colours, so "body" and "nose" have to be listened to.
@@ -267,11 +298,12 @@ test('build: levels 5 to 7 ask for four or five parts, and the hidden level hide
   for (const [level, list] of byLevel) {
     const n = Number(level.replace('build', ''));
     if (!n) continue;
-    const want = { 1: [2, 2], 2: [3, 3], 3: [3, 3], 4: [4, 4], 5: [4, 4], 6: [4, 5], 7: [5, 5] }[n];
+    const want = { 1: [2, 2], 2: [3, 3], 3: [3, 3], 4: [4, 4], 5: [4, 4], 6: [4, 4], 7: [5, 5] }[n];
     for (const it of list) assert.ok(it.scene.rows.length >= want[0] && it.scene.rows.length <= want[1], `${it.id}: ${it.scene.rows.length} rows in level ${n}`);
     assert.equal(list.every((it) => it.hide), n === 7, `${level}: only the last level is built from memory`);
     assert.ok(new Set(list.map((it) => it.say)).size === list.length, `${level}: a sentence is repeated`);
     if (n >= 3) assert.ok(new Set(list.map((it) => it.v)).size >= (n === 4 ? 1 : 3), `${level}: too few sentence patterns`);
+    assert.ok(new Set(list.map((it) => it.v)).size <= 5, `${level}: more than five kinds of sentence in one level`);
   }
 });
 
@@ -283,27 +315,30 @@ test('build: the oracle works on hand-written examples (and refuses what it cann
   const arms = row('arms', 'claws', 'short', 'long');
   const legs = row('bottom', 'jet', 'legs', 'wheels');
   assert.deepEqual(solve(make('build-list', 'Give the robot a round head and wheels.', [heads, legs])), { head: 'round', bottom: 'wheels' });
-  assert.deepEqual(solve(make('build-not', 'Give the robot wheels, not legs. It also needs a pointy head, not a round one, and claws.', [heads, arms, legs])), { head: 'pointy', arms: 'claws', bottom: 'wheels' });
+  assert.deepEqual(solve(make('build-not', 'Give the robot wheels, not legs. It also needs claws, and a pointy head, not a round one.', [heads, arms, legs])), { head: 'pointy', arms: 'claws', bottom: 'wheels' });
   assert.deepEqual(solve(make('build-notnot', 'The body is not red and not blue. Give the robot a jet and a red nose.', [row('nose', 'red', 'blue', 'green'), row('body', 'blue', 'green', 'red'), legs])), { body: 'green', nose: 'red', bottom: 'jet' });
   assert.deepEqual(solve(make('build-dont', 'Do not give the robot legs or a jet. Give it claws and a square head.', [heads, arms, legs])), { head: 'square', arms: 'claws', bottom: 'wheels' });
   assert.deepEqual(solve(make('build-size', 'Give the robot the longest arms, the smaller wheels and two eyes.', [row('eyes', 1, 2, 3), row('arms', 'mid', 'long', 'short'), row('bottom', 'wheels-big', 'legs-short', 'wheels-small', 'legs-long')])), { eyes: 2, arms: 'long', bottom: 'wheels-small' });
   assert.deepEqual(solve(make('build-more', 'Give the robot two antennas and legs. It has more eyes than antennas.', [row('antennas', 2, 3, 1), row('eyes', 1, 3, 2), legs])), { antennas: 2, eyes: 3, bottom: 'legs' });
   assert.deepEqual(solve(make('build-most', 'Give the robot the most buttons, the fewest eyes and claws.', [row('eyes', 3, 2, 4), row('buttons', 1, 4, 2), arms])), { eyes: 2, buttons: 4, arms: 'claws' });
   assert.deepEqual(solve(make('build-same', 'Give the robot three eyes and a jet. It has the same number of buttons as eyes.', [row('eyes', 1, 3, 2), row('buttons', 3, 4, 1), legs])), { eyes: 3, buttons: 3, bottom: 'jet' });
-  assert.deepEqual(solve(make('build-before', 'Before you give the robot claws, give it a round head. Then give it wheels.', [heads, arms, legs])), { head: 'round', arms: 'claws', bottom: 'wheels' });
-  assert.deepEqual(solve(make('build-after', 'Give the robot claws after you give it a round head. It also needs wheels.', [heads, arms, legs])), { head: 'round', arms: 'claws', bottom: 'wheels' });
-  assert.deepEqual(solve(make('build-neither', 'The head is neither round nor square. The body and the nose are both green. Give the robot claws.', [heads, row('nose', 'red', 'green', 'blue'), row('body', 'green', 'blue', 'red'), arms])), { head: 'pointy', nose: 'green', body: 'green', arms: 'claws' });
+  assert.deepEqual(solve(make('build-neither', 'The head is neither round nor square. Give the robot claws, a green nose and a blue body.', [heads, row('nose', 'red', 'green', 'blue'), row('body', 'green', 'blue', 'red'), arms])), { head: 'pointy', nose: 'green', body: 'blue', arms: 'claws' });
   const ifSay = (given) => `If the robot has wheels, it gets two antennas. If it has legs, it gets three antennas. Give it ${given} and a round head.`;
   const ifRows = [row('antennas', 3, 0, 2), heads, legs];
   assert.deepEqual(solve(make('build-if', ifSay('legs'), ifRows)), { antennas: 3, head: 'round', bottom: 'legs' });
   assert.deepEqual(solve(make('build-if', ifSay('wheels'), ifRows)), { antennas: 2, head: 'round', bottom: 'wheels' });
   assert.throws(() => solve(make('build-if', ifSay('a jet'), ifRows)), /no rule applies/); // neither "if" happens: no answer
-  const unlessSay = (given) => `The robot gets three eyes, unless it has a jet. Then it gets one eye. Give it ${given} and claws.`;
+  const unlessSay = (given) => `The robot gets three eyes, unless it has a jet. If it has a jet, it gets one eye instead. Give it ${given} and claws.`;
   const unlessRows = [row('eyes', 1, 2, 3), arms, legs];
   assert.deepEqual(solve(make('build-unless', unlessSay('a jet'), unlessRows)), { eyes: 1, arms: 'claws', bottom: 'jet' });
   assert.deepEqual(solve(make('build-unless', unlessSay('legs'), unlessRows)), { eyes: 3, arms: 'claws', bottom: 'legs' });
-  assert.deepEqual(solve(make('build-place', 'Pick the last head and the second body. This robot has two eyes and twice as many buttons as eyes.', [heads, row('eyes', 2, 4, 3), row('body', 'red', 'blue', 'green', 'yellow'), row('buttons', 2, 3, 4)])), { head: 'round', eyes: 2, body: 'blue', buttons: 4 });
+  assert.deepEqual(solve(make('build-place', 'Pick the last head and the second body. The robot also needs two eyes and claws.', [heads, row('eyes', 2, 4, 3), row('body', 'red', 'blue', 'green', 'yellow'), arms])), { head: 'round', eyes: 2, body: 'blue', arms: 'claws' });
   assert.deepEqual(solve(make('build-sum', 'This robot has two eyes and one more button than eyes. Give it claws.', [row('eyes', 2, 3, 1), row('buttons', 2, 3, 4), arms])), { eyes: 2, buttons: 3, arms: 'claws' });
+  assert.deepEqual(solve(make('build-sum', 'This robot has two eyes and twice as many buttons as eyes. Give it claws.', [row('eyes', 2, 3, 1), row('buttons', 2, 3, 4), arms])), { eyes: 2, buttons: 4, arms: 'claws' });
+  const eyes = row('eyes', 4, 2, 3);
+  const changeRows = [heads, eyes, legs];
+  assert.deepEqual(solve(make('build-change', 'Give the robot four eyes, a round head and wheels. Wait, no. Not wheels. Give it a jet.', changeRows)), { head: 'round', eyes: 4, bottom: 'jet' });
+  assert.deepEqual(solve(make('build-change', 'Build a robot with four eyes, a round head and wheels. Wait, no. Not four eyes. Give it two eyes.', changeRows)), { head: 'round', eyes: 2, bottom: 'wheels' });
 
   // What must be refused:
   assert.throws(() => solve(make('build-new', 'Give the robot a round head and wheels.', [heads, legs])), /no independent rule/);
@@ -314,4 +349,25 @@ test('build: the oracle works on hand-written examples (and refuses what it cann
   assert.throws(() => solve(make('build-more', 'Give the robot one antenna and legs. It has more eyes than antennas.', [row('antennas', 2, 3, 1), row('eyes', 1, 3, 2), legs])), /2 options fit/);
   assert.throws(() => solve(make('build-list', 'Give the robot a green head and wheels.', [heads, legs])), /did not understand|says nothing/);
   assert.throws(() => solve(make('build-size', 'Give the robot the bigger wheels and claws.', [arms, row('bottom', 'wheels', 'wheels-big', 'legs')])), /exactly two sizes/);
+  // something after a "not ..." in the same sentence
+  assert.throws(() => solve(make('build-not', 'Give the robot wheels, not legs. It also needs a pointy head, not a round one, and claws.', [heads, arms, legs])), /must not be worded like this/);
+  // an order is never checked, so it may never be spoken
+  assert.throws(() => solve(make('build-list', 'Give the robot a round head. Then give it wheels.', [heads, legs])), /did not understand/);
+  assert.throws(() => solve(make('build-list', 'Before you give the robot a round head, give it wheels.', [heads, legs])), /did not understand/);
+  // "unless ... Then ..." (can be heard as "and next") and an "if" about a different exception
+  assert.throws(() => solve(make('build-unless', 'The robot gets three eyes, unless it has a jet. Then it gets one eye. Give it legs and claws.', unlessRows)), /did not understand|must contain/);
+  assert.throws(() => solve(make('build-unless', 'The robot gets three eyes, unless it has a jet. If it has wheels, it gets one eye instead. Give it legs and claws.', unlessRows)), /same exception/);
+  // a change of plan: about a part that was not said, about a different thing than was said, said twice,
+  // to a picture that is not there, without a change, in a sentence of another kind, or with two changes
+  assert.throws(() => solve(make('build-change', 'Give the robot four eyes and a round head. Wait, no. Not wheels. Give it a jet.', changeRows)), /not said \(once\) before/);
+  assert.throws(() => solve(make('build-change', 'Give the robot four eyes, a round head and legs. Wait, no. Not wheels. Give it a jet.', changeRows)), /not said \(once\) before/);
+  assert.throws(() => solve(make('build-change', 'Give the robot wheels, a round head and wheels. Wait, no. Not wheels. Give it a jet.', [heads, legs])), /not said \(once\) before/);
+  assert.throws(() => solve(make('build-change', 'Give the robot one eye, a round head and wheels. Wait, no. Not one eye. Give it two eyes.', changeRows)), /0 options fit/);
+  assert.throws(() => solve(make('build-change', 'Give the robot four eyes, a round head and wheels. Wait, no. Not wheels. Give it wheels.', changeRows)), /must change something/);
+  assert.throws(() => solve(make('build-change', 'Give the robot four eyes, a round head and wheels. Wait, no. Not wheels. Give it claws.', changeRows)), /same part/);
+  assert.throws(() => solve(make('build-change', 'Give the robot four eyes, a round head and wheels.', changeRows)), /frame/);
+  assert.throws(() => solve(make('build-list', 'Give the robot four eyes, a round head and wheels. Wait, no. Not wheels. Give it a jet.', changeRows)), /did not understand|2 options|0 options/);
+  assert.throws(() => solve(make('build-change', 'Give the robot four eyes, a round head and wheels. Wait, no. Not four eyes. Give it two eyes. Wait, no. Not wheels. Give it a jet.', changeRows)), /frame|did not understand/);
+  // "both" and arithmetic are no longer part of a neither / place sentence
+  assert.throws(() => solve(make('build-place', 'Pick the last head. This robot has two eyes and twice as many buttons as eyes.', [heads, row('eyes', 2, 4, 3), row('buttons', 2, 3, 4)])), /did not understand/);
 });

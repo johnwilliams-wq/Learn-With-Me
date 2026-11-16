@@ -57,7 +57,106 @@ function told(it, n = 4) {
   return distinct(it, events, n);
 }
 const asGroups = (it, h, kinds) => kinds.map((kind) => [h.one(it, { kind })]);
-const swap = (list, i, j) => { [list[i], list[j]] = [list[j], list[i]]; };
+
+// The order things HAPPENED in. Every sentence that names a thing on screen tells one event, and
+// its opening words say where that event belongs. Each opening is read as the LEAST a fair
+// listener can take from it ("then" = some time later, "before" = some time earlier; only
+// "right before" and "just before" mean next to each other). All orders of the events are then
+// tried against every sentence, and exactly ONE must be left: a story that two orders fit is
+// refused, however its answer key was made.
+//   First, / To start with,                 this event is the first of all
+//   Then / Next, / After that,              later than the event of the sentence before
+//   Last of all, / At the very end, / Finally,   this event is the last of all
+//   He ... (no opening, first event only)   says nothing about when
+//   But before he did that,                 earlier than the event of the sentence before
+//   After those two things,                 later than both events told so far
+//   But just before the end,                next to last (an event must have been called the last)
+//   But right before that,                  the one straight before the event of the sentence before
+//   Before he X, he W.                      two events: W is earlier than X
+//   Then he Z, but only after he Y.         two events: Y is earlier than Z, and nothing more
+const OPENINGS = [
+  [/^(?:First|To start with), \w+ /, 'first'],
+  [/^(?:Last of all|At the very end|Finally), \w+ /, 'last'],
+  [/^But before \w+ did that, \w+ /, 'before-that'],
+  [/^After those two things, \w+ /, 'after-both'],
+  [/^But just before the end, \w+ /, 'next-to-last'],
+  [/^But right before that, \w+ /, 'right-before-that'],
+  [/^Before \w+ [^,.]+, \w+ /, 'before-pair'],
+  [/^(?:Then|Next,|After that,) \w+ [^,.]+, but only after \w+ /, 'only-after-pair'],
+  [/^(?:Then|Next,|After that,) \w+ /, 'then'],
+  [/^(?:He|She) /, 'plain'],
+];
+const TIME_WORDS = /\b(before|after|then|next|first|last|finally|end|until|while|once|earlier|later)\b/i;
+function permutations(list) {
+  if (list.length <= 1) return [list];
+  return list.flatMap((x, i) => permutations([...list.slice(0, i), ...list.slice(i + 1)]).map((rest) => [x, ...rest]));
+}
+/** Every order of the story's events that fits all of its sentences. */
+function possibleOrders(it, n) {
+  const events = told(it, n);
+  const facts = []; // each: (at) => boolean, where at[kind] is the place of that event, 0 = first
+  const seen = []; // the events told so far
+  let that = null; // the event "that" points back to (nothing after a sentence with two events)
+  let then = null; // the event "then" carries on from (after "Before he X, he W." that is X, the later one)
+  let end = null; // the event that was called the last one
+  for (const s of storyOf(it)) {
+    const kinds = named(it, s);
+    if (!kinds.length) {
+      // the setting or the ending of the story: it must not be about when things happened
+      assert.ok(seen.length === 0 || seen.length === n, `"${it.say}" - a sentence without an event in the middle of the story: ${s}`);
+      continue;
+    }
+    const opening = OPENINGS.find(([re]) => re.test(s));
+    assert.ok(opening, `"${it.say}" - cannot tell when this happened: ${s}`);
+    const [re, how] = opening;
+    const pair = how === 'before-pair' || how === 'only-after-pair';
+    distinct(it, kinds, pair ? 2 : 1);
+    // apart from its opening (and the "before"/"only after" of a pair), the sentence says nothing more about time
+    const rest = s.replace(re, '').replace(/, but only after \w+ /, ' ');
+    assert.ok(!TIME_WORDS.test(rest), `"${it.say}" - more words about time than the rule knows: ${s}`);
+    const [k, k2] = kinds;
+    const prev = how === 'then' || how === 'only-after-pair' ? then : that;
+    const needPrev = () => assert.ok(prev, `"${it.say}" - nothing for this to point back to: ${s}`);
+    if (how === 'first') facts.push((at) => at[k] === 0);
+    else if (how === 'last') { facts.push((at) => at[k] === n - 1); end = k; }
+    else if (how === 'then') { needPrev(); facts.push((at) => at[k] > at[prev]); }
+    else if (how === 'before-that') { needPrev(); facts.push((at) => at[k] < at[prev]); }
+    else if (how === 'right-before-that') { needPrev(); facts.push((at) => at[k] === at[prev] - 1); }
+    else if (how === 'after-both') {
+      assert.equal(seen.length, 2, `"${it.say}" - "those two things" needs exactly two events before it`);
+      const [x, y] = seen;
+      facts.push((at) => at[k] > at[x] && at[k] > at[y]);
+    } else if (how === 'next-to-last') {
+      assert.ok(end, `"${it.say}" - "the end" has not been told yet`);
+      const last = end;
+      facts.push((at) => at[k] === at[last] - 1);
+    } else if (how === 'before-pair') facts.push((at) => at[k2] < at[k]); // "Before he K, he K2."
+    else if (how === 'only-after-pair') { // "Then he K, but only after he K2."
+      needPrev();
+      facts.push((at) => at[k] > at[prev] && at[k2] < at[k]);
+    } else assert.equal(seen.length, 0, `"${it.say}" - only the first event may come without an opening: ${s}`);
+    seen.push(...kinds);
+    that = pair ? null : k;
+    then = k;
+  }
+  return permutations(events).filter((order) => {
+    const at = Object.fromEntries(order.map((kind, i) => [kind, i]));
+    return facts.every((fact) => fact(at));
+  });
+}
+/** The one order the events can have happened in. */
+function happened(it, n = 4) {
+  const orders = possibleOrders(it, n);
+  assert.ok(orders.length > 0, `"${it.say}" - no order fits the story: its sentences contradict each other`);
+  assert.equal(orders.length, 1, `"${it.say}" - more than one order fits the story (${orders.length}): ${orders.map((o) => o.join(', ')).join(' / ')}`);
+  return orders[0];
+}
+/** A story told in the order it happened: the one possible order is the order of the telling. */
+function inOrder(it, n = 4) {
+  const order = happened(it, n);
+  assert.deepEqual(order, told(it, n), `"${it.say}" - this pattern is told in order`);
+  return order;
+}
 
 // Level 5 ("work it out"): the answer is never named, so the rule cannot read it off the text.
 // Instead this table says, for every thing and character, which clue words point to it. A rule
@@ -66,8 +165,8 @@ const swap = (list, i, j) => { [list[i], list[j]] = [list[j], list[i]]; };
 // (3) insists that exactly ONE choice is pointed to - and that its name is never spoken.
 const CLUES = {
   gem: /sparkl|jewel/, key: /\block/, potion: /drank|fizzy|gulp/, shield: /held it in front/, sword: /sharp|cut the rope/, chest: /box with a lid/,
-  map: /drawn on it/, star: /twinkl/, coin: /\bpa(y|id)\b|\bbuy\b/, crown: /bowed/, bell: /\brang\b/, drum: /\bsticks\b|boom/, torch: /flame/,
-  boot: /\b(foot|feet)\b/, book: /\bpages\b|read out loud/, mushroom: /\bstem\b|growing/, hat: /\bbrim\b/, ring: /finger/, rocket: /\bmoon\b|counted down/,
+  map: /drawn on it/, star: /twinkl/, coin: /\bpa(y|id)\b|\bbuy\b/, crown: /bowed/, bell: /\brang\b|ding dong/, drum: /\bsticks\b|boom/, torch: /flame/,
+  boot: /\b(foot|feet)\b/, book: /\bpages\b/, mushroom: /\bstem\b|growing/, hat: /\bbrim\b/, ring: /finger/, rocket: /\bmoon\b|counted down/,
   egg: /\bnest\b|hatch|cracked open/, flag: /\bpole\b|flapped/, heart: /\blove/,
   robot: /\boil\b|beep|charge/, dragon: /burned|breath\w* fire/, wizard: /\bwand\b|\bspell/, knight: /armor/, cat: /purr|whisker/, owl: /feather/,
   ghost: /float\w* straight through|float\w* through/, fox: /bushy tail/,
@@ -83,12 +182,17 @@ function detective(it, h, wantCharacter) {
   assert.equal(fits.length, 1, `"${it.say}" - the clues should point to exactly one choice, they point to: ${fits.join(', ') || 'none'}`);
   assert.ok(!new RegExp(`\\b${fits[0]}s?\\b`, 'i').test(it.say), `"${it.say}" - the answer is given away`);
   assert.equal(CHARACTERS.includes(fits[0]), wantCharacter, it.say);
+  // "golden" is a clue you can see: the answer is the yellow one, and no other choice looks gold
+  if (/\bgold(en)?\b/i.test(text)) {
+    const gold = it.scene.objects.filter((o) => o.color === 'yellow' || o.color === 'orange');
+    assert.ok(gold.length === 1 && gold[0].kind === fits[0] && gold[0].color === 'yellow', `"${it.say}" - only the answer may look golden: it must be yellow, and nothing else yellow or orange`);
+  }
   assert.match(questionOf(it), wantCharacter ? /^Who / : /^What /, it.say);
   return [[h.one(it, { kind: fits[0] })]];
 }
 
 function retell(it, h, n, word) {
-  const events = told(it, n);
+  const events = inOrder(it, n);
   assert.ok(!/\b(before|only after)\b/i.test(it.say), `${it.say}: this pattern is told in order`);
   assert.equal(it.scene.objects.length, n + 1, `${it.say}: one extra thing on screen`);
   assert.equal(questionOf(it), `Tap the ${word} things in the order they happened.`);
@@ -141,26 +245,26 @@ export const RULES = {
   // ---------------------------------------------------------------- 2: what happened when
   // Four events told in order (First / Next / ...). The order of the things named IS the order.
   'st-order-before': (it, m, h) => {
-    const events = told(it);
+    const events = inOrder(it);
     assert.match(questionOf(it), /^What did .+ do right before /);
     const at = events.indexOf(distinct(it, named(it, questionOf(it)), 1)[0]);
     assert.ok(at > 0, it.say);
     return [[h.one(it, { kind: events[at - 1] })]];
   },
   'st-order-after': (it, m, h) => {
-    const events = told(it);
+    const events = inOrder(it);
     assert.match(questionOf(it), /^What did .+ do right after /);
     const at = events.indexOf(distinct(it, named(it, questionOf(it)), 1)[0]);
     assert.ok(at >= 0 && at < 3, it.say);
     return [[h.one(it, { kind: events[at + 1] })]];
   },
   'st-order-nth': (it, m, h) => {
-    const events = told(it);
+    const events = inOrder(it);
     const [nth] = h.rx(it, /What was the (first|second|third|fourth|last) thing .+ did\?$/);
     return [[h.one(it, { kind: events[{ first: 0, second: 1, third: 2, fourth: 3, last: 3 }[nth]] })]];
   },
   'st-order-between': (it, m, h) => {
-    const events = told(it);
+    const events = inOrder(it);
     assert.match(questionOf(it), /^What did .+ do after .+ but before /);
     const [from, to] = distinct(it, named(it, questionOf(it)), 2).map((k) => events.indexOf(k));
     assert.equal(to - from, 2, `${it.say}: exactly one thing must lie between`);
@@ -178,7 +282,7 @@ export const RULES = {
   },
   // Moved once; a third place is only thought about; then put back at the start, or left alone.
   'st-move-back': (it, m, h) => {
-    const [p1, p2, p3] = h.rx(it, new RegExp(`hid an? \\w+ ${PLACE}\\. [^.]*, so \\w+ moved it ${PLACE}\\. \\w+ thought about putting it ${PLACE}, but \\w+ did not\\.`));
+    const [p1, p2, p3] = h.rx(it, new RegExp(`put an? \\w+ ${PLACE}\\. [^.]*, so \\w+ moved it ${PLACE}\\. \\w+ thought about putting it ${PLACE}, but \\w+ did not\\.`));
     distinct(it, [p1, p2, p3], 3);
     assert.match(questionOf(it), /^Where is the \w+ now\?$/);
     const end = storyOf(it).at(-1);
@@ -285,21 +389,15 @@ export const RULES = {
   // Four (or five) events told in order; one more thing on screen that is never named.
   'st-retell-4': (it, m, h) => retell(it, h, 4, 'four'),
   'st-retell-5': (it, m, h) => retell(it, h, 5, 'five'),
-  // Four events NOT told in order. Each marker swaps two neighbours of the told order:
-  //   "X. But before he did that, W."        the first two are the other way around
-  //   "Before he X, he W."                   the same
-  //   "At the very end, Z. But just before the end, Y."   the last two are the other way around
-  //   "Then he Z, but only after he Y."      the same
+  // Four events NOT told in order. The answer is the ONE order that fits every sentence
+  // (see possibleOrders above), and it must differ from the order of the telling:
+  //   "He X. But before he did that, he W. After those two things, he Y. Last of all, he Z."
+  //   "First, he W. Then he X. At the very end, he Z. But just before the end, he Y."
+  //   "Before he X, he W. Last of all, he Z. But right before that, he Y."
   'st-retell-back': (it, m, h) => {
-    const order = told(it).slice();
-    const story = storyOf(it).join(' ');
-    let twists = 0;
-    if (/\. But before \w+ did that, /.test(story)) { swap(order, 0, 1); twists++; }
-    if (/\. Before \w+ [^,.]+, \w+ /.test(story)) { swap(order, 0, 1); twists++; }
-    if (/\. But just before the end, /.test(story)) { swap(order, 2, 3); twists++; }
-    if (/, but only after \w+ /.test(story)) { swap(order, 2, 3); twists++; }
-    assert.ok(twists >= 1 && twists <= 2, `${it.say}: no twist in the telling`);
-    assert.equal((story.match(/\bbefore\b|\bonly after\b/gi) || []).length, twists, `${it.say}: a "before" or "after" the rule does not know`);
+    const order = happened(it, 4);
+    assert.notDeepEqual(order, told(it, 4), `${it.say}: no twist in the telling`);
+    assert.equal(it.scene.objects.length, 4, `${it.say}: only the four things of the story are on screen`);
     assert.match(questionOf(it), /^Tap the four things in the order they really happened\.$/);
     return asGroups(it, h, order);
   },
@@ -313,7 +411,7 @@ export const RULES = {
     if ((x = /^But (.+?) was not home .* saw \w+ last of all\.$/.exec(change))) order = [a, b, c].filter((n) => n !== x[1]).concat(x[1]);
     else if ((x = /bumped into (.+?), so \1 was the first one \w+ saw\.$/.exec(change))) order = [x[1], ...[a, b, c].filter((n) => n !== x[1])];
     else if ((x = /^But (.+?) was fast asleep, so .+ skipped \w+ and saw the other two\.$/.exec(change))) order = [a, b, c].filter((n) => n !== x[1]);
-    else if (/visited them the other way around\.$/.test(change)) order = [c, b, a];
+    else if (/^But .+ started with the last friend, so \w+ visited them the other way around\.$/.test(change)) order = [c, b, a];
     assert.ok(order && order.length >= 2 && order.every((n) => [a, b, c].includes(n)), `${it.say}: unknown change of plan`);
     assert.match(questionOf(it), new RegExp(`^Tap the friends in the order ${visitor} really saw them\\.$`));
     return order.map((n) => [who(it, h, n)]);

@@ -55,6 +55,11 @@ for (const world of WORLDS) {
     for (const id of sources) if (!banks.has(id)) throw new Error(`${level.id}: mixes unknown level ${id}`);
     const items = sources.flatMap((id) => banks.get(id));
     if (items.some(isNone) && !level.allowNone) throw new Error(`${level.id}: has "do nothing" items but no hand button`);
+    // ...and no hand button where it could never be right (a level that only borrows "always do something" items)
+    if (level.allowNone && !items.some(isNone)) {
+      level.allowNone = false;
+      delete worldsOut.find((w) => w.id === world.id).levels.find((l) => l.id === level.id).allowNone;
+    }
     for (const [group, count] of Object.entries(level.quota || {})) {
       if (items.filter((it) => it.g === group).length < count * 3) throw new Error(`${level.id}: not enough "${group}" items for its quota`);
     }

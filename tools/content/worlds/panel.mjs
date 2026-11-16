@@ -5,11 +5,18 @@
 // The ladder, one new difficulty per level:
 //   1 one press or one flip            2 how many times, and two things in order
 //   3 the dial                         4 codes of three and four numbers
-//   5 five numbers / three things      6 tricky words: backwards, before, after, except, neither, second...
+//   5 five numbers / three things      6 tricky words (backwards, before, after, except) and the status
+//                                         light, met with the controls in view ("unless", "only if")
 //   7 all of it from memory (the panel is covered while the voice talks), with "if", "unless", "only if"
 //
 // Scenes always hold look-alikes: a button and a switch of the same colour, and other colours of each,
 // so both the colour word and the word "button" / "switch" are needed.
+//
+// Nothing on a panel may be countable as part of what a sentence names without being wanted:
+//   - "every round button" is only said on panels with no dial and no number pad (their keys are buttons
+//     too), and the rocket button is only there when the sentence ends with "press launch";
+//   - a panel with a status light has no red and no green button or switch, so "red" and "green" can
+//     only mean the light.
 
 import { pickColors, cap } from '../lib.mjs';
 
@@ -22,7 +29,7 @@ const flipped2 = (colour) => (colour === 'red' ? 'green' : 'red'); // the light'
  * B buttons, S switches, D dial, K number pad, L light, G launch (null when not on this panel).
  */
 function desk(rng, { buttons = 3, switches = 2, dial = false, keypad = false, launch = false, light = null } = {}) {
-  const colours = pickColors(rng, buttons);
+  const colours = pickColors(rng, buttons, { avoid: light ? ['red', 'green'] : [] }); // red and green belong to the light
   const B = colours.map((color) => ({ type: 'button', color }));
   const S = rng.sample(colours, switches).map((color) => ({ type: 'switch', color, pos: rng.pick(['up', 'down']) }));
   const D = dial ? { type: 'dial', value: rng.range(0, 9) } : null;
@@ -38,7 +45,8 @@ const press = (b, n = 1) => ({ text: `press the ${b.color} button${n > 1 ? ` ${N
 const flip = (s) => ({ text: `flip the ${s.color} switch`, e: [{ c: s, v: flipped(s.pos) }] });
 const flipBoth = (S) => ({ text: 'flip both switches', e: S.map((s) => ({ c: s, v: flipped(s.pos) })) });
 const setDial = (d, v) => ({ text: `set the dial to ${NUM[v]}`, e: [{ c: d, v }] });
-const typeCode = (k, digits) => ({ text: `type the code ${digits.map((n) => NUM[n]).join(', ')}`, e: [{ c: k, v: digits.join('') }] });
+// "type this code: four, ..." - never "the code four", which is heard as "the code for"
+const typeCode = (k, digits) => ({ text: `type this code: ${digits.map((n) => NUM[n]).join(', ')}`, e: [{ c: k, v: digits.join('') }] });
 const fire = (g) => ({ text: 'press launch', e: [{ c: g, v: true }] });
 
 /** A code of n digits, all different (so it never reads the same backwards and never stutters). */
@@ -72,6 +80,38 @@ const groups = (acts) => acts.map((a) => a.e); // one group per thing, in the or
 const stepsTag = (n) => (n >= 4 ? 'steps4' : n === 3 ? 'steps3' : 'steps2');
 const item = (say, p, expect, s, v, extra = {}) => ({ t: 'panel', say, controls: p.controls, expect, s: [...new Set(s)], v, ...extra });
 const counted = (acts) => (acts.some((a) => a.e.some((e) => typeof e.v === 'number' && e.v > 1 && e.c.type === 'button')) ? ['count'] : []);
+
+// --- sentences shared by Tricky Talk (controls in view) and Blackout (controls covered) --------------
+
+/**
+ * "Press every round button except the yellow one, then ..." The big rocket button is a button too, so
+ * it is only on the panel when the sentence ends with it; "round" keeps it apart from the colour buttons.
+ */
+function everyRoundExcept(rng, toLaunch) {
+  const p = desk(rng, { buttons: 4, switches: 3, launch: toLaunch });
+  const out = rng.pick(p.twins);
+  const tail = toLaunch ? fire(p.G) : flip(rng.pick(p.S));
+  const all = p.B.filter((b) => b !== out).map((b) => ({ c: b, v: 1 }));
+  return { p, say: `Press every round button except the ${out.color} one, then ${tail.text}.`, expect: [all, tail.e] };
+}
+
+/** "..., then .... Then press launch, unless the light is red." `go` = is launch pressed in the end? */
+function unlessLight(rng, go) {
+  const colour = rng.pick(['red', 'green']); // the colour the sentence names
+  const p = desk(rng, { dial: true, launch: true, light: go ? flipped2(colour) : colour });
+  const first = several(rng, p, 2, { both: rng.chance(0.6), counts: [1, 2, 3] });
+  const say = `${cap(first[0].text)}, then ${first[1].text}. Then press launch, unless the light is ${colour}.`;
+  return { p, say, expect: [...groups(first), ...(go ? [fire(p.G).e] : [])], s: ['panel', 'logic', 'if', go ? 'steps3' : 'steps2', 'order', ...counted(first)] };
+}
+
+/** "Type this code: .... Then press launch only if the light is green." */
+function onlyIfLight(rng, go, length) {
+  const colour = rng.pick(['red', 'green']);
+  const p = desk(rng, { keypad: true, launch: true, light: go ? colour : flipped2(colour) });
+  const code = typeCode(p.K, digits(rng, length));
+  const say = `${cap(code.text)}. Then press launch only if the light is ${colour}.`;
+  return { p, say, expect: [code.e, ...(go ? [fire(p.G).e] : [])], s: ['panel', 'code', 'if'] };
+}
 
 // ------------------------------------------------------------------------------------------------
 
@@ -172,9 +212,12 @@ const levels = [
   },
   {
     id: 'panel6', title: 'Tricky Talk', n: 18, holdMs: 700,
-    tip: 'Tricky words now. Before and after can be said backwards. Except means leave that one out. Backwards means start with the last number. Think first, then press.',
+    tip: 'Tricky words now. Before and after can be said backwards. Except means leave that one out. Backwards means start with the last number. The light is red or green. Sometimes it decides what you do.',
     gen(rng, i) {
-      const k = i % 8;
+      // Six kinds of sentence, three of each, every one announced by the tip. Nothing is covered here:
+      // this is where he meets the light, with the controls in view.
+      const k = i % 6;
+      const turn = Math.floor(i / 6) % 2; // the light items come out both ways, turn and turn about
       if (k === 0) {
         const p = desk(rng, { buttons: 2, keypad: true, launch: true });
         const code = digits(rng, rng.pick([3, 4, 4]));
@@ -187,6 +230,17 @@ const levels = [
         const [x, y, z] = acts;
         return item(`Before you ${z.text}, ${x.text} and ${y.text}.`, p, [[...x.e, ...y.e], z.e], ['panel', 'before', 'flip', 'steps3', ...counted(acts)], 'before-flipped');
       }
+      if (k === 2) {
+        if (turn === 0) {
+          const { p, say, expect } = everyRoundExcept(rng, i < 6); // once ending with launch, once with a switch
+          return item(say, p, expect, ['panel', 'except', 'all', 'order'], 'all-except');
+        }
+        const p = desk(rng, { buttons: 4, switches: 3, launch: true });
+        const out = rng.pick(p.S);
+        const tail = rng.chance(0.5) ? fire(p.G) : press(rng.pick(p.twins), rng.pick([1, 2]));
+        const all = p.S.filter((s) => s !== out).map((s) => ({ c: s, v: flipped(s.pos) }));
+        return item(`Flip every switch except the ${out.color} one, then ${tail.text}.`, p, [all, tail.e], ['panel', 'except', 'all', 'order', ...counted([tail])], 'all-except');
+      }
       if (k === 3) {
         // "Z after you X. But first, Y." - said last, done first: Y, then X, then Z.
         const p = desk(rng, { dial: true, launch: true });
@@ -194,63 +248,17 @@ const levels = [
         const [y, x, z] = acts;
         return item(`${cap(z.text)} after you ${x.text}. But first, ${y.text}.`, p, [y.e, x.e, z.e], ['panel', 'after', 'flip', 'steps3', 'order', ...counted(acts)], 'after-flipped');
       }
-      if (k === 2) {
-        const p = desk(rng, { buttons: 4, switches: 3, launch: true });
-        if (rng.chance(0.5)) {
-          const out = rng.pick(p.twins);
-          const tail = rng.chance(0.5) ? fire(p.G) : flip(rng.pick(p.S));
-          const all = p.B.filter((b) => b !== out).map((b) => ({ c: b, v: 1 }));
-          return item(`Press every button except the ${out.color} one, then ${tail.text}.`, p, [all, tail.e], ['panel', 'except', 'all', 'order'], 'all-except');
-        }
-        const out = rng.pick(p.S);
-        const tail = rng.chance(0.5) ? fire(p.G) : press(rng.pick(p.twins), rng.pick([1, 2]));
-        const all = p.S.filter((s) => s !== out).map((s) => ({ c: s, v: flipped(s.pos) }));
-        return item(`Flip every switch except the ${out.color} one, then ${tail.text}.`, p, [all, tail.e], ['panel', 'except', 'all', 'order', ...counted([tail])], 'all-except');
-      }
       if (k === 4) {
-        const p = desk(rng, { buttons: 4, switches: 3 });
-        const [n1, n2] = rng.sample(p.B, 2);
-        const tail = flip(rng.pick(p.S));
-        const all = p.B.filter((b) => b !== n1 && b !== n2).map((b) => ({ c: b, v: 1 }));
-        return item(`Press every button that is neither ${n1.color} nor ${n2.color}, then ${tail.text}.`, p, [all, tail.e], ['panel', 'logic', 'all', 'order'], 'neither');
+        const { p, say, expect, s } = unlessLight(rng, turn === 0);
+        return item(say, p, expect, s, 'unless');
       }
-      if (k === 5) {
-        const p = desk(rng, { buttons: 3, switches: 3 });
-        const which = rng.pick(['up', 'down']);
-        const hits = p.S.filter((s) => s.pos === which);
-        if (hits.length < 1 || hits.length > 2) throw new Error('try again: one or two switches must match');
-        const tail = press(rng.pick(p.twins), rng.pick([1, 2, 3]));
-        return item(`Flip every switch that is ${which}, then ${tail.text}.`, p, [hits.map((s) => ({ c: s, v: flipped(s.pos) })), tail.e], ['panel', 'all', 'order', ...counted([tail])], 'switch-state');
-      }
-      if (k === 6) {
-        // Counting along the row. The order on screen is the order of the lists, so it is fixed here.
-        const p = desk(rng, { buttons: 4, switches: 3 });
-        const B = rng.shuffle(p.B);
-        const S = rng.shuffle(p.S);
-        const place = (list, max) => {
-          const n = rng.range(1, max);
-          const side = rng.pick(['left', 'right']);
-          return { words: `${['first', 'second', 'third'][n - 1]}`, side, hit: side === 'left' ? list[n - 1] : list[list.length - n] };
-        };
-        const b = place(B, 3);
-        const s = place(S, 2);
-        const n = rng.pick([1, 2, 3]);
-        const first = { text: `press the ${b.words} button from the ${b.side}${n > 1 ? ` ${NUM[n]} times` : ''}`, e: [{ c: b.hit, v: n }] };
-        const second = { text: `flip the ${s.words} switch from the ${s.side}`, e: [{ c: s.hit, v: flipped(s.hit.pos) }] };
-        const acts = rng.shuffle([first, second]);
-        return { ...item(sentence(acts.map((a) => a.text).join(', then ')), { controls: [...B, ...S] }, groups(acts), ['panel', 'ordinal', 'side', 'steps2', 'order', ...(n > 1 ? ['count'] : [])], 'ordinal'), keepOrder: true };
-      }
-      const p = desk(rng, { buttons: 3, switches: 3 });
-      const which = rng.pick(['up', 'down']);
-      const n = p.S.filter((s) => s.pos === which).length;
-      if (n < 2) throw new Error('try again: at least two switches must match');
-      const b = rng.pick(p.twins);
-      return item(`Press the ${b.color} button one time for each switch that is ${which}.`, p, [[{ c: b, v: n }]], ['panel', 'count'], 'count-up');
+      const { p, say, expect, s } = onlyIfLight(rng, turn === 1, rng.pick([3, 4]));
+      return item(say, p, expect, s, 'only-if');
     },
   },
   {
     id: 'panel7', title: 'Blackout', n: 18, holdMs: 800,
-    tip: 'Blackout! The controls stay covered while I talk, so remember everything. Sometimes the light decides what you do. Look at it when the cover opens.',
+    tip: 'Blackout! The controls stay covered while I talk, so remember everything. The light is red or green, and sometimes it decides what you do. Look at it when the cover opens.',
     gen(rng, i) {
       const k = i % 7;
       const turn = Math.floor(i / 7) % 2; // the light items come out both ways, turn and turn about
@@ -262,31 +270,25 @@ const levels = [
         return item(`The code is ${spoken(code)}.`, p, [[{ c: p.K, v: code.join('') }]], ['panel', 'code', 'hidden'], 'code6', hidden);
       }
       if (k === 1) {
-        // Three things, then one more that depends on the light.
+        // Two things, then one more that depends on the light. Both ways have to be kept: he cannot see the light yet.
         const p = desk(rng, { dial: true, launch: true, light: lit });
         const [b1] = rng.shuffle(p.twins);
         const [s1, s2] = rng.shuffle(p.S);
-        const first = rng.shuffle([press(b1, rng.pick([1, 1, 2])), flip(s1), setDial(p.D, nearby(rng, p.D, 3))]);
+        const first = rng.sample([press(b1, rng.pick([1, 1, 2])), flip(s1), setDial(p.D, nearby(rng, p.D, 3))], 2);
         const [c1, c2] = rng.shuffle(['red', 'green']);
         const [a1, a2] = rng.shuffle([fire(p.G), flip(s2)]);
         const taken = c1 === lit ? a1 : a2;
-        const say = `${cap(first[0].text)}, ${first[1].text}, then ${first[2].text}. If the light is ${c1}, ${a1.text}. If it is ${c2}, ${a2.text} instead.`;
-        return item(say, p, [...groups(first), taken.e], ['panel', 'if', 'hidden', 'steps4', 'order', ...counted(first)], 'if-light', hidden);
+        const say = `${cap(first[0].text)}, then ${first[1].text}. If the light is ${c1}, ${a1.text}. If the light is ${c2}, ${a2.text} instead.`;
+        return item(say, p, [...groups(first), taken.e], ['panel', 'if', 'hidden', 'steps3', 'order', ...counted(first)], 'if-light', hidden);
       }
-      if (k === 2 || k === 4) {
-        // "Then press launch, unless the light is red."  /  "Then press launch only if the light is green."
-        const go = k === 2 ? turn === 0 : turn === 1; // is launch pressed in the end?
-        const colour = rng.pick(['red', 'green']); // the colour the sentence names
-        const shown = (k === 2) === go ? flipped2(colour) : colour; // "unless red" launches on green; "only if red" launches on red
-        const p = desk(rng, { dial: k === 2, keypad: k === 4, launch: true, light: shown });
-        if (k === 2) {
-          const first = several(rng, p, 2, { both: rng.chance(0.6), counts: [1, 2, 3] });
-          const say = `${cap(first[0].text)}, then ${first[1].text}. Then press launch, unless the light is ${colour}.`;
-          return item(say, p, [...groups(first), ...(go ? [fire(p.G).e] : [])], ['panel', 'logic', 'if', 'hidden', go ? 'steps3' : 'steps2', 'order', ...counted(first)], 'unless', hidden);
-        }
-        const code = typeCode(p.K, digits(rng, 4));
-        const say = `${cap(code.text)}. Then press launch only if the light is ${colour}.`;
-        return item(say, p, [code.e, ...(go ? [fire(p.G).e] : [])], ['panel', 'code', 'if', 'hidden'], 'only-if', hidden);
+      if (k === 2) {
+        // "Then press launch, unless the light is red." - as in Tricky Talk, but now from memory
+        const { p, say, expect, s } = unlessLight(rng, turn === 0);
+        return item(say, p, expect, [...s, 'hidden'], 'unless-hidden', hidden);
+      }
+      if (k === 4) {
+        const { p, say, expect, s } = onlyIfLight(rng, turn === 1, 4);
+        return item(say, p, expect, [...s, 'hidden'], 'only-if-hidden', hidden);
       }
       if (k === 3) {
         const p = desk(rng, { dial: true, launch: true });
@@ -300,11 +302,8 @@ const levels = [
         return item(`Type this code backwards: ${spoken(code)}. Then press launch.`, p, [[{ c: p.K, v: code.slice().reverse().join('') }], fire(p.G).e], ['panel', 'code', 'reverse', 'hidden', 'steps2'], 'backwards-hidden', hidden);
       }
       // He cannot see which buttons there are while he listens: he has to keep the rule, not a picture.
-      const p = desk(rng, { buttons: 4, switches: 3, launch: true });
-      const out = rng.pick(p.twins);
-      const tail = rng.chance(0.5) ? fire(p.G) : flip(rng.pick(p.S));
-      const all = p.B.filter((b) => b !== out).map((b) => ({ c: b, v: 1 }));
-      return item(`Press every button except the ${out.color} one, then ${tail.text}.`, p, [all, tail.e], ['panel', 'except', 'all', 'hidden', 'order'], 'hidden-except', hidden);
+      const { p, say, expect } = everyRoundExcept(rng, turn === 0);
+      return item(say, p, expect, ['panel', 'except', 'all', 'hidden', 'order'], 'hidden-except', hidden);
     },
   },
   {

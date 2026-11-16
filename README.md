@@ -1,8 +1,8 @@
 # Learn With Me
 
 A learning game for a child, played on an iPad. The first part is **Listening Quest**: a friendly
-guide gives spoken instructions, the child carries them out by tapping, and the game checks that he
-listened and understood. It starts very simply and adds one difficulty at a time.
+guide gives spoken instructions, the child carries them out on screen, and the game checks that he
+listened and understood. It starts simply, adds one difficulty at a time, and ends up genuinely hard.
 
 ## Install on the iPad
 
@@ -18,11 +18,23 @@ and works offline.
 
 - Every turn follows the same routine: tap the ear when ready, wait while the guide talks, then do
   what was said.
-- 8 worlds, 44 levels: one-step instructions with more and more detail, two steps, tricky words
-  (not, all, except, next to, left and right), time-order words (first, then, before, after), waiting
-  for the real order ("Captain says", "if"), three and four steps from memory, and short stories.
+- It starts in **Training Camp**. Beating the camp boss opens nine worlds, each with its own kind of
+  task, seven levels and a boss:
+  - **Memory Mountain** - long orders: up to six steps, backwards, with skips and counts, from memory.
+  - **Logic Lab** - count along a row, groups, two clues at once, more and fewer, unless, only if.
+  - **Move and Pack** - pick things up and put them in, on or under the right place.
+  - **Paint Shop** - colour the right things the right colour.
+  - **Robot Workshop** - build the robot that is described, part by part.
+  - **Map Routes** - steer a rover by directions, landmarks and rules.
+  - **Control Room** - buttons, switches, a dial and secret codes.
+  - **Truth Detector** - look at the picture: is the sentence true or not?
+  - **Story Cave** - longer stories, then who, when, where and why.
+- In an open world the first level and the boss are open; the other levels open one by one. Beating a
+  boss with two stars clears the whole world, so a strong listener can skip ahead. **Legend Trials**
+  (everything mixed) opens after four worlds are cleared. The original gentle ladder stays available
+  under "Starter levels" at the bottom of the map.
 - A miss is never punished. He hears it again a little slower; if needed the guide shows him.
-- Each finished mission earns stars, XP and a new card for his collection.
+- Each finished mission earns stars, XP and a new card for his collection (180 cards).
 - Missions are short (6 instructions). After a few, the game suggests stopping for the day.
 
 ## For parents

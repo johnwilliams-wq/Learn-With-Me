@@ -2,7 +2,8 @@
 
 A learning game for one primary-school child, played on an iPad as an installed web app.
 Phase 1 is **Listening Quest**: a recorded voice gives instructions, the child carries them out
-by tapping, and the game checks that he listened *and* understood. English, math, science,
+on screen (tapping, moving, painting, building, steering, pressing, judging true or false), and the
+game checks that he listened *and* understood. English, math, science,
 history and social studies sections are planned as later phases.
 
 **This repository is public.** Never commit anything personal: no ages, schools, photos,
@@ -51,7 +52,8 @@ assets/data/                GENERATED: listening/levels.json, listening/<level>.
 assets/audio/               GENERATED voice clips (mp3): listening/ = instructions, ui/ = the guide's lines
 tools/content/              worlds/ (one module per world), types/ (content rules per activity type), pipeline.mjs,
                             levels.mjs (the Starter levels), voice.mjs (guide lines), build.mjs, preview.mjs
-tools/tts/                  setup.sh, synth.py (make clips), verify.py (speech-recognition check), manifest.json
+tools/tts/                  setup.sh, synth.py (make clips), verify.py (speech-recognition check), retake.py (second takes),
+                            manifest.json, verified.json, report.json, tweaks.json, accepted.json
 tools/build-precache.mjs    regenerates the service-worker file list in sw.js
 tests/unit/                 node:test - logic, sprites, shell, and an independent check of every item
 tests/e2e/                  Playwright (Chromium): run.cjs (scenarios), all-items.cjs (plays every item), robots/ (one per activity type)
@@ -85,6 +87,8 @@ Each item in `assets/data/listening/<level>.json`:
 - `auto` = checked on the first tap (single-tap items); otherwise he presses Done (Undo is available).
 - `mode: "pick"` = choosing a set (tick marks, tap again to un-pick). `hide` = objects face-down while the voice talks.
 - `s` = skill tags (must exist in `src/listening/insights.js` SKILLS). `v` = sentence pattern. `g` = quota group.
+- `t` = activity type (missing = `tap`, the format shown above). Every other type has its own `scene` and
+  `expect` shapes, described at the top of `tools/content/types/<type>.mjs` and checked by its `validate()`.
 - Levels (`levels.json`): `trials`, `allowNone` (shows the hand button), `holdMs`, `quota`, `mix` (boss/review
   levels borrow other levels' items), `tip` (voice line id) and `tipText`.
 
@@ -107,8 +111,13 @@ bash tools/tts/setup.sh                               # once per machine; needs 
 ~/.venvs/tts/bin/python tools/tts/verify.py           # transcribe every clip and compare with its text
 ```
 
-`verify.py` writes `tools/tts/report.json`; anything listed under `failed` must be reworded or accepted
-knowingly. In Claude Code cloud sessions use the `learn-with-me` environment (it allows the Hugging Face hosts).
+`verify.py` writes `tools/tts/report.json`; anything listed under `failed` is dealt with in this order:
+(1) if the recogniser only spelt a true sound-alike differently (right / write), add the pair to `SAME` in
+`verify.py`; (2) if it shows a real risk for a listener ("hid a key" heard as "hit a key"), reword the
+sentence in its generator; (3) if the take itself stumbled (a swallowed syllable), run
+`~/.venvs/tts/bin/python tools/tts/retake.py`, which tries other speeds, keeps the first take that both
+recognisers hear correctly and records it in `tools/tts/tweaks.json`; (4) only then accept it knowingly
+in `tools/tts/accepted.json`, with the reason. In Claude Code cloud sessions use the `learn-with-me` environment (it allows the Hugging Face hosts).
 
 ## Rewards and chores (all on the device)
 
@@ -173,8 +182,8 @@ reference implementations - read them before writing a new one.
 | test robot | `tests/e2e/robots/<type>.cjs` | `solve(page, item)`, `wrong(page, item)`, `isNone(item)` |
 
 The registries (`src/listening/scenes/index.js`, `tools/content/types/index.mjs`,
-`tools/content/worlds/index.mjs`) and `index.html` already name every planned type; a type that is not
-built yet is a placeholder file that you replace.
+`tools/content/worlds/index.mjs`) and `index.html` (one stylesheet per type) name every type. All seven
+are built: `tap`, `truth`, `put`, `paint`, `build`, `route`, `panel`. A new type is added to all four.
 
 ### The play area: `src/listening/scenes/<type>.js`
 
@@ -203,7 +212,10 @@ export default {
 
 - **Modes.** `ready`: frozen; any touch calls `host.onIdle()` (the ear pulses). `listening`: frozen; any
   touch calls `host.onEarly()` (he jumped in too soon - the mission counts it and reminds him).
-  `respond`: interactive. `off`: frozen and silent (feedback, demo). Only act on input in `respond`.
+  `respond`: interactive. `off`: frozen and silent (feedback, demo, and the short pause between the end
+  of the sentence and "go"). Only act on input in `respond`. Touches that land between your controls
+  are caught by the mission itself (a listener on `.board-wrap`), and so are presses on the switched-off
+  hand, check mark and back arrow - you only report touches on your own controls.
 - Call `host.onChange()` after every change to the answer, and `host.sfx.tap()` for the little click.
   Call `host.onSubmit()` only for items with `item.auto` (a one-touch answer). Otherwise he presses the
   green Done button; Undo calls your `undo()`; "Not this time" (the hand) calls `reset()` then checks.
@@ -251,7 +263,14 @@ export default {
   traps, symbols and abbreviations. Keep a sentence under about 35 words.
 - A tip is spoken before the level (until he has passed it), so it must teach the new thing by ear and
   refer to buttons by what they look like ("the green check mark", "the hand").
-- Levels that include "do nothing" items need `allowNone: true` (the hand button).
+- Levels that include "do nothing" items need `allowNone: true` (the hand button). The build switches
+  the hand off again for any level whose items never need it, so it is only on screen where it can be right.
+- What reviewers of the spoken content keep finding (check new sentences against this list): an order
+  that is checked but never spoken; "or" without "or both"; a bare "the first one" after "from the right";
+  a colour word straight after a thing that does not get that colour; "on the way" for something far off
+  the way; "then" used both for sequence and for a condition; a tricky word (unless, neither, only if,
+  all but one) that no tip of that world explains; verbs that sound like a colour or a thing on screen
+  (read / red, rang / ring); names that sound alike in one story.
 
 ### Building and testing one world without touching the game data
 

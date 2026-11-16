@@ -59,7 +59,6 @@ const GROUPS = {
   'group-fly': { say: 'Tap everything that can fly.', members: ['owl', 'rocket', 'dragon'], never: ['ghost', 'wizard', 'robot', 'star', 'flag', 'egg'] },
   'group-music': { say: 'Tap everything you can make music with.', members: ['bell', 'drum'], never: ['ring', 'coin', 'key', 'chest', 'shield', 'sword', 'rocket', 'cat', 'owl', 'fox', 'dragon', 'robot', 'wizard', 'knight', 'ghost'] },
   'group-people': { say: 'Tap all the people.', members: ['wizard', 'knight'], never: ['ghost', 'robot'] },
-  'group-read': { say: 'Tap everything you can read.', members: ['book', 'map'], never: ['flag', 'coin', 'potion', 'chest', 'shield', 'wizard', 'robot'] },
 };
 function group(it) {
   const g = GROUPS[it.v];
@@ -87,7 +86,8 @@ function twoClues(it, re, keep, corners) {
 
 function groupColour(what, members, never) {
   return (it, m, h) => {
-    const [C] = h.rx(it, new RegExp(`^Tap the ${what} that are ${COLOUR}\\.$`));
+    // "every ... that is": one thing or several may fit, so the sentence must not promise several
+    const [C] = h.rx(it, new RegExp(`^Tap ${what} that is ${COLOUR}\\.$`));
     assert.equal(it.mode, 'pick', it.id);
     noFlames(it);
     clearColour(it, C);
@@ -116,7 +116,7 @@ function compare(relation) {
 }
 
 export const RULES = {
-  // ---- level 1: places in one row
+  // ---- places in one row (logic1)
   nth: (it, m, h) => {
     const [which, side] = h.rx(it, new RegExp(`^Tap the ${ORD} one from the (left|right)\\.$`));
     return [[nthOf(it, which, side, () => true).id]];
@@ -137,7 +137,7 @@ export const RULES = {
     return [[t.id]];
   },
 
-  // ---- level 2: which one, by its neighbours (look-alikes are the same kind, colour and size)
+  // ---- which one, by its neighbours (logic2) (look-alikes are the same kind, colour and size)
   'between-two': (it, m, h) => {
     const [K, G] = h.rx(it, /^Tap the (\w+) that is between the two (\w+)\.$/);
     oneRow(it);
@@ -174,16 +174,17 @@ export const RULES = {
     return single(it, objs(it).filter((o) => o.kind === K && !beside(o)));
   },
 
-  // ---- level 3: groups
-  'group-wear': group, 'group-animals': group, 'group-fly': group, 'group-music': group, 'group-people': group, 'group-read': group,
+  // ---- groups (logic3, the first level of the world)
+  'group-wear': group, 'group-animals': group, 'group-fly': group, 'group-music': group, 'group-people': group,
 
   // ---- level 4: two conditions at once
   'both-colour-size': (it) => twoClues(it, new RegExp(`^Tap everything that is ${COLOUR} and ${SIZE}\\.$`), (c, s) => c && s, ['CS', 'Cs', 'cS']),
   'neither-nor': (it) => twoClues(it, new RegExp(`^Tap the things that are neither ${COLOUR} nor ${SIZE}\\.$`), (c, s) => !c && !s, ['cs', 'Cs', 'cS']),
   'size-not-colour': (it) => twoClues(it, new RegExp(`^Tap everything that is ${SIZE} but not ${COLOUR}\\.$`), (c, s) => s && !c, ['cS', 'CS', 'cs']),
-  'either-or': (it) => twoClues(it, new RegExp(`^Tap everything that is ${COLOUR} or ${SIZE}\\.$`), (c, s) => c || s, ['CS', 'Cs', 'cS', 'cs']),
-  'group-colour-animals': groupColour('animals', GROUPS['group-animals'].members, GROUPS['group-animals'].never),
-  'group-colour-wear': groupColour('things you can wear', GROUPS['group-wear'].members, GROUPS['group-wear'].never),
+  // "red, or small, or both": the thing that is both counts too, and the sentence has to say so
+  'either-or': (it) => twoClues(it, new RegExp(`^Tap everything that is ${COLOUR}, or ${SIZE}, or both\\.$`), (c, s) => c || s, ['CS', 'Cs', 'cS', 'cs']),
+  'group-colour-animals': groupColour('every animal', GROUPS['group-animals'].members, GROUPS['group-animals'].never),
+  'group-colour-wear': groupColour('everything you can wear', GROUPS['group-wear'].members, GROUPS['group-wear'].never),
 
   // ---- level 5: count, compare, decide
   'more-than': compare('more'),

@@ -20,6 +20,15 @@ import { RULES as LOGIC } from './oracles/tap-logic.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SOUND_ALIKE = [['boot', 'book'], ['heart', 'hat'], ['coin', 'crown']];
+// names that are too close by ear to share a story
+const NAMES_ALIKE = [['Zip', 'Zazz'], ['Boo', 'Hoot']];
+// words that sound like a colour: never said at all in a story
+const SOUNDS_LIKE_A_COLOUR = /\b(read|reads|blew)\b/i;
+// words that sound like something that can be on screen: never said while that thing is shown
+const SOUNDS_LIKE_A_THING = [[/\b(rang|rung|ringing)\b/i, 'ring'], [/\bnights?\b/i, 'knight'], [/\bcrows?\b/i, 'crown'], [/\bnaps?\b/i, 'map'],
+  [/\bboats?\b/i, 'boot'], [/\bdreams?\b/i, 'drum'], [/\bflat\b/i, 'flag']];
+// things that are drawn on another card (src/art/sprites.js): a hidden one must not send him to the wrong card
+const DRAWN_ON = { book: ['star'], hat: ['star'], crown: ['gem'] };
 const ALLOWED_TAGS = ['story', 'infer', 'order', 'detail', 'hidden', 'steps3', 'not', 'all'];
 const norm = (groups) => groups.map((g) => [...g].sort());
 const words = (say) => say.split(/\s+/).length;
@@ -63,6 +72,11 @@ test('stories: the world has seven levels and a boss made of the hardest three',
   }
   // the levels that need the Done button say what it looks like
   for (const id of ['stories6', 'stories7']) assert.match(world.levels.find((l) => l.id === id).tip, /green check mark/);
+  // level 6: the first hidden cards of this world are announced, and nobody is told to tap everything he hears
+  const six = world.levels.find((l) => l.id === 'stories6').tip;
+  assert.match(six, /hidden/);
+  assert.match(six, /only the ones that fit/);
+  assert.ok(!/everything on my list/.test(six), 'stories6: half of what is listed must NOT be tapped');
 });
 
 test('stories: every pattern is new and has its own oracle rule', () => {
@@ -114,6 +128,13 @@ test('stories: every story is a real story, fits one clip, and is fair', () => {
           if (objects.some((o) => o.kind === shown)) assert.ok(!new RegExp(`\\b${said}s?\\b`, 'i').test(it.say), `${where} - "${said}" is said while ${shown} is on screen`);
         }
       }
+      // ... and no word of the story can be heard as a colour, or as a thing that is on screen
+      assert.ok(!SOUNDS_LIKE_A_COLOUR.test(it.say), `${where} - a word that sounds like a colour`);
+      for (const [word, shown] of SOUNDS_LIKE_A_THING) {
+        if (objects.some((o) => o.kind === shown)) assert.ok(!word.test(it.say), `${where} - ${word} is said while the ${shown} is on screen`);
+      }
+      // he never has to tell two names apart that sound alike
+      for (const [x, y] of NAMES_ALIKE) assert.ok(!(new RegExp(`\\b${x}\\b`).test(it.say) && new RegExp(`\\b${y}\\b`).test(it.say)), `${where} - ${x} and ${y} in one story`);
     }
   }
 });
@@ -160,6 +181,20 @@ test('stories: each kind of story keeps the promise of its level', () => {
       // at most one choice that the story never names
       assert.ok(named(it, it.say).length >= it.scene.objects.length - 1, where);
     }
+    if (it.v.startsWith('st-move')) {
+      // the thing that is moved is never shown, so it must not be drawn on one of the cards either
+      const hidden = [...it.say.matchAll(/\b(?:hid|put) an? (\w+) (?:inside|under|behind)\b| and an? (\w+) (?:inside|under|behind)\b/g)].map((m) => m[1] || m[2]);
+      assert.equal(hidden.length, it.v === 'st-move-two' ? 2 : 1, where);
+      for (const k of hidden) {
+        assert.ok(!it.scene.objects.some((o) => o.kind === k), `${where} - the ${k} is on screen`);
+        for (const o of it.scene.objects) assert.ok(!(DRAWN_ON[o.kind] || []).includes(k), `${where} - the ${o.kind} card has a ${k} drawn on it`);
+      }
+    }
+    if (/\bgolden\b/.test(it.say)) {
+      // "golden" is a clue: the answer is yellow, and nothing else on screen is yellow or orange
+      assert.equal(answer[0].color, 'yellow', where);
+      assert.equal(it.scene.objects.filter((o) => o.color === 'yellow' || o.color === 'orange').length, 1, where);
+    }
     // colour words are only spoken when the scene makes them matter
     for (const colour of new Set(it.say.match(/\b(red|blue|green|yellow|purple|orange)\b/g) || [])) {
       const twin = it.scene.objects.some((o) => o.color === colour && it.scene.objects.some((p) => p.kind === o.kind && p.color !== colour));
@@ -192,11 +227,11 @@ test('stories oracle: changing the story changes the answer', () => {
   assert.deepEqual(ask('st-move-two', two('egg'), 'hat', 'drum', 'chest', 'bell'), [['o1']]);
   assert.deepEqual(ask('st-move-two', two('coin'), 'hat', 'drum', 'chest', 'bell'), [['o3']]);
 
-  const pass = (end) => `Zip the robot found a map and gave it to Hoot the owl. Hoot did not need it, so she passed it on to Boo the ghost. ${end} Who has the map now?`;
-  const three = ['robot', 'owl', 'ghost'];
-  assert.deepEqual(ask('st-pass-who', pass('Boo kept it safe.'), ...three), [['o3']]);
-  assert.deepEqual(ask('st-pass-who', pass('Boo took it back to the one who found it.'), ...three), [['o1']]);
-  assert.deepEqual(ask('st-pass-who', pass('Boo did not want it either, so he gave it back to Hoot.'), ...three), [['o2']]);
+  const pass = (end) => `Zip the robot found a map and gave it to Hoot the owl. Hoot did not need it, so she passed it on to Dash the fox. ${end} Who has the map now?`;
+  const three = ['robot', 'owl', 'fox'];
+  assert.deepEqual(ask('st-pass-who', pass('Dash kept it safe.'), ...three), [['o3']]);
+  assert.deepEqual(ask('st-pass-who', pass('Dash took it back to the one who found it.'), ...three), [['o1']]);
+  assert.deepEqual(ask('st-pass-who', pass('Dash did not want it either, so she gave it back to Hoot.'), ...three), [['o2']]);
 
   const lost = (first, second) => `Dash the fox set off for the old tower with a key, a map, a flag, and a bell. On the way, ${first}. Later, ${second}. In the end, Dash had to turn back. Why did Dash have to turn back?`;
   const trip = ['key', 'map', 'flag', 'bell'];
@@ -208,15 +243,18 @@ test('stories oracle: changing the story changes the answer', () => {
   const parade = ['bell', 'flag', 'drum', 'sword'];
   assert.deepEqual(ask('st-retell-back', back('He rang the bell. But before he did that, he waved the flag. After those two things, he banged the drum. Last of all, he polished the sword.'), ...parade), [['o2'], ['o1'], ['o3'], ['o4']]);
   assert.deepEqual(ask('st-retell-back', back('First, he rang the bell. Then he waved the flag. At the very end, he banged the drum. But just before the end, he polished the sword.'), ...parade), [['o1'], ['o2'], ['o4'], ['o3']]);
-  assert.deepEqual(ask('st-retell-back', back('Before he rang the bell, he waved the flag. Then he banged the drum, but only after he polished the sword.'), ...parade), [['o2'], ['o1'], ['o4'], ['o3']]);
+  assert.deepEqual(ask('st-retell-back', back('Before he rang the bell, he waved the flag. Last of all, he banged the drum. But right before that, he polished the sword.'), ...parade), [['o2'], ['o1'], ['o4'], ['o3']]);
   assert.throws(() => ask('st-retell-back', back('First, he rang the bell. Then he waved the flag. Next, he banged the drum. Finally, he polished the sword.'), ...parade), /no twist/);
+
+  // the same story, read by the level-two rules, is in order
+  assert.deepEqual(ask('st-order-before', `${back('First, he rang the bell. Then he waved the flag. Next, he banged the drum. Finally, he polished the sword.').replace(/ Tap .*$/, '')} What did Zip do right before he banged the drum?`, ...parade), [['o2']]);
 
   const visit = (change) => `Dash the fox had three friends to visit. She planned to see Zip the robot first, then Hoot the owl, and Boo the ghost last. ${change} Tap the friends in the order Dash really saw them.`;
   const friends = ['fox', 'robot', 'owl', 'ghost'];
   assert.deepEqual(ask('st-plan-visit', visit('But Zip was not home in the morning, so Dash went back and saw him last of all.'), ...friends), [['o3'], ['o4'], ['o2']]);
   assert.deepEqual(ask('st-plan-visit', visit('But on the way, Dash bumped into Boo, so Boo was the first one she saw.'), ...friends), [['o4'], ['o2'], ['o3']]);
   assert.deepEqual(ask('st-plan-visit', visit('But Hoot was fast asleep, so Dash skipped her and saw the other two.'), ...friends), [['o2'], ['o4']]);
-  assert.deepEqual(ask('st-plan-visit', visit('But Dash read the list from the bottom, so she visited them the other way around.'), ...friends), [['o4'], ['o3'], ['o2']]);
+  assert.deepEqual(ask('st-plan-visit', visit('But Dash started with the last friend, so she visited them the other way around.'), ...friends), [['o4'], ['o3'], ['o2']]);
   assert.throws(() => ask('st-plan-visit', visit('But then it rained, so Dash stayed home.'), ...friends), /unknown change/);
 
   const bag = (change) => `Puff the dragon packed a bag for a camping trip. He put in a map, a torch, and a red flag. Then he changed his mind. ${change} Just before he left, he added a key. Tap everything that is in the bag now.`;
@@ -226,8 +264,43 @@ test('stories oracle: changing the story changes the answer', () => {
   assert.throws(() => ask('st-plan-bag', bag('He took out the drum and put in a blue flag instead.'), ...things), /never put in/);
 });
 
+test('stories oracle: a story told out of order must leave exactly one possible order', () => {
+  // The oracle tries every order of the events against what each sentence says. These are tellings
+  // that sound fine but that two or more orders fit - it must refuse every one of them.
+  const back = (story) => `Zip the robot was getting ready for the big parade. ${story} Tap the four things in the order they really happened.`;
+  const parade = ['bell', 'flag', 'drum', 'sword'];
+  const refuses = (story, orders) => assert.throws(() => ask('st-retell-back', back(story), ...parade), new RegExp(`more than one order fits the story \\(${orders}\\)`), story);
+  // the telling the reviewer caught: "only after" does not say WHEN the sword was polished
+  refuses('Before he rang the bell, he waved the flag. Then he banged the drum, but only after he polished the sword.', 3);
+  // "before" twice, with nothing pinned to the start or the end
+  refuses('Before he rang the bell, he waved the flag. Before he banged the drum, he polished the sword.', 6);
+  // "then" after a step back in time: later than the flag, but before or after the bell?
+  refuses('He rang the bell. But before he did that, he waved the flag. Then he banged the drum. Last of all, he polished the sword.', 2);
+  // a sentence the rules cannot place in time at all is refused, not guessed
+  assert.throws(() => ask('st-retell-back', back('He rang the bell. Earlier, he waved the flag. Then he banged the drum. Last of all, he polished the sword.'), ...parade), /cannot tell when/);
+  // sentences that contradict each other leave no order at all
+  assert.throws(() => ask('st-retell-back', back('First, he rang the bell. Last of all, he waved the flag. Then he banged the drum. But before he did that, he polished the sword.'), ...parade), /no order fits/);
+  assert.throws(() => ask('st-retell-back', back('First, he rang the bell while he waved the flag. Then he banged the drum. Last of all, he polished the sword.'), ...parade));
+
+  // Every story with an order, shipped or freshly drawn: exactly one order fits (solve() insists on
+  // it), it is the stored answer, and all three ways of telling a story backwards are in use.
+  const ORDERED = ['st-order-before', 'st-order-after', 'st-order-nth', 'st-order-between', 'st-retell-4', 'st-retell-5', 'st-retell-back'];
+  const tellings = new Set();
+  let n = 0;
+  for (const level of own.filter((l) => ['stories2', 'stories7'].includes(l.id))) {
+    for (const it of [...built.get(level.id), ...draw(level, 'one-order', 240)].filter((x) => ORDERED.includes(x.v))) {
+      const order = solve(it);
+      if (it.v.startsWith('st-retell')) assert.deepEqual(order, it.expect, `${it.id} (${it.v}): ${it.say}`);
+      if (it.v === 'st-retell-back') tellings.add(it.say.match(/[^.?!]+[.?!]/g).slice(1, -1).map((x) => x.trim().split(' ')[0].replace(/^She$/, 'He')).join(' / '));
+      n++;
+    }
+  }
+  assert.ok(n > 350, `only ${n} ordered stories`);
+  assert.deepEqual([...tellings].sort(), ['Before / Last / But', 'First, / Then / At / But', 'He / But / After / Last']);
+});
+
 test('stories oracle: it refuses riddles and lists that are not fair', () => {
-  const bell = 'Boo the ghost found something in the attic. It was made of metal, and it was much too big to wear on a finger. When he shook it, it rang so loudly that the bats flew away. What did Boo find?';
+  const bell = 'Boo the ghost found something in the attic. It was made of metal, and it was much too big to wear on a finger. When he shook it, it went ding dong so loudly that the bats flew away. What did Boo find?';
   assert.deepEqual(ask('st-detect-thing', bell, 'ring', 'bell', 'drum', 'key'), [['o2']]);
   // two choices fit the clues
   assert.throws(() => ask('st-detect-thing', bell.replace('much too big to wear on a finger', 'kept behind a lock'), 'ring', 'bell', 'drum', 'key'), /exactly one choice/);
@@ -238,6 +311,13 @@ test('stories oracle: it refuses riddles and lists that are not fair', () => {
   // a "who" riddle must be about a character
   assert.throws(() => ask('st-detect-who', bell, 'ring', 'bell', 'drum', 'key'));
 
+  // "golden" must be something he can see: a yellow crown, and no other card that looks gold
+  const king = 'The old king was sad, because nobody at the market knew who he was. So he went home and came back with something golden and shiny on his head. Now everybody bowed. What did the king put on?';
+  assert.deepEqual(ask('st-detect-thing', king, 'blue hat', 'red ring', 'yellow crown', 'purple gem'), [['o3']]);
+  assert.throws(() => ask('st-detect-thing', king, 'blue hat', 'yellow ring', 'orange crown', 'purple gem'), /look golden/);
+  assert.throws(() => ask('st-detect-thing', king, 'yellow hat', 'red ring', 'purple crown', 'blue gem'), /look golden/);
+  assert.throws(() => ask('st-detect-thing', king, 'orange hat', 'red ring', 'yellow crown', 'blue gem'), /look golden/);
+
   const attic = 'Zip the robot climbed up into the dusty attic. Behind the door, he saw a drum. On the floor lay a map and a flag. Hanging from the roof was a bell. He sneezed three times and climbed back down. Which one of these was not in the attic?';
   assert.deepEqual(ask('st-not-in', attic, 'drum', 'map', 'key', 'flag', 'bell'), [['o3']]);
   assert.throws(() => ask('st-not-in', attic, 'drum', 'map', 'key', 'star', 'bell'));
@@ -247,7 +327,7 @@ test('stories oracle: it refuses riddles and lists that are not fair', () => {
   // a choice the story never mentions makes the list unfair
   assert.throws(() => ask('st-all-packed', packed, 'map', 'bell', 'drum', 'flag', 'key', 'star'));
 
-  const party = 'There was a big party at the castle last night. Zip the robot danced all night long. Hoot the owl was sick in bed and could not come. Boo the ghost wanted to come, but he had to work. Dash the fox brought a huge cake. Tap everyone who was at the party.';
+  const party = 'There was a big party at the castle yesterday. Zip the robot danced for hours and hours. Hoot the owl was sick in bed and could not come. Boo the ghost wanted to come, but he had to work. Dash the fox brought a huge cake. Tap everyone who was at the party.';
   assert.deepEqual(norm(ask('st-all-came', party, 'robot', 'owl', 'ghost', 'fox')), [['o1', 'o4']]);
 });
 

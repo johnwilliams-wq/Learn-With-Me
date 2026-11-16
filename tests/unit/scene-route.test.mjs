@@ -207,3 +207,16 @@ test('the art: every landmark, the rover and the arrows are clean inline SVG', (
   assert.throws(() => landmarkSVG('constructor'), Error);
   assert.throws(() => arrowSVG('north'), Error);
 });
+
+test('counted routes: a square too far and straight back again is a correction, not a miss', () => {
+  const item = counted('uurrr'); // "Go up two, then right three."
+  right(mark(item, 'uuudrrr')); // overshot the first part by one, stepped back, carried on
+  right(mark(item, 'uurrrrl')); // overshot the end by one and came back
+  right(mark(item, 'uduurrr')); // changed his mind after the very first step
+  wrong(mark(item, 'uurrrr'), 'count'); // one too far and left there
+  wrong(mark(item, 'uurrrd'), 'extra'); // a different extra step is still extra
+  wrong(mark(item, 'ud'), 'incomplete'); // back on the start square: nothing has been driven
+  // driving to places: a visit followed by a step back is still a visit
+  const item2 = places({ end: [3, 2], avoid: [[1, 2]] }); // "Go to the tree. Do not touch the key."
+  assert.equal(mark(item2, 'rlurrdr').correct, false); // onto the key and back off it: he did touch it
+});

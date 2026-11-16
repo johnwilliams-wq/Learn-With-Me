@@ -161,7 +161,7 @@ const RULES = {
   }],
   'left-end': [re('The ', NP, ' is at the (left) end of the row\\.'), (m, it) => atEnd(it, m)],
   'right-end': [re('The ', NP, ' is at the (right) end of the row\\.'), (m, it) => atEnd(it, m)],
-  middle: [re('The ', NP, ' is in the middle of the row\\.'), ([c, k], it) => {
+  middle: [re('The ', NP, ' is exactly in the middle of the row\\.'), ([c, k], it) => {
     const n = row(it);
     note(it, n % 2 === 1, 'a row with an even number of things has no middle');
     const d = Math.abs(pos(it, the(it, k, c)) - (n - 1) / 2);

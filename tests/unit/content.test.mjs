@@ -100,6 +100,7 @@ test('every level can fill a mission, and missions can be varied', () => {
       assert.ok(items.filter((it) => it.g === group).length >= count * 3, `${level.id}: quota ${group}`);
     }
     if (items.some(isNone)) assert.ok(level.allowNone, `${level.id} needs the hand button`);
+    if (level.allowNone) assert.ok(items.some(isNone), `${level.id}: the hand button is shown but can never be the right answer`);
     assert.ok(voice.lines[level.tip], `${level.id}: tip line missing`);
     assert.ok(level.tipText.length <= 200, `${level.id}: tip is too long`);
   }

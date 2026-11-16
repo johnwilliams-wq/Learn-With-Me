@@ -3,7 +3,11 @@
 // The ladder, one new difficulty per level:
 //   1 three steps with colours      2 four steps                 3 three steps with colours, hidden
 //   4 five steps                    5 backwards (2, 3, 4 things) 6 leave one out / how many times each
-//   7 six steps, and four hidden steps with size AND colour      boss = mix of 5-7
+//   7 six steps, and three hidden steps with size AND colour     boss = mix of 5-7
+//
+// This world is about ORDER, so every sentence whose answer has an order says so in words
+// ("then", "First ... Next ... Last", "After that", "backwards", "the opposite order"); the
+// oracle insists on it.
 //
 // Drafts are finished by tools/content/lib.mjs (see the top of tools/content/levels.mjs).
 // Every pattern name `v` has its own rule in tests/unit/oracles/tap-memory.mjs.
@@ -33,8 +37,10 @@ const things = (rng, n) => kinds(rng, n).map((k) => obj(k, col(rng)));
 const plain = (o) => `the ${o.kind}`;
 const hue = (o) => `the ${o.color} ${o.kind}`;
 const exact = (o) => `the ${o.size} ${o.color} ${o.kind}`;
-/** "the key and the gem" / "the key, the gem, and the star" */
+/** "the key and the gem" / "the key, the gem, and the star" - only where the order is given by another word ("backwards") */
 const series = (p) => (p.length === 2 ? `${p[0]} and ${p[1]}` : `${p.slice(0, -1).join(', ')}, and ${p.at(-1)}`);
+/** "the key, then the gem, then the star": the order is part of the instruction */
+const inOrder = (p) => p.join(', then ');
 
 const FORMS = {
   then: (p) => `Tap ${p.join(', then ')}.`,
@@ -69,7 +75,8 @@ function colourTrio(rng) {
 
 /**
  * Two kinds x two colours x two sizes = 8 objects, so every one of the three words in
- * "the small blue key" is needed. Four of them are the targets. The colours must be easy to tell
+ * "the small blue key" is needed. Three of them are the targets (one more word per thing than
+ * the hidden level before, not one more thing as well). The colours must be easy to tell
  * apart on a small picture found in a hurry: no torch or rocket (yellow flames), and never
  * orange against red or yellow.
  */
@@ -78,7 +85,7 @@ function detailCube(rng) {
   const [C1, C2] = pickColors(rng, 2);
   if ([C1, C2].includes('orange') && (C1 === 'red' || C2 === 'red' || C1 === 'yellow' || C2 === 'yellow')) throw new Error('colours too close: try again');
   const objects = [K1, K2].flatMap((k) => [C1, C2].flatMap((c) => SIZES.map((sz) => obj(k, c, sz))));
-  return { targets: rng.sample(objects, 4), objects };
+  return { targets: rng.sample(objects, 3), objects };
 }
 
 export default {
@@ -141,7 +148,7 @@ export default {
           const counts = targets.map(() => rng.range(1, 3));
           if (new Set(counts).size === 1) throw new Error('same count three times: try again');
           return {
-            say: `Tap ${series(targets.map((o, j) => `${plain(o)} ${TIMES[counts[j]]}`))}.`, objects,
+            say: `Tap ${inOrder(targets.map((o, j) => `${plain(o)} ${TIMES[counts[j]]}`))}.`, objects,
             expect: targets.map((o, j) => Array(counts[j]).fill(o)), auto: false, s: ['count', 'steps3'], v: 'count-each',
           };
         }
@@ -152,18 +159,18 @@ export default {
         const kept = said.filter((_, j) => j !== k);
         const verb = rng.pick(['skip', 'leave out']);
         const base = { objects, expect: kept.map((o) => [o]), auto: false };
-        if (p === 2) return { ...base, say: `Tap ${series(said.map(plain))}, but ${verb} ${plain(said[k])}.`, s: ['skip', 'steps3'], v: 'skip-named' };
+        if (p === 2) return { ...base, say: `Tap ${inOrder(said.map(plain))}, but ${verb} ${plain(said[k])}.`, s: ['skip', 'steps3'], v: 'skip-named' };
         const which = k === n - 1 && rng.chance(0.5) ? 'last' : ORDINALS[k];
-        return { ...base, say: `Tap ${series(said.map(plain))}, but ${verb} the ${which} one.`, s: ['skip', 'ordinal', `steps${n - 1}`], v: 'skip-nth' };
+        return { ...base, say: `Tap ${inOrder(said.map(plain))}, but ${verb} the ${which} one.`, s: ['skip', 'ordinal', `steps${n - 1}`], v: 'skip-nth' };
       },
     },
     {
       id: 'memory7', title: 'The Summit', n: 18, holdMs: 900,
-      tip: 'The top of the mountain! Six steps in a row. And sometimes four hidden things, with a size and a color for each one. Breathe, listen to the end, and picture them.',
+      tip: 'The top of the mountain! Six steps in a row. And sometimes three hidden things, with a size and a color for each one. Breathe, listen to the end, and picture them.',
       gen(rng, i) {
         if (i % 2) {
           const { targets, objects } = detailCube(rng);
-          return chain('quad-detail-hidden', ['then', 'first'], (i - 1) / 2, targets, objects, exact, ['steps4', 'detail', 'hidden'], { hide: true });
+          return chain('trio-detail-hidden', ['then', 'first'], (i - 1) / 2, targets, objects, exact, ['steps3', 'detail', 'hidden'], { hide: true });
         }
         const objects = things(rng, 9);
         return chain('six', ['list', 'halves', 'then'], i / 2, objects.slice(0, 6), objects, plain, ['steps6']);

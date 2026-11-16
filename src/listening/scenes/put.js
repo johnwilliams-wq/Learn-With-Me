@@ -345,9 +345,13 @@ function create(item, host) {
     answer: () => ({ moves: history.map((m) => [m.id, m.to]), where: Object.fromEntries(where) }),
     size: () => where.size,
     undo() {
+      if (held !== null) { // something is in his hand: the back arrow only puts it down again
+        held = null;
+        render(false);
+        return;
+      }
       const m = history.pop();
       if (!m) return;
-      held = null;
       if (m.to === null) where.set(m.id, m.from);
       else where.delete(m.id);
       if (!where.size) history = [];

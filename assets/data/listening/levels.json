@@ -150,7 +150,7 @@
      "id": "memory7",
      "title": "The Summit",
      "tip": "tip-memory7",
-     "tipText": "The top of the mountain! Six steps in a row. And sometimes four hidden things, with a size and a color for each one. Breathe, listen to the end, and picture them.",
+     "tipText": "The top of the mountain! Six steps in a row. And sometimes three hidden things, with a size and a color for each one. Breathe, listen to the end, and picture them.",
      "trials": 6,
      "holdMs": 900
     },
@@ -180,24 +180,24 @@
    ],
    "levels": [
     {
+     "id": "logic3",
+     "title": "Groups",
+     "tip": "tip-logic3",
+     "tipText": "Welcome to the Logic Lab! First, think about groups. Things you can wear, like a hat or a ring. Animals, like a cat. Things that can fly. Tap every one that fits. Then press the green check mark.",
+     "trials": 6
+    },
+    {
      "id": "logic1",
      "title": "Count the Places",
      "tip": "tip-logic1",
-     "tipText": "Welcome to the Logic Lab! Everything is in one row. Count along the row to find the right one. Listen for which side to start from: the left, or the right.",
+     "tipText": "Now everything is in one row. Listen for the side to start counting from: the left, or the right. If I say the second red one, count only the red ones.",
      "trials": 6
     },
     {
      "id": "logic2",
      "title": "Neighbors",
      "tip": "tip-logic2",
-     "tipText": "Now some things look the same. Listen for what is beside each one. Next to. Between. To the left of. Only one of them fits.",
-     "trials": 6
-    },
-    {
-     "id": "logic3",
-     "title": "Groups",
-     "tip": "tip-logic3",
-     "tipText": "Now think about groups. Things you can wear, like a hat or a ring. Animals, like a cat. Things that can fly. Tap every one that fits. Then press the green check mark.",
+     "tipText": "One row again, but now some things look the same. Listen for what is beside each one. Next to. Between. To the left of. Only one of them fits.",
      "trials": 6
     },
     {
@@ -218,7 +218,7 @@
      "id": "logic6",
      "title": "Unless and Only If",
      "tip": "tip-logic6",
-     "tipText": "Tricky words: unless, and only if. Tap the star, unless there is a dragon. So if you see a dragon, do not tap anything. Press the hand instead.",
+     "tipText": "Tricky words: unless, and only if. Tap the star, unless there is a dragon. So if you see a dragon, do not tap anything. Press the hand instead. Only if means: do it just when that is true.",
      "trials": 6,
      "allowNone": true,
      "quota": {
@@ -290,7 +290,7 @@
      "id": "pack5",
      "title": "First Things First",
      "tip": "tip-pack5",
-     "tipText": "Now the order matters. Listen for first, then, before, and after. Sometimes I say it backwards. So stop and think: which one do I move first? The little numbers show your order.",
+     "tipText": "Now the order matters. Listen for first, then, before, after, and not until. Sometimes I say it backwards. So stop and think: which one do I move first? The little numbers show your order.",
      "trials": 6,
      "holdMs": 600
     },
@@ -298,7 +298,7 @@
      "id": "pack6",
      "title": "Only If",
      "tip": "tip-pack6",
-     "tipText": "Now there is an if. Look at the shelf before you move anything. And if there is nothing you should move, tap the hand.",
+     "tipText": "Now there is an if. Look at the shelf before you move anything. Unless there is a crown means: if you see a crown, move nothing. And if there is nothing you should move, tap the hand.",
      "trials": 6,
      "allowNone": true,
      "holdMs": 600
@@ -369,14 +369,14 @@
      "id": "paint5",
      "title": "In a Row",
      "tip": "tip-paint5",
-     "tipText": "Now they stand in one row. The row starts on the left, like reading. Listen for where: second, last, in the middle, between, next to.",
+     "tipText": "Now they stand in one row. The first one is on the left, like reading. The last one is on the right. Listen for where: second from the right, in the middle, between, next to.",
      "trials": 6
     },
     {
      "id": "paint6",
      "title": "Not and If",
      "tip": "tip-paint6",
-     "tipText": "Listen for NOT, IF, and UNLESS. They tell you which things get paint, and which things you must leave alone.",
+     "tipText": "Tricky words. Unless they are keys means: the keys do not get that paint. Neither a drum nor a gem means: not a drum, and not a gem. Listen for NOT and IF too. Some things get no paint at all.",
      "trials": 6
     },
     {
@@ -444,14 +444,14 @@
      "id": "build5",
      "title": "Longest and Most",
      "tip": "tip-build5",
-     "tipText": "Now you have to compare. Listen for words like longest, bigger, more and fewer. Look along the whole row before you choose.",
+     "tipText": "Now you have to compare. Listen for words like longest, bigger, more and fewer. Twice as many means two times as many. Look along the whole row before you choose.",
      "trials": 6
     },
     {
      "id": "build6",
-     "title": "Twisted Orders",
+     "title": "Think Twice",
      "tip": "tip-build6",
-     "tipText": "These are tricky. I may say the parts in a mixed up order, give you a rule to work out, or ask for the first or last picture in a row. Listen to every word, think, then build.",
+     "tipText": "Listen for if and unless. Unless means: but not when. Neither red nor blue means: not red and not blue. The first picture is on the left, like reading. If I change my mind, build the new part.",
      "trials": 6
     },
     {
@@ -498,7 +498,7 @@
      "id": "route2",
      "title": "Turn the Corner",
      "tip": "tip-route2",
-     "tipText": "Now the route has a turn in it. Drive the first part, then turn and drive the next part. Made a slip? The arrow at the bottom of the screen takes one move back.",
+     "tipText": "Now the route has a turn in it. Drive the first part, then turn and drive the next part. Made a slip? The thin arrow next to the round arrow takes one move back.",
      "trials": 6
     },
     {
@@ -512,21 +512,21 @@
      "id": "route4",
      "title": "Road Trip",
      "tip": "tip-route4",
-     "tipText": "Now there are stops on the way. Drive to each place in the order I say, and finish on the last one. You can see a number on every place you have been.",
+     "tipText": "Now there are stops on the way. Drive to each place in the order I say, and finish on the last one. Driving past other places is fine. The numbers show where you have been.",
      "trials": 6
     },
     {
      "id": "route5",
      "title": "Rules of the Road",
      "tip": "tip-route5",
-     "tipText": "Now there are rules. Do not touch means: never drive onto that square. To pick a thing up, drive over it. Listen for the words not and only.",
+     "tipText": "Now there are rules. Do not touch means: never drive onto that square. To pick a thing up, drive over it. Except means: leave that one out. Listen for the words not and only.",
      "trials": 6
     },
     {
      "id": "route6",
      "title": "Tricky Orders",
      "tip": "tip-route6",
-     "tipText": "Tricky orders! Sometimes I say the last stop first. Sometimes the map decides where you go. Think before you drive: what comes first?",
+     "tipText": "Tricky orders! Sometimes I say the last stop first. Think: what comes first? Sometimes the map decides. Only if it is red means: when it is red, do it. When it is not red, leave it alone.",
      "trials": 6
     },
     {
@@ -540,7 +540,7 @@
      "id": "route-boss",
      "title": "Route Boss",
      "tip": "tip-route-boss",
-     "tipText": "Route Boss! Rules, tricky orders and long routes from memory. Take your time, and think before you drive.",
+     "tipText": "Route Boss! Rules, tricky orders and long routes from memory. To pick a thing up, drive over it. Do not touch means never drive onto it. Think before you drive.",
      "trials": 6,
      "boss": true,
      "mix": [
@@ -600,7 +600,7 @@
      "id": "panel6",
      "title": "Tricky Talk",
      "tip": "tip-panel6",
-     "tipText": "Tricky words now. Before and after can be said backwards. Except means leave that one out. Backwards means start with the last number. Think first, then press.",
+     "tipText": "Tricky words now. Before and after can be said backwards. Except means leave that one out. Backwards means start with the last number. The light is red or green. Sometimes it decides what you do.",
      "trials": 6,
      "holdMs": 700
     },
@@ -608,7 +608,7 @@
      "id": "panel7",
      "title": "Blackout",
      "tip": "tip-panel7",
-     "tipText": "Blackout! The controls stay covered while I talk, so remember everything. Sometimes the light decides what you do. Look at it when the cover opens.",
+     "tipText": "Blackout! The controls stay covered while I talk, so remember everything. The light is red or green, and sometimes it decides what you do. Look at it when the cover opens.",
      "trials": 6,
      "holdMs": 800
     },
@@ -685,7 +685,7 @@
      "id": "truth5",
      "title": "Where Is It",
      "tip": "tip-truth5",
-     "tipText": "Everything stands in one row now. Listen for where things are: next to, between, left, right, the end, and the middle. Find the place, then choose.",
+     "tipText": "Everything stands in one row now. Listen for where things are: next to, between, left, right, the end, and the middle. Exactly in the middle means the same number on each side.",
      "trials": 6,
      "quota": {
       "yes": 2,
@@ -696,7 +696,7 @@
      "id": "truth6",
      "title": "Two Facts",
      "tip": "tip-truth6",
-     "tipText": "Now I say two things in one sentence. Check them both. Listen for the little words that change everything: and, but, not, either, neither, and except.",
+     "tipText": "Now I say two things in one sentence. Check them both. Listen for the little words: and, but, not, either, neither, except. Neither means not this one, and not that one.",
      "trials": 6,
      "quota": {
       "yes": 2,
@@ -707,7 +707,7 @@
      "id": "truth7",
      "title": "Master Detective",
      "tip": "tip-truth7",
-     "tipText": "The hardest test. The picture is covered while I talk, so hold the whole sentence in your head. It has two parts, and both must be true. Then look, count and choose.",
+     "tipText": "The hardest test. The picture is covered while I talk, so hold the whole sentence in your head. Both parts must be true. All but one means every one except one. Then look and choose.",
      "trials": 6,
      "holdMs": 600,
      "quota": {
@@ -783,7 +783,7 @@
      "id": "stories6",
      "title": "In or Out",
      "tip": "tip-stories6",
-     "tipText": "Two new jobs. Sometimes, tap the one thing that was not in the story. Sometimes, tap everything on my list, and then press the green check mark.",
+     "tipText": "Sometimes the cards are hidden while I talk. Then tap the one thing that was not in the story. Other times, tap only the ones that fit my question, not the rest, and press the green check mark.",
      "trials": 6
     },
     {
@@ -853,7 +853,6 @@
      "tip": "tip-legend2",
      "tipText": "Legend Trial two. Stay calm, breathe, and listen all the way to the end.",
      "trials": 6,
-     "allowNone": true,
      "holdMs": 900,
      "mix": [
       "route6",
@@ -872,7 +871,6 @@
      "tip": "tip-legend-boss",
      "tipText": "The final boss. Only the hardest challenge from every world. You are ready.",
      "trials": 6,
-     "allowNone": true,
      "holdMs": 900,
      "boss": true,
      "mix": [
@@ -1184,7 +1182,6 @@
      "tip": "tip-w5l4",
      "tipText": "Now there are two choices. If it is true, do the first thing. If not, do the second.",
      "trials": 6,
-     "allowNone": true,
      "quota": {
       "yes": 3,
       "no": 3
@@ -1333,7 +1330,6 @@
      "tip": "tip-w8l1",
      "tipText": "Hero’s Trial, part one. Clues, steps, and tricky words.",
      "trials": 6,
-     "allowNone": true,
      "holdMs": 700,
      "boss": true,
      "mix": [

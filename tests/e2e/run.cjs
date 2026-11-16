@@ -923,6 +923,137 @@ scenario('19 expectations: set by a grown-up, ticked by him, rewards locked unti
 });
 
 // ---------------------------------------------------------------------------------------------
+scenario('20 touching too soon: noticed on the switched-off buttons and between the things, never after the voice has finished', async (t) => {
+  // (a) The short pause between the end of the sentence and "go": a touch there is NOT too early.
+  //     (fast audio: the "voice" is over after 30 ms; pack5 then waits 600 ms)
+  {
+    const { page } = await t.open();
+    await toMap(page);
+    await openLevel(page, 'pack5');
+    await begin(page);
+    await H.recordPhases(page);
+    await page.click('.btn-listen', { force: true });
+    await sleep(200);
+    t.check((await H.phase(page)) === 'listening', 'expected to be in the pause before "go"');
+    await page.click('.put-thing', { force: true });
+    const box = await page.locator('.board-wrap').boundingBox();
+    await page.mouse.click(box.x + 4, box.y + 4);
+    await waitPhase(page, 'respond');
+    t.check(!(await H.phaseLog(page)).some((e) => e.p === 'feedback'), 'a touch after the voice has finished must not bring the "please listen" reminder');
+    await answer(page);
+    await waitTrials(page, 1);
+    const tr = await lastTrial(page);
+    t.check(tr.et === 0 && tr.c1 === 1, `expected no early touch counted and a right answer, got et=${tr.et} c1=${tr.c1}`);
+  }
+
+  // (b) While the voice really is talking: a touch between the things, and a press on the hand
+  //     (switched off, so it falls through to the bar), both bring the reminder.
+  const have = H.loadItems('w5l1').filter(H.clipExists).length;
+  if (have < 6) return t.note(`part (b) not run: only ${have} of the w5l1 clips exist yet`);
+  const { page } = await t.open({ query: 'nosw=1', state: { ...OPEN, seen: H.seenExcept('w5l1', H.clipExists) } });
+  await toMap(page);
+  await openLevel(page, 'w5l1');
+  await begin(page);
+  // a point inside the play area that is on no thing
+  const gap = await page.evaluate(() => {
+    const r = document.querySelector('.board-wrap').getBoundingClientRect();
+    for (let y = r.top + 3; y < r.bottom; y += 7) {
+      for (let x = r.left + 3; x < r.right; x += 7) {
+        const el = document.elementFromPoint(x, y);
+        if (el && el.closest('.board-wrap') && !el.closest('button')) return { x, y };
+      }
+    }
+    return null;
+  });
+  t.must(gap, 'no gap found in the play area');
+  const centre = async (sel) => { const b = await page.locator(sel).boundingBox(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; };
+  const hinted = () => page.evaluate(() => document.querySelector('.btn-listen').classList.contains('hint'));
+  const state = () => page.evaluate(() => ({ phase: document.querySelector('.mission').dataset.phase, mood: document.querySelector('.guide-col .guide').dataset.mood }));
+
+  // before the ear: both just point at the ear
+  await page.mouse.click(gap.x, gap.y);
+  t.check(await hinted(), 'a touch between the things before the ear should make the ear pulse');
+  await sleep(900);
+  const hand = await centre('.btn-hand');
+  await page.mouse.click(hand.x, hand.y);
+  t.check(await hinted(), 'pressing the switched-off hand before the ear should make the ear pulse');
+  t.check((await getState(page)).trials.length === 0, 'nothing may be answered by those touches');
+
+  for (const [what, at] of [['a touch between the things', gap], ['a press on the hand', hand]]) {
+    await waitPhase(page, 'ready', 20000);
+    await page.click('.btn-listen', { force: true });
+    await waitPhase(page, 'listening', 3000);
+    await sleep(250);
+    await page.mouse.click(at.x, at.y);
+    const now = await state();
+    t.check(now.phase === 'feedback' && now.mood === 'wait', `${what} while the voice talks should bring the reminder (got ${JSON.stringify(now)})`);
+  }
+  await waitPhase(page, 'ready', 20000);
+  await listen(page);
+  await answer(page);
+  await waitTrials(page, 1);
+  const tr = await lastTrial(page);
+  t.check(tr.et === 2 && tr.c1 === 1, `expected two early touches counted and the turn still right first time, got et=${tr.et} c1=${tr.c1}`);
+});
+
+// ---------------------------------------------------------------------------------------------
+scenario('21 small things: Undo puts down what he holds, the "leave?" box holds the demonstration, the Starter drawer scrolls into view', async (t) => {
+  // Move and Pack: with a thing in his hand, the back arrow only puts it down
+  {
+    const { page } = await t.open();
+    await toMap(page);
+    await openLevel(page, 'pack3');
+    await begin(page);
+    await listen(page);
+    const item = await curItem(page);
+    const [a, b] = item.scene.objects;
+    const packed = () => page.locator('.put-zone .put-thing').count();
+    await page.click(`.put-thing[data-id="${a.id}"]`);
+    await page.click(`.put-zone[data-place="${item.scene.places[0].id}"]`, { position: { x: 12, y: 12 } });
+    t.check((await packed()) === 1, 'one thing should be packed');
+    await page.click(`.put-thing[data-id="${b.id}"]`); // lifted, not yet put anywhere
+    await page.click('.btn-undo');
+    t.check((await packed()) === 1, 'Undo with a thing in his hand should only put it down, not unpack the thing before it');
+    await page.click('.btn-undo');
+    t.check((await packed()) === 0, 'the next Undo should take the packed thing back out');
+  }
+
+  // "Leave this mission?" opened during the demonstration: nothing moves on behind the box
+  {
+    const { page } = await t.open();
+    await toMap(page);
+    await openLevel(page, 'w1l1');
+    await begin(page);
+    await listen(page);
+    const item = await answer(page, { wrong: true });
+    await listen(page);
+    await answer(page, { wrong: true });
+    await page.click('.hud .icon-btn');
+    await page.waitForSelector('.overlay .panel.small');
+    await sleep(3000);
+    t.check((await curItem(page)).id === item.id, 'the game must not move on to the next turn behind the "leave?" box');
+    await page.click('.overlay .btn:has-text("Keep playing")');
+    await page.waitForFunction((id) => globalThis.__lwm.debug.item.id !== id, item.id, { timeout: 20000 });
+    await waitPhase(page, 'ready');
+    t.check((await getState(page)).trials.length === 1, 'the missed turn should be recorded once');
+  }
+
+  // The map: opening the Starter drawer brings its levels into view, and the handle is big enough to hit
+  {
+    const { page } = await t.open();
+    await toMap(page);
+    const summary = page.locator('details.starter summary');
+    await summary.scrollIntoViewIfNeeded();
+    t.check((await summary.boundingBox()).height >= 60, `the Starter handle should be at least 60 px high (is ${(await summary.boundingBox()).height})`);
+    await summary.click();
+    await sleep(1200);
+    const view = page.viewportSize();
+    const first = await page.locator('details.starter .level-node').first().boundingBox();
+    t.check(first.y >= 0 && first.y + first.height <= view.height, `the first Starter level should be fully on screen after opening the drawer (top ${Math.round(first.y)}, height ${Math.round(first.height)}, screen ${view.height})`);
+  }
+});
+
+// ---------------------------------------------------------------------------------------------
 async function main() {
   const filters = process.argv.slice(2).map((a) => a.toLowerCase());
   const wanted = scenarios.filter((s) => !filters.length || filters.some((f) => (/^\d+$/.test(f) ? s.name.startsWith(f.padStart(2, '0')) : s.name.toLowerCase().includes(f))));

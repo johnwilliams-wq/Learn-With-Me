@@ -6,7 +6,8 @@
 //
 // Besides the answer, each rule insists that the item is FAIR: the sentence has the shape
 // the pattern promises, every detail word is needed (a look-alike differs only by it), and
-// hidden / visible is what the level says.
+// hidden / visible is what the level says. And because this world is about order: whenever the
+// answer has an order, the sentence must SAY an order (see `spoken` at the end of this file).
 
 import assert from 'node:assert/strict';
 
@@ -71,7 +72,10 @@ function reverse(n) {
   };
 }
 
-export const RULES = {
+/** "the wizard, then the crown, then the rocket": a list whose order is spoken at every step. */
+const THEN_LIST = new RegExp(`^${T}(?:, then ${T})+$`);
+
+const rules = {
   // level 1 and 3: three things, each with a colour (3 = the same, face-down while the voice talks)
   'trio-then': steps(3, shape.then(3), { colour: true }),
   'trio-list': steps(3, shape.list(3), { colour: true }),
@@ -93,6 +97,7 @@ export const RULES = {
   // level 6: leave one out (by its place in the list, or by its name) ...
   'skip-nth': (it, m, h) => {
     const [list, which] = h.rx(it, /^Tap (.+), but (?:skip|leave out) the (first|second|third|fourth|fifth|last) one\.$/);
+    assert.match(list, THEN_LIST, `${it.id}: the order of the list must be spoken ("..., then ...")`);
     const said = h.mentions(list).map((q) => h.one(it, q));
     assert.ok(said.length >= 4 && new Set(said).size === said.length, it.id);
     const at = which === 'last' ? said.length - 1 : ORDINAL[which];
@@ -102,6 +107,7 @@ export const RULES = {
   'skip-named': (it, m, h) => {
     const [list, kind] = h.rx(it, /^Tap (.+), but (?:skip|leave out) the (\w+)\.$/);
     assert.notEqual(kind, 'one');
+    assert.match(list, THEN_LIST, `${it.id}: the order of the list must be spoken ("..., then ...")`);
     const said = h.mentions(list).map((q) => h.one(it, q));
     const out = h.one(it, { kind });
     assert.ok(said.length >= 4 && new Set(said).size === said.length, it.id);
@@ -111,17 +117,30 @@ export const RULES = {
   // ... and how many times each
   'count-each': (it, m, h) => {
     const C = '(once|two times|three times)';
-    const [k1, n1, k2, n2, k3, n3] = h.rx(it, new RegExp(`^Tap the (\\w+) ${C}, the (\\w+) ${C}, and the (\\w+) ${C}\\.$`));
+    const [k1, n1, k2, n2, k3, n3] = h.rx(it, new RegExp(`^Tap the (\\w+) ${C}, then the (\\w+) ${C}, then the (\\w+) ${C}\\.$`));
     const groups = [[k1, n1], [k2, n2], [k3, n3]].map(([kind, n]) => Array(TIMES[n]).fill(h.one(it, { kind })));
     assert.equal(new Set(groups.map((g) => g[0])).size, 3, it.id);
     assert.ok(new Set([n1, n2, n3]).size > 1, `${it.id}: the counts should not all be the same`);
     assert.ok(groups.flat().length <= 12, `${it.id}: more taps than the board accepts`);
     return groups;
   },
-  // level 7: six things; and four hidden things with size + colour
+  // level 7: six things; and three hidden things with size + colour
   'six-then': steps(6, shape.then(6)),
   'six-list': steps(6, shape.list(6)),
   'six-halves': steps(6, shape.halves(6)),
-  'quad-detail-hidden-then': steps(4, shape.then(4), { colour: true, size: true, hidden: true }),
-  'quad-detail-hidden-first': steps(4, shape.first(4), { colour: true, size: true, hidden: true }),
+  'trio-detail-hidden-then': steps(3, shape.then(3), { colour: true, size: true, hidden: true }),
+  'trio-detail-hidden-first': steps(3, shape.first(3), { colour: true, size: true, hidden: true }),
 };
+
+// Order is checked by the game, so order must be heard. An answer of more than one group is an
+// ordered answer (group after group); a sentence that only lists things with commas and "and"
+// ("Tap the key, the gem, and the star.") does not say which comes first, so a child who taps
+// them another way has understood every word. Such a sentence may never have an ordered answer.
+const ORDER_WORDS = /\bthen\b|^First, |\. After that, |\bbackwards\b|\bopposite order\b/;
+const spoken = (rule) => (it, m, h) => {
+  const groups = rule(it, m, h);
+  if (groups.length > 1) assert.match(it.say, ORDER_WORDS, `${it.id}: the answer has an order, but "${it.say}" never says one`);
+  return groups;
+};
+
+export const RULES = Object.fromEntries(Object.entries(rules).map(([v, rule]) => [v, spoken(rule)]));

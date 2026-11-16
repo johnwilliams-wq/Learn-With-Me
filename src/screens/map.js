@@ -106,7 +106,7 @@ export function mapScreen(ctx) {
           dot(b.toCheck + b.rewardsOwed + b.toConfirm)))),
     h('main', { class: 'map-body' },
       main.map(worldSection),
-      starter.length ? h('details', { class: 'starter' },
+      starter.length ? h('details', { class: 'starter', ontoggle: (e) => { if (e.currentTarget.open) e.currentTarget.scrollIntoView({ block: 'start', behavior: 'smooth' }); } },
         h('summary', {}, 'Starter levels', h('small', {}, ' - easier, one new thing at a time')),
         starter.map(worldSection)) : null),
     h('footer', { class: 'map-foot' },

@@ -35,6 +35,7 @@ SAME = [
     {"campfire", "camp"}, {"bell", "belle"}, {"gem", "jem", "gym", "jam"}, {"boot", "boots"},
     {"wait", "weight"}, {"except", "accept"}, {"listened", "listen"}, {"ate", "eight", "8"}, {"tap", "tapped"},
     {"zero", "0"}, {"five", "5"}, {"six", "6"}, {"seven", "7"}, {"nine", "9"},
+    {"right", "write"}, {"rows", "rose"}, {"route", "root"}, {"routes", "roots"},
 ]
 ORDINALS = {"1st": "first", "2nd": "second", "3rd": "third", "4th": "fourth", "5th": "fifth", "6th": "sixth"}
 CANON = {}
@@ -47,7 +48,8 @@ for group in SAME:
 def words(text):
     text = text.lower().replace("’", "'").replace("camp fire", "campfire")
     for long, short in (("every one", "everyone"), ("here is", "heres"), ("that is", "thats"), ("it is", "its"),
-                        ("i am", "im"), ("do not", "dont"), ("you are", "youre"), ("what is", "whats"), ("let us", "lets")):
+                        ("i am", "im"), ("do not", "dont"), ("you are", "youre"), ("what is", "whats"), ("let us", "lets"),
+                        ("check mark", "checkmark"), ("on to", "onto")):
         text = text.replace(long, short)
     text = re.sub(r"[^a-z0-9' ]+", " ", text).replace("'", "")
     for short, long in ORDINALS.items():

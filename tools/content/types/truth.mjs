@@ -7,7 +7,7 @@ export default {
    * draft: { t: 'truth', say, objects, truth: boolean, about?, cols?, keepOrder?, hide?, s, v, g? }
    *   about   optional: groups of object REFERENCES - the things the sentence talks about. After two misses
    *           the guide points at them (group by group, each group in reading order) before showing the answer.
-   *   g       optional quota group; 'yes' / 'no' must agree with `truth` (levels use quota: { yes: 3, no: 3 }).
+   *   g       optional quota group; 'yes' / 'no' must agree with `truth` (levels use quota: { yes: 2, no: 2 }).
    */
   finish(rng, draft) {
     const { truth, t, about, ...rest } = draft;

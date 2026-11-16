@@ -15,7 +15,7 @@ const H = require('./helpers.cjs');
   const args = process.argv.slice(2);
   const dirAt = args.indexOf('--dir');
   const dir = dirAt >= 0 ? path.resolve(args[dirAt + 1]) : path.join(H.ROOT, 'assets', 'data', 'listening');
-  const types = args.filter((a, i) => !a.startsWith('--') && i !== dirAt + 1);
+  const types = args.filter((a, i) => !a.startsWith('--') && (dirAt < 0 || i !== dirAt + 1));
   const out = path.join(H.ROOT, 'tests', 'e2e', 'out', 'all-items');
   fs.mkdirSync(out, { recursive: true });
 

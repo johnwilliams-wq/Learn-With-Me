@@ -239,7 +239,7 @@ function where(rng, i) {
       fact = (a) => at(a) === 2;
       yes = fact(A);
       no = at(A) === 1 || at(A) === 3;
-      say = `The ${name(A)} is in the middle of the row.`;
+      say = `The ${name(A)} is exactly in the middle of the row.`; // "exactly": one place off is then clearly not true
       [s, v] = [['where'], 'middle'];
     } else {
       args = [A];
@@ -397,11 +397,11 @@ export default {
     { id: 'truth4', title: 'More or Fewer', n: 18, quota, gen: comparing,
       tip: 'Now we compare. More means a bigger number. Fewer means a smaller number. As many means the very same number. Look at both groups before you choose.' },
     { id: 'truth5', title: 'Where Is It', n: 18, quota, gen: where,
-      tip: 'Everything stands in one row now. Listen for where things are: next to, between, left, right, the end, and the middle. Find the place, then choose.' },
+      tip: 'Everything stands in one row now. Listen for where things are: next to, between, left, right, the end, and the middle. Exactly in the middle means the same number on each side.' },
     { id: 'truth6', title: 'Two Facts', n: 18, quota, gen: twoFacts,
-      tip: 'Now I say two things in one sentence. Check them both. Listen for the little words that change everything: and, but, not, either, neither, and except.' },
+      tip: 'Now I say two things in one sentence. Check them both. Listen for the little words: and, but, not, either, neither, except. Neither means not this one, and not that one.' },
     { id: 'truth7', title: 'Master Detective', n: 18, quota, gen: master, holdMs: 600,
-      tip: 'The hardest test. The picture is covered while I talk, so hold the whole sentence in your head. It has two parts, and both must be true. Then look, count and choose.' },
+      tip: 'The hardest test. The picture is covered while I talk, so hold the whole sentence in your head. Both parts must be true. All but one means every one except one. Then look and choose.' },
     { id: 'truth-boss', title: 'Truth Boss', boss: true, quota, mix: ['truth5', 'truth6', 'truth7'], holdMs: 600,
       tip: 'Truth Boss! Rows, two facts at once, and covered pictures. Listen to every word, check every part, and then decide. You can do it.' },
   ],

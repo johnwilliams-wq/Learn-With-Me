@@ -5,9 +5,9 @@
 //   2 two and three counted moves "Go right three, then up one."
 //   3 a landmark                  "Go to the tree."            (any way there is right)
 //   4 stops in order              "Go to the tree, then to the tower."
-//   5 rules                       "Do not touch the bridge." / "Pick up only the key."
+//   5 rules                       "Do not touch the bridge." / "Pick up only the key." / "every place except"
 //   6 said backwards, and "if"    "Before you go to the tower, visit the pond." / "..., unless there is a rock next to it."
-//   7 long routes from memory     the map is covered while the voice talks
+//   7 long routes from memory     the map is covered while the voice talks (three, four and five counted moves; four stops)
 //
 // Squares are [column, row], [0, 0] at the top left. A draft's `goal` refers to the things on the
 // map themselves; tools/content/types/route.mjs turns them into squares and checks there is a way.
@@ -81,6 +81,50 @@ function mapOf(rng, cols, rows) {
 }
 
 const far = (from, n = 2) => (p) => dist(p, from) >= n;
+/** p lies in the block of squares that every shortest drive from a to b stays in. */
+const boxed = (a, b, p) => p[0] >= Math.min(a[0], b[0]) && p[0] <= Math.max(a[0], b[0]) && p[1] >= Math.min(a[1], b[1]) && p[1] <= Math.max(a[1], b[1]);
+/** "On the way" has to be true: going past p costs at most `slack` extra moves on a drive from s to e. */
+const near = (s, e, slack = 2) => (p) => dist(s, p) + dist(p, e) <= dist(s, e) + slack;
+
+/** The fewest moves that finish on `end`, drive over every `need` square and keep off the `avoid` squares (Infinity: no way). */
+function fewest(m, end, need = [], avoid = []) {
+  const everything = (1 << need.length) - 1;
+  const known = new Set([`${m.start}|0`]);
+  let front = [[m.start, 0]];
+  for (let n = 1; front.length; n++) {
+    const next = [];
+    for (const [[c, r], got] of front) {
+      for (const p of [[c + 1, r], [c - 1, r], [c, r + 1], [c, r - 1]]) {
+        if (p[0] < 0 || p[1] < 0 || p[0] >= m.cols || p[1] >= m.rows || among(avoid, p)) continue;
+        const now = need.reduce((bits, q, k) => (same(p, q) ? bits | (1 << k) : bits), got);
+        if (now === everything && same(p, end)) return n;
+        if (known.has(`${p}|${now}`)) continue;
+        known.add(`${p}|${now}`);
+        next.push([p, now]);
+      }
+    }
+    front = next;
+  }
+  return Infinity;
+}
+
+/**
+ * A sentence that says "on the way" must be true on the map: every thing to fetch (`get`) is near the
+ * straight way to `end`, fetching costs at most two extra moves per thing (even with the things in
+ * `leave` kept off), and every one of them could be missed by a drive that is no longer - so its name
+ * has to be heard.
+ */
+function onTheWayCheck(m, end, get, leave) {
+  const direct = dist(m.start, end.at);
+  const need = get.map((o) => o.at);
+  const avoid = leave.map((o) => o.at);
+  const right = fewest(m, end.at, need, avoid);
+  if (right > direct + 2 * get.length) again('the things to fetch are not on the way');
+  for (const g of need) {
+    if (!near(m.start, end.at)(g)) again('a thing to fetch is not on the way');
+    if (fewest(m, end.at, need.filter((p) => p !== g), [...avoid, g]) > right) again('every way there passes the thing anyway');
+  }
+}
 
 // Twins (two flags, two keys) are told apart by colour alone, so their colours must be easy to tell apart at a glance.
 const TOO_CLOSE = [['yellow', 'orange'], ['red', 'orange']];
@@ -124,7 +168,8 @@ function counted(rng, cols, rows, legs, { most = 3, total = 99, least = legs > 1
     const free = [];
     for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) if (!among(keepClear, [c, r])) free.push([c, r]);
     if (free.length < scenery) continue;
-    const kinds = rng.shuffle(LANDMARKS);
+    // "three" and "tree" sound alike: no tree on a map where a count of three is spoken
+    const kinds = rng.shuffle(LANDMARKS.filter((k) => !(k === 'tree' && moves.some((mv) => mv[1] === 3))));
     const marks = rng.sample(free, scenery).map((at, i) => ({ kind: kinds[i], at }));
     return { moves, base: { t: 'route', cols, rows, start: scene.start, marks, moves } };
   }
@@ -152,7 +197,7 @@ const level1 = {
 
 const level2 = {
   id: 'route2', title: 'Turn the Corner', n: 18,
-  tip: 'Now the route has a turn in it. Drive the first part, then turn and drive the next part. Made a slip? The arrow at the bottom of the screen takes one move back.',
+  tip: 'Now the route has a turn in it. Drive the first part, then turn and drive the next part. Made a slip? The thin arrow next to the round arrow takes one move back.',
   gen(rng, i) {
     if (i % 3 === 2) {
       const { moves: [a, b, c], base } = counted(rng, 6, 4, 3);
@@ -169,30 +214,36 @@ const level3 = {
   tip: 'Now I name a place on the map. Drive the rover there any way you like, and stop on its square. Then press the green check mark.',
   gen(rng, i) {
     const m = mapOf(rng, 5, 4);
-    if (i % 3 === 2) {
-      // flags: the colour word is needed
+    if (i % 3 !== 0) {
+      // two flags (two turns in three): the colour word is needed as well as the place word
       const [c1, c2] = twoColours(rng);
       const end = m.flag(c1, far(m.start));
       m.flag(c2);
       m.fill(5);
-      return m.draft(`Go to ${the(end)}.`, { end }, ['route', 'landmark'], 'to-flag');
+      return m.draft(i % 3 === 1 ? `Go to ${the(end)}.` : `Drive the rover to ${the(end)}.`, { end }, ['route', 'landmark'], i % 3 === 1 ? 'to-flag' : 'to-flag-drive');
     }
     const end = m.mark(far(m.start));
     m.fill(5);
-    return m.draft(i % 3 === 0 ? `Go to ${the(end)}.` : `Drive the rover to ${the(end)}.`, { end }, ['route', 'landmark'], i % 3 === 0 ? 'to' : 'to-drive');
+    return m.draft(`Go to ${the(end)}.`, { end }, ['route', 'landmark'], 'to');
   },
 };
 
-/** n stops, each at least two squares from the one before. Every third map also has flags to stop at. */
+/**
+ * n stops, each at least two squares from the one before. Every third map also has flags to stop at.
+ * No stop lies on a short way to an EARLIER stop: the map numbers the places in the order he reaches
+ * them, and on a straight drive those numbers must agree with the order that was said.
+ */
 function stops(rng, m, n, flags = false) {
   const out = [];
   const colours = twoColours(rng);
   const flagAt = flags ? rng.int(n) : -1;
+  const drive = [m.start];
   let from = m.start;
   for (let k = 0; k < n; k++) {
-    const ok = (p) => dist(p, from) >= 2 && !out.some((o) => dist(o.at, p) < 2);
+    const ok = (p) => dist(p, from) >= 2 && !out.some((o) => dist(o.at, p) < 2) && !drive.slice(1).some((q, j) => boxed(drive[j], q, p));
     out.push(k === flagAt ? m.flag(colours[0], ok) : m.mark(ok));
     from = out[k].at;
+    drive.push(from);
   }
   if (flags) m.flag(colours[1]);
   return out;
@@ -200,7 +251,7 @@ function stops(rng, m, n, flags = false) {
 
 const level4 = {
   id: 'route4', title: 'Road Trip', n: 18,
-  tip: 'Now there are stops on the way. Drive to each place in the order I say, and finish on the last one. You can see a number on every place you have been.',
+  tip: 'Now there are stops on the way. Drive to each place in the order I say, and finish on the last one. Driving past other places is fine. The numbers show where you have been.',
   gen(rng, i) {
     const m = mapOf(rng, 6, 4);
     if (i % 3 === 2) {
@@ -217,11 +268,11 @@ const level4 = {
 
 const level5 = {
   id: 'route5', title: 'Rules of the Road', n: 18,
-  tip: 'Now there are rules. Do not touch means: never drive onto that square. To pick a thing up, drive over it. Listen for the words not and only.',
+  tip: 'Now there are rules. Do not touch means: never drive onto that square. To pick a thing up, drive over it. Except means: leave that one out. Listen for the words not and only.',
   gen(rng, i) {
     const m = mapOf(rng, 6, 5);
     const s = m.start;
-    switch (i % 6) {
+    switch (i % 7) {
       case 0: { // the thing to keep off is right in the way
         const straight = rng.chance(0.6);
         const end = m.mark((p) => dist(p, s) >= (straight ? 2 : 3) && (!straight || p[0] === s[0] || p[1] === s[1]));
@@ -229,13 +280,14 @@ const level5 = {
         m.fill(5);
         return m.draft(`Go to ${the(end)}. Do not touch ${the(no)}.`, { end, avoid: [no] }, ['route', 'landmark', 'not'], 'avoid');
       }
-      case 1: { // one thing to fetch, and things to leave alone
+      case 1: { // one thing to fetch (it really is on the way), and things to leave alone
         const [kind, ...others] = rng.shuffle(LOOT);
         const flags = twoColours(rng);
         const end = rng.chance(0.5) ? m.flag(flags[0], far(s, 3)) : m.mark(far(s, 3));
         if (end.kind === 'flag') m.flag(flags[1]);
-        const get = m.thing(kind, rng.pick(COLORS), (p) => dist(p, s) >= 2 && dist(p, end.at) >= 2);
+        const get = m.thing(kind, rng.pick(COLORS), (p) => dist(p, s) >= 2 && dist(p, end.at) >= 2 && near(s, end.at)(p));
         const leave = [m.thing(others[0], rng.pick(COLORS), (p) => among(onTheWay(s, get.at, end.at), p)), m.thing(others[1], rng.pick(COLORS))];
+        onTheWayCheck(m, end, [get], leave);
         m.fill(4);
         return m.draft(`Go to ${the(end)}. On the way, pick up only ${the(get)}.`, { end, need: [get], avoid: leave }, ['route', 'landmark', 'steps2'], 'pickup-only');
       }
@@ -249,8 +301,9 @@ const level5 = {
         const kind = rng.pick(LOOT);
         const [yes, no] = twoColours(rng);
         const end = m.mark(far(s, 3));
-        const get = m.thing(kind, yes, (p) => dist(p, s) >= 2 && dist(p, end.at) >= 2, true);
+        const get = m.thing(kind, yes, (p) => dist(p, s) >= 2 && dist(p, end.at) >= 2 && near(s, end.at)(p), true);
         const leave = m.thing(kind, no, (p) => among(onTheWay(s, get.at, end.at), p), true);
+        onTheWayCheck(m, end, [get], [leave]);
         m.fill(4);
         return m.draft(`Go to ${the(end)}. Pick up ${the(get)} on the way, but not the ${leave.color} one.`, { end, need: [get], avoid: [leave] }, ['route', 'landmark', 'not', 'steps2'], 'pickup-not');
       }
@@ -259,28 +312,42 @@ const level5 = {
         const no1 = m.mark((p) => among(between(s, a.at), p));
         const no2 = m.mark((p) => among(between(a.at, b.at), p));
         m.fill(5);
-        return m.draft(`Go to ${the(a)}, then to ${the(b)}. Touch neither ${the(no1)} nor ${the(no2)}.`, { via: [a], end: b, avoid: [no1, no2] }, ['route', 'landmark', 'not', 'steps2'], 'neither');
+        return m.draft(`Go to ${the(a)}, then to ${the(b)}. Do not touch ${the(no1)} or ${the(no2)}.`, { via: [a], end: b, avoid: [no1, no2] }, ['route', 'landmark', 'not', 'steps2'], 'chain-avoid-two');
       }
-      default: { // two things to fetch, one to leave
+      case 5: { // two things to fetch (both on the way, and named in the order he comes to them), one to leave
         const [k1, k2, k3] = rng.shuffle(LOOT);
         const end = m.mark(far(s, 3));
-        const g1 = m.thing(k1, rng.pick(COLORS), (p) => dist(p, s) >= 2 && dist(p, end.at) >= 2);
-        const g2 = m.thing(k2, rng.pick(COLORS), (p) => dist(p, g1.at) >= 2 && dist(p, end.at) >= 2);
-        const leave = m.thing(k3, rng.pick(COLORS), (p) => among([...onTheWay(s, g1.at, g2.at, end.at), ...onTheWay(s, g2.at, g1.at, end.at)], p));
+        const spot = (p) => dist(p, s) >= 2 && dist(p, end.at) >= 2 && near(s, end.at)(p);
+        const g1 = m.thing(k1, rng.pick(COLORS), spot);
+        const g2 = m.thing(k2, rng.pick(COLORS), (p) => spot(p) && dist(p, g1.at) >= 2);
+        const round = (x, y) => dist(s, x.at) + dist(x.at, y.at) + dist(y.at, end.at);
+        if (round(g1, g2) === round(g2, g1)) again('which thing comes first?');
+        const [first, second] = round(g1, g2) < round(g2, g1) ? [g1, g2] : [g2, g1];
+        const leave = m.thing(k3, rng.pick(COLORS), (p) => among(onTheWay(s, first.at, second.at, end.at), p));
+        onTheWayCheck(m, end, [first, second], [leave]);
         m.fill(4);
-        return m.draft(`Go to ${the(end)}. On the way, pick up ${the(g1)} and ${the(g2)}, but nothing else.`, { end, need: [g1, g2], avoid: [leave] }, ['route', 'landmark', 'not', 'steps3'], 'pickup-two');
+        return m.draft(`Go to ${the(end)}. On the way, pick up ${the(first)} and ${the(second)}, but nothing else.`, { end, need: [first, second], avoid: [leave] }, ['route', 'landmark', 'not', 'steps3'], 'pickup-two');
+      }
+      default: { // every place but one, in any order - and the last stop is said at the very end
+        const end = m.mark(far(s, 2));
+        m.fill(4);
+        const rest = m.marks.filter((o) => o !== end);
+        const no = m.mark((p) => among(onTheWay(s, ...rest.map((o) => o.at), end.at), p));
+        if (fewest(m, end.at, rest.map((o) => o.at), [no.at]) > 12) again('too long a round for this level');
+        return m.draft(`Visit every place except ${the(no)}, and finish at ${the(end)}.`, { need: rest, end, avoid: [no] }, ['route', 'landmark', 'except', 'steps4'], 'all-except');
       }
     }
   },
 };
 
+// Only what the tip announces: order words said backwards, and "the map decides" (unless / only if).
 const level6 = {
   id: 'route6', title: 'Tricky Orders', n: 18,
-  tip: 'Tricky orders! Sometimes I say the last stop first. Sometimes the map decides where you go. Think before you drive: what comes first?',
+  tip: 'Tricky orders! Sometimes I say the last stop first. Think: what comes first? Sometimes the map decides. Only if it is red means: when it is red, do it. When it is not red, leave it alone.',
   gen(rng, i) {
     const m = mapOf(rng, 6, 5);
     const s = m.start;
-    switch (i % 7) {
+    switch (i % 6) {
       case 0: {
         const [a, b] = stops(rng, m, 2);
         m.fill(5);
@@ -299,18 +366,21 @@ const level6 = {
         return m.draft(`Go to ${the(home)}, unless there is ${an(what.kind)} ${what.kind} next to it. If there is, go to ${the(other)}.`,
           { end: yes ? other : home }, ['route', 'landmark', 'if'], 'unless');
       }
-      case 2: {
+      case 2: { // both, in either order, and then the last stop - which is on no short way to the other two
         const [a, b, c] = stops(rng, m, 3);
+        if (boxed(s, b.at, c.at)) again('the last stop lies on the way to an earlier one');
         m.fill(5);
         return m.draft(`Go to ${the(c)}, but only after you visit ${the(a)} and ${the(b)}.`, { need: [a, b], end: c }, ['route', 'landmark', 'after', 'flip', 'steps3'], 'after-both');
       }
-      case 3: { // pick it up only if it is the colour I say
+      case 3: { // pick it up only if it is the colour I say; either way it lies right on a straight way there
         const yes = rng.chance(0.5);
         const [kind, kind2] = rng.shuffle(LOOT);
         const [asked, not] = twoColours(rng);
         const end = m.mark(far(s, 3));
-        const it = m.thing(kind, yes ? asked : not, (p) => dist(p, s) >= 2 && dist(p, end.at) >= 2 && (yes || among(onTheWay(s, end.at), p)));
+        const it = m.thing(kind, yes ? asked : not, (p) => dist(p, s) >= 2 && dist(p, end.at) >= 2 && among(onTheWay(s, end.at), p));
         m.thing(kind2, yes ? not : asked); // the other thing has the other colour, so both words are needed
+        if (yes) onTheWayCheck(m, end, [it], []);
+        else if (fewest(m, end.at, [], [it.at]) > dist(s, end.at) + 2) again('too far round the thing to leave');
         m.fill(4);
         return m.draft(`Go to ${the(end)}. Pick up ${the(it)} on the way, but only if it is ${asked}.`,
           yes ? { end, need: [it] } : { end, avoid: [it] }, ['route', 'landmark', 'if', 'steps2'], 'pickup-if');
@@ -320,18 +390,11 @@ const level6 = {
         m.fill(5);
         return m.draft(`Before you go to ${the(c)}, visit ${the(b)}. But before ${the(b)}, go to ${the(a)}.`, { via: [a, b], end: c }, ['route', 'landmark', 'before', 'flip', 'steps3'], 'before-before');
       }
-      case 5: {
+      default: {
         const [a, b] = stops(rng, m, 2);
         const no = m.mark((p) => among(onTheWay(s, a.at, b.at), p));
         m.fill(5);
         return m.draft(`Go to ${the(b)} after you visit ${the(a)}, and do not touch ${the(no)}.`, { via: [a], end: b, avoid: [no] }, ['route', 'landmark', 'after', 'flip', 'not', 'steps2'], 'flip-avoid');
-      }
-      default: { // every place but one, in any order - and the last stop is said at the very end
-        const end = m.mark(far(s, 2));
-        m.fill(4);
-        const rest = m.marks.filter((o) => o !== end);
-        const no = m.mark((p) => among(onTheWay(s, ...rest.map((o) => o.at), end.at), p));
-        return m.draft(`Visit every place except ${the(no)}, and finish at ${the(end)}.`, { need: rest, end, avoid: [no] }, ['route', 'landmark', 'except', 'steps4'], 'all-except');
       }
     }
   },
@@ -347,10 +410,11 @@ const level7 = {
       m.fill(6);
       return m.draft(`Go to ${the(a)}, then ${the(b)}, then ${the(c)}, then ${the(d)}.`, { via: [a, b, c], end: d }, ['route', 'landmark', 'hidden', 'steps4'], 'mem-chain', { hide: true });
     }
-    const legs = i % 3 === 0 ? 4 : 5;
-    const { moves, base } = counted(rng, 6, 5, legs, { total: legs === 4 ? 9 : 10, least: legs + 2 });
+    // The counted routes take turns: three moves (the same as in level 2, but now from memory), then four, then five.
+    const legs = 3 + (i - Math.floor(i / 3)) % 3;
+    const { moves, base } = counted(rng, 6, 5, legs, { total: legs + 5, least: legs + 2 });
     const say = `Go ${moves.slice(0, -1).map(short).join(', ')}, then ${short(moves.at(-1))}.`;
-    return { ...base, say, hide: true, s: ['route', 'count', 'turn', 'hidden', legs === 4 ? 'steps4' : 'steps5'], v: legs === 4 ? 'legs4' : 'legs5' };
+    return { ...base, say, hide: true, s: ['route', 'count', 'turn', 'hidden', `steps${legs}`], v: legs === 3 ? 'legs3-hidden' : `legs${legs}` };
   },
 };
 
@@ -359,6 +423,6 @@ export default {
   levels: [
     level1, level2, level3, level4, level5, level6, level7,
     { id: 'route-boss', title: 'Route Boss', boss: true, mix: ['route5', 'route6', 'route7'],
-      tip: 'Route Boss! Rules, tricky orders and long routes from memory. Take your time, and think before you drive.' },
+      tip: 'Route Boss! Rules, tricky orders and long routes from memory. To pick a thing up, drive over it. Do not touch means never drive onto it. Think before you drive.' },
   ],
 };

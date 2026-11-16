@@ -32,7 +32,9 @@ const mv = (what, to, n) => ({ what: [].concat(what), to, ...(n ? { n } : {}) })
 
 /** The places of a scene (containers, and perhaps the table) and the kinds of thing that may stand next to them. */
 function setting(rng, containers, table = false) {
-  const boxes = rng.sample(CONTAINERS, containers).map((kind) => ({ kind, prep: 'in' }));
+  let picked;
+  do picked = rng.sample(CONTAINERS, containers); while (picked.includes('bag') && picked.includes('basket')); // they start with the same sound
+  const boxes = picked.map((kind) => ({ kind, prep: 'in' }));
   const places = table ? [...boxes, { kind: 'table', prep: 'on' }, { kind: 'table', prep: 'under' }] : boxes;
   const banned = places.flatMap((p) => PLACE_CLASH[p.kind] || []);
   const roomy = (need, not = []) => places.filter((p) => ROOM[p.prep] >= need && !not.includes(p));
@@ -280,12 +282,12 @@ function sorting(rng, i) {
     const name = (g) => `the ${g === big ? 'big' : 'small'} ${plural(K)}`;
     return draft(S, `Put ${name(g1)} ${at(X)} and ${name(g2)} ${at(Y)}.`, things, [mv(g1, X), mv(g2, Y)], ['put', 'sort', 'detail', 'steps2'], 'sort-size');
   }
-  // "Put all but one of the coins in the pot."
+  // "Put all the coins in the pot except one."
   const [K, J] = S.kinds(2);
   const pile = copies(rng.range(3, 5), K, col(rng));
   const things = [...pile, ...copies(3, J, col(rng))];
   const X = S.spot(pile.length - 1);
-  return draft(S, `Put all but one of the ${plural(K)} ${at(X)}.`, things, [mv(pile, X, pile.length - 1)], ['put', 'quantity', 'all', 'except'], 'all-but-one');
+  return draft(S, `Put all the ${plural(K)} ${at(X)} except one.`, things, [mv(pile, X, pile.length - 1)], ['put', 'quantity', 'all', 'except'], 'all-but-one');
 }
 
 // --------------------------------------------------------------------------------- level 5
@@ -340,7 +342,8 @@ function ordering(rng, i) {
     const Y = S.spot(1, [X]);
     return draft(S, `After you put all the ${plural(K)} ${at(X)}, put ${the(j, things)} ${at(Y)}.`, things, [mv(group, X), mv(j, Y)], ['put', 'after', 'all', 'steps2'], 'after-all', ordered);
   }
-  // "Do not put three coins in the pot until you have put the blue key in the chest."
+  // "Put three coins in the pot, but not until you have put the blue key in the chest."
+  // (not "Do not put ... until ...": that only forbids, and never says the coins must be moved at all)
   const [K, KA, L] = S.kinds(3);
   const [C, Cb] = pickColors(rng, 2);
   const N = rng.range(2, 3);
@@ -349,7 +352,7 @@ function ordering(rng, i) {
   const things = [...pile, a, obj(KA, Cb), obj(L, col(rng))];
   const X = S.spot();
   const Y = S.spot(N, [X]);
-  return draft(S, `Do not put ${many(N, K)} ${at(Y)} until you have put ${the(a, things)} ${at(X)}.`, things, [mv(a, X), mv(pile, Y, N)], ['put', 'before', 'flip', 'not', 'quantity', 'steps2', 'detail'], 'not-until', ordered);
+  return draft(S, `Put ${many(N, K)} ${at(Y)}, but not until you have put ${the(a, things)} ${at(X)}.`, things, [mv(a, X), mv(pile, Y, N)], ['put', 'before', 'flip', 'not', 'quantity', 'steps2', 'detail'], 'not-until', ordered);
 }
 
 // --------------------------------------------------------------------------------- level 6
@@ -401,13 +404,15 @@ function conditions(rng, i) {
       [nk > nj ? mv(pk, X, N) : mv(pj, Y, N)], ['put', 'if', 'compare', 'quantity'], 'if-more');
   }
   if (k === 4) {
-    // "Put everything that is neither red nor blue in the cart."
-    const [K1, K2, K3, K4] = S.kinds(4);
-    const [C1, C2, C3, C4] = pickColors(rng, 4);
-    const mine = [obj(K2, C3), obj(K4, C3), obj(K3, C4), obj(K1, C4)];
-    const things = [obj(K1, C1), obj(K2, C1), obj(K1, C2), obj(K3, C2), ...mine];
-    const X = S.spot(4);
-    return draft(S, `Put everything that is neither ${C1} nor ${C2} ${at(X)}.`, things, [mv(mine, X)], ['put', 'logic', 'not', 'sort'], 'neither');
+    // "If there is a red key on the shelf, put it in the chest."  A blue key and a red something are always
+    // there, so both words have to be checked; when no red key is there, nothing is moved (the hand).
+    const [K, J, L] = S.kinds(3);
+    const [C, Cb] = pickColors(rng, 2);
+    const go = round % 2 === 0;
+    const it = obj(K, C);
+    const things = [...(go ? [it] : []), obj(K, Cb), obj(J, C), obj(L, Cb), obj(L, col(rng), 'small')];
+    const X = S.spot();
+    return draft(S, `If there is ${an(C)} ${C} ${K} on the shelf, put it ${at(X)}.`, things, go ? [mv(it, X)] : [], ['put', 'if', 'detail'], 'if-one', { g: go ? 'go' : 'nogo' });
   }
   // "If there is a crown on the shelf, put all the gems in the chest. If not, put them in the bag."
   const [K, K0, J] = S.kinds(3);
@@ -510,9 +515,9 @@ export default {
     { id: 'pack4', title: 'Sort It Out', n: 18, gen: sorting,
       tip: 'Sorting time! All means every single one. Everything red means every red thing, whatever it is. And except means that one stays on the shelf.' },
     { id: 'pack5', title: 'First Things First', n: 18, gen: ordering, holdMs: 600,
-      tip: 'Now the order matters. Listen for first, then, before, and after. Sometimes I say it backwards. So stop and think: which one do I move first? The little numbers show your order.' },
+      tip: 'Now the order matters. Listen for first, then, before, after, and not until. Sometimes I say it backwards. So stop and think: which one do I move first? The little numbers show your order.' },
     { id: 'pack6', title: 'Only If', n: 18, gen: conditions, allowNone: true, holdMs: 600,
-      tip: 'Now there is an if. Look at the shelf before you move anything. And if there is nothing you should move, tap the hand.' },
+      tip: 'Now there is an if. Look at the shelf before you move anything. Unless there is a crown means: if you see a crown, move nothing. And if there is nothing you should move, tap the hand.' },
     { id: 'pack7', title: 'Pack from Memory', n: 18, gen: memory, holdMs: 700,
       tip: 'Memory time! Everything hides while I talk. Say the list back in your head. Then pack it all, and press the green check mark.' },
     { id: 'pack-boss', title: 'Pack Boss', boss: true, mix: ['pack5', 'pack6', 'pack7'], allowNone: true, holdMs: 700,

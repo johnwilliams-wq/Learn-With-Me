@@ -80,7 +80,49 @@ function oneOrAll(it, word, size) {
 function counted(it, list, word, side, what) {
   const n = NTH[word];
   assert.ok(n <= list.length, `${it.id}: there is no ${word} ${what}`);
+  // counted from the other side it must be a different thing, or "from the ${side}" is not needed
+  assert.notEqual(list[n - 1], list[list.length - n], `${it.id}: "${it.say}" - the ${word} ${what} is the same from both sides, so the side word is not needed`);
   return side === 'left' ? list[n - 1] : list[list.length - n];
+}
+/** "the one between the A and the B": exactly one thing stands between the two. */
+function between(it, a, b) {
+  const row = rowOf(it);
+  const i = row.indexOf(named(it, a));
+  const j = row.indexOf(named(it, b));
+  assert.equal(Math.abs(i - j), 2, `${it.id}: exactly one thing must stand between the ${a} and the ${b}`);
+  return row[(i + j) / 2];
+}
+/** "both things next to" a named thing: its neighbour on each side. */
+function neighbours(it, kind) {
+  const row = rowOf(it);
+  const i = row.indexOf(named(it, kind));
+  assert.ok(i > 0 && i < row.length - 1, `${it.id}: the ${kind} needs a neighbour on both sides`);
+  return [row[i - 1], row[i + 1]];
+}
+/** Which sides a sentence counts from, in the order they are spoken: ['left', 'right'] */
+const sidesSaid = (it) => [...it.say.matchAll(/ from the (left|right)\b/g)].map((m) => m[1]);
+
+// ---- rules of wording that hold for every sentence ------------------------------------------------
+
+/**
+ * A bare place ("the first one", "the last two", "the one in the middle") straight after "from the right"
+ * can be heard as counted from the right too. So a bare place is only ever said BEFORE any side is named.
+ */
+export function bareAfterSide(say) {
+  const m = /\bfrom the (?:left|right)\b.*\b(the (?:first|last) (?:one|two)(?! from the (?:left|right)\b)|the one in the middle)/.exec(say);
+  return m ? m[1] : null;
+}
+/** Patterns whose paint job may not happen at all: there the colour after a name is only a "maybe". */
+const MAYBE = ['only-if', 'if-more'];
+/**
+ * A colour word straight after the name of a thing ("the ring yellow", "a crown yellow", "the keys red")
+ * is heard as: that thing gets that colour. So it must be true - at least one such thing ends up that colour.
+ */
+export function colourAfterName(it, answer) {
+  for (const [, kind, colour] of it.say.matchAll(new RegExp(`\\b${K}(?:es|s)? ${C}\\b`, 'g'))) {
+    if (!things(it).some((o) => o.kind === kind && answer[o.id] === colour)) return `the ${kind} ${colour}`;
+  }
+  return null;
 }
 
 /** Every way a sentence can point at things: phrase type -> [pattern, (item, ...captures) => things]. */
@@ -102,19 +144,6 @@ const PHRASES = {
     const mine = row.filter((o) => o.kind === kind);
     assert.ok(mine.length >= 2 && mine.length < row.length, `${it.id}: counting ${kind}s needs several of them among other things`);
     return [counted(it, mine, word, side, kind)];
-  }],
-  between: [`the one between the ${K} and the ${K}`, (it, a, b) => {
-    const row = rowOf(it);
-    const i = row.indexOf(named(it, a));
-    const j = row.indexOf(named(it, b));
-    assert.equal(Math.abs(i - j), 2, `${it.id}: exactly one thing must stand between the ${a} and the ${b}`);
-    return [row[(i + j) / 2]];
-  }],
-  sides: [`both things next to the ${K}`, (it, kind) => {
-    const row = rowOf(it);
-    const i = row.indexOf(named(it, kind));
-    assert.ok(i > 0 && i < row.length - 1, `${it.id}: the ${kind} needs a neighbour on both sides`);
-    return [row[i - 1], row[i + 1]];
   }],
 };
 /** What a phrase points at. Only the phrase types this pattern is allowed to use are tried. */
@@ -238,47 +267,50 @@ const RULES = {
     return paint(it, [[a, c1], [b, c2]]);
   },
 
-  // level 5: where it is in a row
+  // level 5: where it is in a row - always two paint jobs
   'row-ord': (it) => {
-    const { types, jobs } = listed(it, 3, ['nth', 'first', 'last', 'middle']);
-    assert.deepEqual(types.slice(0, 2), ['nth', 'nth']);
-    assert.notEqual(types[2], 'nth');
-    assert.ok(/from the left .* from the right/.test(it.say), `${it.id}: one counted from each end`);
+    const { types, jobs } = listed(it, 2, ['nth', 'first', 'last', 'middle']);
+    assert.ok(['first', 'last', 'middle'].includes(types[0]) && types[1] === 'nth', `${it.id}: an end or the middle first, then one counted place`);
+    differ(it, ...jobs.map((j) => j[1]));
+    return paint(it, jobs);
+  },
+  'row-both': (it) => {
+    const { types, jobs } = listed(it, 2, ['nth']);
+    assert.deepEqual(types, ['nth', 'nth']);
+    assert.deepEqual(sidesSaid(it).sort(), ['left', 'right'], `${it.id}: one counted from each end`);
     differ(it, ...jobs.map((j) => j[1]));
     return paint(it, jobs);
   },
   'row-ends': (it) => {
-    const { types, jobs } = listed(it, 3, ['first', 'first-two', 'last', 'last-two', 'middle']);
-    assert.deepEqual(types.map((t) => t.replace('-two', '')).sort(), ['first', 'last', 'middle']);
+    const { types, jobs } = listed(it, 2, ['first', 'first-two', 'last', 'last-two', 'middle']);
+    const places = types.map((t) => t.replace('-two', ''));
+    assert.equal(new Set(places).size, 2, `${it.id}: two different places`);
     differ(it, ...jobs.map((j) => j[1]));
     return paint(it, jobs);
   },
   'row-between': (it) => {
-    const { types, jobs } = listed(it, 3, ['between', 'thing', 'nth']);
-    assert.deepEqual(types, ['between', 'thing', 'nth']);
-    const [a, b] = /between the (\w+) and the (\w+)/.exec(it.say).slice(1);
-    assert.ok([a, b].includes(jobs[1][0][0].kind), `${it.id}: the named thing is one of the two it stands between`);
-    differ(it, ...jobs.map((j) => j[1]));
-    return paint(it, jobs);
+    const [c1, a, b, kind, c2] = rx(it, `Use ${C} on the one between the ${K} and the ${K}\\. Paint the ${K} ${C}\\.`);
+    assert.notEqual(a, b);
+    assert.ok([a, b].includes(kind), `${it.id}: the named thing is one of the two it stands between`);
+    differ(it, c1, c2);
+    return paint(it, [[[between(it, a, b)], c1], [[named(it, kind)], c2]]);
   },
   'row-sides': (it) => {
-    const { types, jobs } = listed(it, 3, ['sides', 'thing', 'first', 'last']);
-    assert.deepEqual(types.slice(0, 2), ['sides', 'thing']);
-    assert.ok(['first', 'last'].includes(types[2]));
-    assert.equal(jobs[1][0][0].kind, /next to the (\w+)/.exec(it.say)[1]);
-    differ(it, ...jobs.map((j) => j[1]));
-    return paint(it, jobs);
+    const [kind, c1, c2] = rx(it, `Paint the ${K} ${C}\\. Use ${C} on both things next to it\\.`); // "it" = the thing just named
+    differ(it, c1, c2);
+    return paint(it, [[[named(it, kind)], c1], [neighbours(it, kind), c2]]);
   },
   'row-kind': (it) => {
-    const { types, jobs } = listed(it, 3, ['nth-kind', 'thing']);
-    assert.deepEqual(types, ['nth-kind', 'nth-kind', 'thing']);
-    assert.ok(/from the left .* from the right/.test(it.say), `${it.id}: one counted from each end`);
+    const { types, jobs } = listed(it, 2, ['nth-kind']);
+    assert.deepEqual(types, ['nth-kind', 'nth-kind']);
     differ(it, ...jobs.map((j) => j[1]));
+    const said = Object.fromEntries([...it.say.matchAll(new RegExp(`the ${ORD} ${K} from the (left|right) `, 'g'))].map((m) => [m[3], { n: NTH[m[1]], kind: m[2] }]));
+    assert.ok(said.left && said.right, `${it.id}: one counted from each end`);
+    assert.equal(said.left.kind, said.right.kind, `${it.id}: both count the same kind of thing`);
     // the kind word must matter: counting every thing instead has to give a different answer somewhere
     const row = rowOf(it);
-    const [n1] = /the (\w+) \w+ from the left/.exec(it.say).slice(1);
-    const [n2] = /the (\w+) \w+ from the right/.exec(it.say).slice(1);
-    assert.ok(row[NTH[n1] - 1] !== jobs[0][0][0] || row[row.length - NTH[n2]] !== jobs[1][0][0], `${it.id}: the kind word is not needed`);
+    const mine = row.filter((o) => o.kind === said.left.kind);
+    assert.ok(row[said.left.n - 1] !== mine[said.left.n - 1] || row[row.length - said.right.n] !== mine[mine.length - said.right.n], `${it.id}: the kind word is not needed`);
     return paint(it, jobs);
   },
 
@@ -298,8 +330,9 @@ const RULES = {
     return paint(it, [[things(it).filter((o) => o.size === s1), c1], [things(it).filter((o) => o.size === s2), c2]]);
   },
   neither: (it) => {
-    const [k1, k2, c1, word, c2] = rx(it, `Paint everything that is neither an? ${K} nor an? ${K} ${C}\\. Paint the (\\w+) ${C}\\.`);
+    const [c1, a1, k1, a2, k2, word, c2] = rx(it, `Use ${C} on everything that is neither (an?) ${K} nor (an?) ${K}\\. Paint the (\\w+) ${C}\\.`);
     assert.notEqual(k1, k2);
+    for (const [article, kind] of [[a1, k1], [a2, k2]]) assert.equal(article, /^[aeiou]/.test(kind) ? 'an' : 'a', `${it.id}: "${article} ${kind}"`);
     differ(it, c1, c2);
     assert.ok(things(it).some((o) => o.kind === k1) && things(it).some((o) => o.kind === k2), `${it.id}: both kinds must be in the picture`);
     const second = oneOrAll(it, word);
@@ -363,6 +396,7 @@ const RULES = {
   'mem-row': (it) => {
     const { types, jobs } = listed(it, 3, ['nth', 'middle', 'thing']);
     assert.deepEqual([...types].sort(), ['middle', 'nth', 'thing']);
+    assert.ok(types.indexOf('middle') < types.indexOf('nth'), `${it.id}: the middle one is said before the counted one`);
     differ(it, ...jobs.map((j) => j[1]));
     return paint(it, jobs);
   },
@@ -390,7 +424,12 @@ const RULES = {
 export function solve(it) {
   const rule = Object.prototype.hasOwnProperty.call(RULES, it.v) ? RULES[it.v] : null;
   assert.ok(rule, `${it.id}: no independent rule for paint pattern "${it.v}" - add one to tests/unit/oracle-paint.test.mjs`);
-  return rule(it);
+  const bare = bareAfterSide(it.say);
+  assert.ok(!bare, `${it.id}: "${it.say}" - "${bare}" comes after "from the left / right" and could be counted from that side`);
+  const answer = rule(it);
+  const slip = MAYBE.includes(it.v) ? null : colourAfterName(it, answer);
+  assert.ok(!slip, `${it.id}: "${it.say}" - he hears "${slip}", but that is not what happens`);
+  return answer;
 }
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => a.localeCompare(b)));
 
@@ -441,16 +480,20 @@ test('paint: the oracle itself - hand-checked answers, unknown patterns, ambiguo
   assert.deepEqual(answer('size-pair', 'Paint the big key red and the small key blue.', ['s-key', 'gem', 'key']), { o1: 'blue', o3: 'red' });
   assert.deepEqual(answer('except-size', 'Paint all the stars red except the small one.', ['star', 's-star', 'star', 's-gem']), { o1: 'red', o3: 'red' });
   assert.deepEqual(answer('except-kind', 'Paint everything blue except the key.', ['gem', 'key', 's-egg']), { o1: 'blue', o3: 'blue' });
-  assert.deepEqual(answer('row-ord', 'Paint the second one from the left red, the second one from the right blue, and the first one green.', ['key', 'gem', 'gem', 'key', 'gem']), { o1: 'green', o2: 'red', o4: 'blue' });
-  assert.deepEqual(answer('row-ends', 'Paint the last one red, the one in the middle blue, and the first one green.', ['key', 'gem', 'gem', 'key', 'gem']), { o1: 'green', o3: 'blue', o5: 'red' });
-  assert.deepEqual(answer('row-ends', 'Paint the first two red, the one in the middle blue, and the last two green.', ['key', 'gem', 'gem', 'key', 'gem', 'gem', 'key']), { o1: 'red', o2: 'red', o4: 'blue', o6: 'green', o7: 'green' });
-  assert.deepEqual(answer('row-between', 'Paint the one between the key and the bell green, the bell blue, and the first one from the right red.', ['gem', 'key', 'gem', 'bell', 'gem']), { o3: 'green', o4: 'blue', o5: 'red' });
-  assert.deepEqual(answer('row-sides', 'Paint both things next to the star blue, the star green, and the first one red.', ['gem', 'egg', 'gem', 'star', 'egg']), { o1: 'red', o3: 'blue', o4: 'green', o5: 'blue' });
-  assert.deepEqual(answer('row-kind', 'Paint the first key from the left red, the first key from the right blue, and the egg green.', ['gem', 'key', 'key', 'egg', 'key', 'gem']), { o2: 'red', o4: 'green', o5: 'blue' });
+  assert.deepEqual(answer('row-ord', 'Paint the first one green and the second one from the right blue.', ['key', 'gem', 'gem', 'key', 'gem']), { o1: 'green', o4: 'blue' });
+  assert.deepEqual(answer('row-ord', 'Paint the one in the middle red and the second one from the left blue.', ['key', 'gem', 'gem', 'key', 'gem']), { o2: 'blue', o3: 'red' });
+  assert.deepEqual(answer('row-both', 'Paint the third one from the right red and the second one from the left blue.', ['key', 'gem', 'gem', 'key', 'gem', 'egg']), { o2: 'blue', o4: 'red' });
+  assert.deepEqual(answer('row-ends', 'Paint the last one red and the one in the middle blue.', ['key', 'gem', 'gem', 'key', 'gem']), { o3: 'blue', o5: 'red' });
+  assert.deepEqual(answer('row-ends', 'Paint the first two red and the last two green.', ['key', 'gem', 'gem', 'key', 'gem', 'gem', 'key']), { o1: 'red', o2: 'red', o6: 'green', o7: 'green' });
+  assert.deepEqual(answer('row-between', 'Use green on the one between the key and the bell. Paint the bell blue.', ['gem', 'key', 'gem', 'bell', 'gem']), { o3: 'green', o4: 'blue' });
+  assert.deepEqual(answer('row-between', 'Use green on the one between the bell and the key. Paint the key blue.', ['gem', 'key', 'gem', 'bell', 'gem']), { o2: 'blue', o3: 'green' });
+  assert.deepEqual(answer('row-sides', 'Paint the star green. Use blue on both things next to it.', ['gem', 'egg', 'gem', 'star', 'egg']), { o3: 'blue', o4: 'green', o5: 'blue' });
+  assert.deepEqual(answer('row-kind', 'Paint the first key from the left red and the first key from the right blue.', ['gem', 'key', 'key', 'egg', 'key', 'gem']), { o2: 'red', o5: 'blue' });
+  assert.deepEqual(answer('row-kind', 'Paint the second key from the right red and the second key from the left blue.', ['key', 'gem', 'key', 'key', 'egg', 'key']), { o3: 'blue', o4: 'red' });
   assert.deepEqual(answer('not-size', 'Paint every hat red, but not the big one. Paint that one blue.', ['s-hat', 'hat', 's-hat', 'gem']), { o1: 'red', o2: 'blue', o3: 'red' });
   assert.deepEqual(answer('if-size', 'If a thing is small, paint it red. Paint the big ones blue.', ['s-hat', 'hat', 's-gem']), { o1: 'red', o2: 'blue', o3: 'red' });
-  assert.deepEqual(answer('neither', 'Paint everything that is neither a key nor an egg green. Paint the egg red.', ['key', 'egg', 'gem', 's-gem', 'star']), { o2: 'red', o3: 'green', o4: 'green', o5: 'green' });
-  assert.deepEqual(answer('neither', 'Paint everything that is neither a key nor an egg green. Paint the keys red.', ['key', 'egg', 'gem', 's-key']), { o1: 'red', o3: 'green', o4: 'red' });
+  assert.deepEqual(answer('neither', 'Use green on everything that is neither a key nor an egg. Paint the egg red.', ['key', 'egg', 'gem', 's-gem', 'star']), { o2: 'red', o3: 'green', o4: 'green', o5: 'green' });
+  assert.deepEqual(answer('neither', 'Use green on everything that is neither a key nor an egg. Paint the keys red.', ['key', 'egg', 'gem', 's-key']), { o1: 'red', o3: 'green', o4: 'red' });
   assert.deepEqual(answer('unless', 'Paint all the small things blue, unless they are keys. Paint the big key red.', ['s-key', 's-gem', 's-egg', 'key', 'gem']), { o2: 'blue', o3: 'blue', o4: 'red' });
   assert.deepEqual(answer('unless', 'Paint all the small things blue, unless they are keys. Paint the big keys red.', ['s-key', 's-gem', 'key', 'key', 'gem']), { o2: 'blue', o3: 'red', o4: 'red' });
   assert.deepEqual(answer('only-if', 'Paint all the gems red. Paint the key blue, but only if it is small.', ['gem', 's-gem', 'key']), { o1: 'red', o2: 'red' });
@@ -459,6 +502,7 @@ test('paint: the oracle itself - hand-checked answers, unknown patterns, ambiguo
   assert.deepEqual(answer('if-more', 'If there are more gems than keys, paint the gems red. If not, paint the keys blue.', ['gem', 'key', 'gem', 'egg', 'gem', 'key']), { o1: 'red', o3: 'red', o5: 'red' });
   assert.deepEqual(answer('mem-except', 'Paint all the gems red except the small one. Paint that one blue and the bell green.', ['gem', 's-gem', 'gem', 'bell', 'hat']), { o1: 'red', o2: 'blue', o3: 'red', o4: 'green' });
   assert.deepEqual(answer('mem-row', 'Paint the drum red, the one in the middle green, and the second one from the left blue.', ['drum', 'gem', 'egg', 'gem', 'egg']), { o1: 'red', o2: 'blue', o3: 'green' });
+  assert.deepEqual(answer('mem-row', 'Paint the one in the middle green, the first one from the right blue, and the drum red.', ['drum', 'gem', 'egg', 'gem', 'egg']), { o1: 'red', o3: 'green', o5: 'blue' });
   assert.deepEqual(answer('mem-not', 'Paint every small thing red, but not the hat. Paint the hat blue.', ['s-gem', 's-hat', 'gem', 's-egg']), { o1: 'red', o2: 'blue', o4: 'red' });
   assert.deepEqual(answer('mem-all', 'Paint all the gems red, all the eggs blue, and the hat green.', ['gem', 'egg', 's-gem', 'hat', 's-egg', 'key']), { o1: 'red', o2: 'blue', o3: 'red', o4: 'green', o5: 'blue' });
 
@@ -468,10 +512,36 @@ test('paint: the oracle itself - hand-checked answers, unknown patterns, ambiguo
   assert.throws(() => solve(it('one', 'Paint the key red.', ['key', 'key', 'gem'])), /exactly one/); // which key?
   assert.throws(() => solve(it('size-pair', 'Paint the big key red and the small key blue.', ['key', 's-key', 's-key'])), /exactly one/);
   assert.throws(() => solve(it('size-one', 'Paint the big key red and the gem blue.', ['key', 'gem', 'egg'])), /is not needed/); // "big" with no small key
-  assert.throws(() => solve(it('row-ord', 'Paint the second one from the left red, the second one from the right blue, and the last one green.', ['key', 'gem', 'key'])), /twice/);
-  assert.throws(() => solve(it('row-between', 'Paint the one between the key and the bell green, the key blue, and the first one from the right red.', ['key', 'bell', 'gem', 'gem'])), /between/);
-  assert.throws(() => solve(it('neither', 'Paint everything that is neither a key nor an egg green. Paint the eggs red.', ['key', 'egg', 'gem'])), /more than one/);
-  assert.throws(() => solve(it('row-ends', 'Paint the first one red, the last one blue, and the one in the middle green.', ['key', 'gem', 'key', 'gem'])), /no middle/);
-  assert.throws(() => solve({ ...it('row-ends', 'Paint the first one red, the last one blue, and the one in the middle green.', ['key', 'gem', 'key', 'gem', 'egg']), scene: { ...picture(['key', 'gem', 'key', 'gem', 'egg']), cols: 3 } }), /one row/);
+  assert.throws(() => solve(it('row-ord', 'Paint the first one green and the third one from the left blue.', ['key', 'gem'])), /no third/);
+  assert.throws(() => solve(it('row-ord', 'Paint the last one green and the first one from the right blue.', ['key', 'gem', 'key'])), /twice/);
+  assert.throws(() => solve(it('row-ord', 'Paint the first one green and the third one from the left blue.', ['key', 'gem', 'key', 'gem', 'egg'])), /side word is not needed/); // third of five = the middle
+  assert.throws(() => solve(it('row-kind', 'Paint the second key from the left red and the first key from the right blue.', ['gem', 'key', 'key', 'egg', 'key'])), /side word is not needed/);
+  assert.throws(() => solve(it('row-kind', 'Paint the first key from the left red and the first key from the right blue.', ['key', 'key', 'egg', 'gem', 'key'])), /kind word is not needed/);
+  assert.throws(() => solve(it('row-both', 'Paint the second one from the left red and the first one from the left blue.', ['key', 'gem', 'key', 'gem', 'egg'])), /each end/);
+  assert.throws(() => solve(it('row-ends', 'Paint the first one red and the first two blue.', ['key', 'gem', 'key', 'gem', 'egg'])), /two different places/);
+  assert.throws(() => solve(it('row-between', 'Use green on the one between the key and the bell. Paint the key blue.', ['key', 'bell', 'gem', 'gem'])), /between/);
+  assert.throws(() => solve(it('row-between', 'Use green on the one between the key and the bell. Paint the egg blue.', ['key', 'egg', 'bell', 'gem'])), /one of the two/);
+  assert.throws(() => solve(it('row-sides', 'Paint the star green. Use blue on both things next to it.', ['star', 'egg', 'gem'])), /neighbour on both sides/);
+  assert.throws(() => solve(it('neither', 'Use green on everything that is neither a key nor an egg. Paint the eggs red.', ['key', 'egg', 'gem'])), /more than one/);
+  assert.throws(() => solve(it('neither', 'Use green on everything that is neither a key nor a egg. Paint the egg red.', ['key', 'egg', 'gem'])), /"a egg"/);
+  // a bare place must never follow "from the left / right" (the old wordings of row-ord and mem-row)
+  assert.throws(() => solve(it('row-ord', 'Paint the second one from the right blue and the first one green.', ['key', 'gem', 'gem', 'key', 'gem'])), /could be counted from that side/);
+  assert.throws(() => solve(it('mem-row', 'Paint the drum red, the second one from the left blue, and the one in the middle green.', ['drum', 'gem', 'egg', 'gem', 'egg'])), /could be counted from that side/);
+  assert.equal(bareAfterSide('Paint the third one from the left red, the fourth one from the right orange, and the last one yellow.'), 'the last one');
+  assert.equal(bareAfterSide('Paint the fourth one from the left yellow, the third one from the right orange, and the first one purple.'), 'the first one');
+  assert.equal(bareAfterSide('Paint the second one from the right red and the last two blue.'), 'the last two');
+  assert.equal(bareAfterSide('Paint the second one from the left red and the one in the middle blue.'), 'the one in the middle');
+  assert.equal(bareAfterSide('Paint the second one from the left red and the first one from the right blue.'), null);
+  assert.equal(bareAfterSide('Paint the last one red, the one in the middle green, and the second one from the right blue.'), null);
+  // a colour straight after a thing's name must be that thing's colour (the old wordings of row-sides, row-between and neither)
+  const row5 = it('x', '', ['gem', 'ring', 'gem', 'egg', 'crown']);
+  assert.equal(colourAfterName({ ...row5, say: 'Paint both things next to the ring yellow, the ring blue, and the last one purple.' }, { o1: 'yellow', o3: 'yellow', o2: 'blue', o5: 'purple' }), 'the ring yellow');
+  assert.equal(colourAfterName({ ...row5, say: 'Paint the one between the egg and the ring yellow, the egg green, and the first one from the left red.' }, { o3: 'yellow', o4: 'green', o1: 'red' }), 'the ring yellow');
+  assert.equal(colourAfterName({ ...row5, say: 'Paint everything that is neither an egg nor a crown yellow. Paint the egg red.' }, { o1: 'yellow', o2: 'yellow', o3: 'yellow', o4: 'red' }), 'the crown yellow');
+  assert.equal(colourAfterName({ ...row5, say: 'Paint the ring blue. Use yellow on both things next to it.' }, { o1: 'yellow', o2: 'blue', o3: 'yellow' }), null);
+  assert.equal(colourAfterName({ ...row5, say: 'Paint all the gems red except the small one.' }, { o1: 'red' }), null);
+  assert.throws(() => solve(it('row-ends', 'Paint the first one red and the one in the middle green.', ['key', 'gem', 'key', 'gem'])), /no middle/);
+  assert.throws(() => solve({ ...it('row-ends', 'Paint the first one red and the one in the middle green.', ['key', 'gem', 'key', 'gem', 'egg']), scene: { ...picture(['key', 'gem', 'key', 'gem', 'egg']), cols: 3 } }), /one row/);
+  assert.throws(() => solve(it('row-ends', 'Paint the first one red, the last one blue, and the one in the middle green.', ['key', 'gem', 'key', 'gem', 'egg'])), /expected 2 paint jobs/); // level 5 is two jobs
   assert.throws(() => solve(it('two', 'Paint the key red and the gem blue and so on.', ['key', 'gem', 'egg'])), /could not read every part/);
 });

@@ -44,6 +44,8 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
   const results = [];
   const startedAt = Date.now();
   let gate = Promise.resolve(); // held shut while the "leave?" box is open
+  let talking = false; // the instruction is being spoken right now (not the short pause after it)
+  let told = 0; // when the play area last reported a touch itself (see onStray)
 
   // --- elements --------------------------------------------------------------
   const pips = h('div', { class: 'pips', 'aria-hidden': 'true' });
@@ -70,7 +72,8 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
     h('main', { class: 'stage' },
       h('div', { class: 'guide-col' }, guideEl, steps),
       h('div', { class: 'board-col' }, boardWrap, caption)),
-    h('footer', { class: 'controls' }, btnHand, btnUndo, btnListen, btnDone));
+    h('footer', { class: 'controls', onclick: onBar }, btnHand, btnUndo, btnListen, btnDone));
+  boardWrap.addEventListener('click', onStray);
 
   const setGuide = (mood) => { guideEl.innerHTML = guideSVG(mood); guideEl.dataset.mood = mood; };
   function setPhase(p) {
@@ -143,14 +146,18 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
     setGuide('talk');
     setPhase('listening');
     const rate = (store.get().settings.slowVoice ? 0.88 : 1) * (support ? 0.88 : 1);
+    talking = true;
     const res = await audio.play(itemAudioUrl(item), { rate, text: item.say });
-    if (!alive || my !== token) return;
+    if (!alive || my !== token) return; // (whatever took over looks after `talking`)
+    talking = false;
     if (res.how === 'cancelled') {
+      view.setMode('ready');
       setGuide('idle');
       setPhase('ready');
       return;
     }
     if (!res.ok) showCaption(item.say); // no sound could be played at all: show the words so the trial stays fair
+    view.setMode('off'); // the voice has finished: a touch in the short pause before "go" is not "too early"
     await wait(level.holdMs ?? 300);
     if (!alive || my !== token) return;
     sfx.go();
@@ -176,10 +183,15 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
     sfx,
     onChange: () => refresh(), // his answer changed
     onSubmit: () => submit(), // a one-tap answer: check it straight away
-    onIdle: () => pulse(btnListen, 'hint', 700), // he touched it before pressing the ear
+    onIdle() { // he touched it before pressing the ear
+      told = performance.now();
+      pulse(btnListen, 'hint', 700);
+    },
     onEarly() {
       // Jumped in while the voice was still talking. Stay calm: count it and show "wait". Then either
       // carry on talking, or (the default) stop, ask him to listen to the end, and start again.
+      told = performance.now();
+      if (!talking) return; // the voice had already finished
       earlyTaps = Math.min(earlyTaps + 1, 9);
       setGuide('wait');
       if (store.get().settings.earlyReminder !== false && voice.has('wait-please')) remind();
@@ -187,9 +199,30 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
     },
   };
 
+  // A touch the play area did not report itself (a gap between things, a picture) still counts:
+  // before the ear it points at the ear, and while the voice talks it is "too early".
+  function onStray() {
+    if (performance.now() - told < 250) return; // the play area has just dealt with this very touch
+    if (phase === 'ready') host.onIdle();
+    else if (talking) host.onEarly();
+  }
+  // The same for the hand, the check mark and the back arrow: while they are switched off, touches
+  // fall through to the bar (see .controls .btn:disabled in app.css).
+  function onBar(e) {
+    if (e.target !== e.currentTarget || (phase !== 'ready' && !talking)) return;
+    const hit = (b) => {
+      const r = b.getBoundingClientRect();
+      return !b.hidden && r.width > 0 && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    };
+    if (![btnHand, btnDone, btnUndo].some(hit)) return;
+    if (phase === 'ready') host.onIdle();
+    else host.onEarly();
+  }
+
   /** "Please try your best to listen until I am finished talking" - then back to the ear. Nothing is lost. */
   async function remind() {
     const my = ++token; // the instruction that was playing stops here, quietly
+    talking = false;
     view.setMode('off');
     setPhase('feedback');
     await voice.say('wait-please');
@@ -273,6 +306,7 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
     }
     if (!alive || my !== token) return;
     await wait(350);
+    await gate; // the "leave?" box is open: the next turn waits for his answer
     if (!alive || my !== token) return;
     startTrial();
   }
@@ -281,15 +315,22 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
   async function demo(my) {
     view.reset();
     view.setMode('off');
-    setGuide('talk');
-    await audio.play(itemAudioUrl(item), { rate: 0.92, text: item.say });
+    for (let tries = 0; tries < 2; tries++) {
+      await gate; // (the "leave?" box cuts the sentence off: say it again when he comes back)
+      if (!alive || my !== token) return;
+      setGuide('talk');
+      const res = await audio.play(itemAudioUrl(item), { rate: 0.92, text: item.say });
+      if (!alive || my !== token) return;
+      if (res.how !== 'cancelled') break;
+    }
+    await gate;
     if (!alive || my !== token) return;
     setGuide('idle');
     if (plugin.isNone(item)) {
       pulse(btnHand, 'glow', 1800); // the right thing was to do nothing
       await wait(1800);
     } else {
-      await view.demo(() => { sfx.tap(); refresh(); });
+      await view.demo(() => { if (alive) { sfx.tap(); refresh(); } });
     }
   }
 

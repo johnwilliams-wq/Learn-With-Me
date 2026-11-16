@@ -35,12 +35,6 @@ function the(it, type, color) {
 }
 const other = (pos) => ({ up: 'down', down: 'up' })[pos];
 const flipOf = (s) => ({ c: s.id, v: other(s.pos) });
-function nth(it, type, word, side) {
-  const list = sort(it, type);
-  const k = ['first', 'second', 'third'].indexOf(word);
-  assert.ok(k >= 0 && k < list.length, `"${it.say}": no ${word} ${type}`);
-  return side === 'left' ? list[k] : list[list.length - 1 - k];
-}
 
 // --- one thing to do -> what it asks of the panel (a list of { c, v }) ---------------------------
 const PHRASES = [
@@ -55,26 +49,20 @@ const PHRASES = [
     const d = the(it, 'dial');
     return [{ c: d.id, v: d.value + (way === 'up' ? n(by) : -n(by)) }];
   }],
-  [new RegExp(`^type the code (${LIST})$`), (it, list) => [{ c: the(it, 'keypad').id, v: code(list) }]],
+  [new RegExp(`^type this code: (${LIST})$`), (it, list) => [{ c: the(it, 'keypad').id, v: code(list) }]],
   [/^press launch$/, (it) => [{ c: the(it, 'launch').id, v: true }]],
-  [new RegExp(`^press every button except the (${COL}) one$`), (it, color) => {
+  // "every round button": the colour buttons. Anything else a child could call a button must not be in
+  // the way: no dial (plus and minus), no number pad, and the rocket button only when the sentence ends with it.
+  [new RegExp(`^press every round button except the (${COL}) one$`), (it, color) => {
     the(it, 'button', color); // the one to leave out must really be there
+    assert.equal(sort(it, 'dial').length + sort(it, 'keypad').length, 0, `"${it.say}": "every round button" on a panel with other keys`);
+    assert.equal(sort(it, 'launch').length, / press launch\.$/.test(it.say) ? 1 : 0, `"${it.say}": the rocket button is there if and only if the sentence ends with it`);
     return sort(it, 'button').filter((b) => b.color !== color).map((b) => ({ c: b.id, v: 1 }));
   }],
   [new RegExp(`^flip every switch except the (${COL}) one$`), (it, color) => {
     the(it, 'switch', color);
     return sort(it, 'switch').filter((s) => s.color !== color).map(flipOf);
   }],
-  [new RegExp(`^press every button that is neither (${COL}) nor (${COL})$`), (it, c1, c2) => {
-    assert.notEqual(c1, c2);
-    the(it, 'button', c1);
-    the(it, 'button', c2);
-    return sort(it, 'button').filter((b) => b.color !== c1 && b.color !== c2).map((b) => ({ c: b.id, v: 1 }));
-  }],
-  [/^flip every switch that is (up|down)$/, (it, pos) => sort(it, 'switch').filter((s) => s.pos === pos).map(flipOf)],
-  [new RegExp(`^press the (first|second|third) button from the (left|right)(?: (${NUM}) times)?$`), (it, word, side, times) => [{ c: nth(it, 'button', word, side).id, v: times ? n(times) : 1 }]],
-  [/^flip the (first|second|third) switch from the (left|right)$/, (it, word, side) => [flipOf(nth(it, 'switch', word, side))]],
-  [new RegExp(`^press the (${COL}) button one time for each switch that is (up|down)$`), (it, color, pos) => [{ c: the(it, 'button', color).id, v: sort(it, 'switch').filter((s) => s.pos === pos).length }]],
 ];
 
 /** One group: what a single phrase such as "flip both switches" asks for. */
@@ -113,9 +101,9 @@ const theCode = (len) => (it) => {
 const backwards = (list) => [...code(list)].reverse().join('');
 
 const ORACLE = {
-  'press-one': chain(1), 'flip-one': chain(1), 'press-times': chain(1), 'dial-set': chain(1), 'dial-by': chain(1), 'count-up': chain(1),
+  'press-one': chain(1), 'flip-one': chain(1), 'press-times': chain(1), 'dial-set': chain(1), 'dial-by': chain(1),
   'two-then': chain(2), 'times-then': chain(2), 'dial-then': chain(2), 'code-then': chain(2),
-  'all-except': chain(2), neither: chain(2), 'switch-state': chain(2), ordinal: chain(2), 'hidden-except': chain(2),
+  'all-except': chain(2), 'hidden-except': chain(2),
   'three-then': chain(3), 'code-three': chain(3),
   code3: theCode(3), code4: theCode(4), code5: theCode(5), code6: theCode(6),
   // both things, in either order
@@ -146,24 +134,28 @@ const ORACLE = {
     const [a, b, c, d] = rx(it, /^([^,.]+), ([^,.]+), ([^,.]+), then ([^,.]+)\.$/);
     return [a, b, c, d].map((p) => does(it, p));
   },
-  // three things, then one of two depending on the light
+  // two things, then one of two depending on the light
   'if-light': (it) => {
-    const [a, b, c, c1, x1, c2, x2] = rx(it, /^([^,.]+), ([^,.]+), then ([^,.]+)\. If the light is (red|green), ([^,.]+)\. If it is (red|green), ([^,.]+) instead\.$/);
+    const [a, b, c1, x1, c2, x2] = rx(it, /^([^,.]+), then ([^,.]+)\. If the light is (red|green), ([^,.]+)\. If the light is (red|green), ([^,.]+) instead\.$/);
     assert.notEqual(c1, c2, `"${it.say}": both ifs name the same colour`);
     const [g1, g2] = [does(it, x1), does(it, x2)]; // both must make sense on this panel, whichever is taken
-    return [does(it, a), does(it, b), does(it, c), lightIs(it) === c1 ? g1 : g2];
+    return [does(it, a), does(it, b), lightIs(it) === c1 ? g1 : g2];
   },
-  unless: (it) => {
-    const [a, b, last, colour] = rx(it, /^([^,.]+), then ([^,.]+)\. Then ([^,.]+), unless the light is (red|green)\.$/);
-    const tail = does(it, last);
-    return [does(it, a), does(it, b), ...(lightIs(it) === colour ? [] : [tail])];
-  },
-  'only-if': (it) => {
-    const [first, last, colour] = rx(it, new RegExp(`^(Type the code ${LIST})\\. Then ([^,.]+) only if the light is (red|green)\\.$`));
-    const tail = does(it, last);
-    return [does(it, first), ...(lightIs(it) === colour ? [tail] : [])];
-  },
+  unless, 'unless-hidden': unless,
+  'only-if': onlyIf, 'only-if-hidden': onlyIf,
 };
+/** "A, then B. Then press launch, unless the light is red." - the last thing is left out when the light IS that colour. */
+function unless(it) {
+  const [a, b, last, colour] = rx(it, /^([^,.]+), then ([^,.]+)\. Then ([^,.]+), unless the light is (red|green)\.$/);
+  const tail = does(it, last);
+  return [does(it, a), does(it, b), ...(lightIs(it) === colour ? [] : [tail])];
+}
+/** "Type this code: .... Then press launch only if the light is green." - the last thing is done when the light IS that colour. */
+function onlyIf(it) {
+  const [first, last, colour] = rx(it, new RegExp(`^(Type this code: ${LIST})\\. Then ([^,.]+) only if the light is (red|green)\\.$`));
+  const tail = does(it, last);
+  return [does(it, first), ...(lightIs(it) === colour ? [tail] : [])];
+}
 
 // --- the tests -------------------------------------------------------------------------------
 const items = itemsOfType('panel');
@@ -203,6 +195,16 @@ test('panel: every item is well formed and fair', () => {
     // a light is only on the panel when the sentence talks about it (and the other way round)
     assert.equal(controls.some((c) => c.type === 'light'), /\blight\b/.test(it.say), `${it.id}: light and sentence do not go together`);
     if (it.auto) assert.ok(named.length === 1 && [1, 'up', 'down', true].includes(named[0].v), `${it.id}: an auto item is answered with one touch`);
+    // on a panel with a light, "red" and "green" can only mean the light
+    if (controls.some((c) => c.type === 'light')) {
+      for (const c of controls) if (c.type === 'button' || c.type === 'switch') assert.ok(!['red', 'green'].includes(c.color), `${it.id}: a ${c.color} ${c.type} beside the light`);
+      assert.doesNotMatch(it.say, /\bit\b/i, `${it.id}: say "the light" again, not "it"`);
+    }
+    // wordings that are heard two ways, or were never taught
+    assert.doesNotMatch(it.say, new RegExp(`\\bcode (?:${NUM}|for|to)\\b`, 'i'), `${it.id}: "the code four" is heard as "the code for"`);
+    assert.doesNotMatch(it.say, /\b(neither|nor)\b/i, `${it.id}: neither / nor is not taught in this world`);
+    // "every button" could count the rocket button, the dial's plus and minus, the keys: it is always "every round button"
+    assert.doesNotMatch(it.say, /\bevery button\b/i, `${it.id}: say "every round button"`);
   }
 });
 
@@ -219,10 +221,12 @@ test('panel: detail words are really needed (look-alikes on the panel)', () => {
       assert.ok(of('button').some((b) => b.color === color), `${it.id}: no ${color} button beside the ${color} switch`);
     }
     // "every switch that is up" must leave at least one switch alone; "both" needs exactly two
-    const state = /every switch that is (up|down)/.exec(it.say);
-    if (state) assert.ok(of('switch').some((s) => s.pos !== state[1]), `${it.id}: every switch is ${state[1]}`);
+    // "every ... except the yellow one": at least two are left to do, so "every" matters
+    const except = /^(Press every round button|Flip every switch) except/.exec(it.say);
+    if (except) assert.ok(of(except[1].startsWith('Press') ? 'button' : 'switch').length >= 3, `${it.id}: "every" names only one thing`);
     // codes: no number twice (so a code never reads the same backwards)
-    const list = new RegExp(`(?:code is|the code|backwards:) (${LIST})`).exec(it.say);
+    const list = new RegExp(`(?:code is|this code:|backwards:) (${LIST})`).exec(it.say);
+    assert.equal(Boolean(list), /\bcode\b/i.test(it.say), `${it.id}: a code is talked about but cannot be read`);
     if (list) assert.equal(new Set(list[1].split(', ')).size, list[1].split(', ').length, `${it.id}: a number is said twice`);
     // "if the light is ..." items come out both ways across the level, so the light cannot be guessed (checked below)
   }
@@ -240,15 +244,30 @@ test('panel: levels are varied, and the light really decides', () => {
     assert.ok(new Set(list.map((it) => it.v)).size >= 2, `${level}: only one sentence pattern`);
     assert.ok(new Set(list.map((it) => it.say)).size >= list.length * 0.6, `${level}: too many repeated sentences`);
   }
-  for (const v of ['unless', 'only-if']) {
-    const list = items.filter((it) => it.v === v);
-    if (!list.length) continue;
-    const launched = list.filter((it) => it.expect.flat().some((e) => e.v === true)).length;
-    assert.ok(launched > 0 && launched < list.length, `${v}: launch is ${launched ? 'always' : 'never'} pressed`);
+  // (worked out from the sentence and the light, not from the stored answer)
+  for (const [level, all] of byLevel) {
+    for (const [word, v] of [['unless', /^unless/], ['only if', /^only-if/]]) {
+      const list = all.filter((it) => v.test(it.v));
+      if (!list.length) continue;
+      const launched = list.filter((it) => {
+        const [colour] = rx(it, new RegExp(`${word} the light is (red|green)\\.$`));
+        return (lightIs(it) === colour) === (word === 'only if');
+      }).length;
+      assert.ok(launched > 0 && launched < list.length, `${level} ${word}: launch is ${launched ? 'always' : 'never'} pressed`);
+    }
   }
   const lights = items.filter((it) => it.v === 'if-light').map((it) => it.scene.controls.find((c) => c.type === 'light').color);
   if (lights.length) assert.equal(new Set(lights).size, 2, 'if-light: the light is always the same colour');
   for (const it of items.filter((x) => /^panel7-/.test(x.id))) assert.ok(it.hide, `${it.id}: Blackout items are heard with the panel covered`);
+  // the light is met with the controls in view (Tricky Talk) before it is met covered (Blackout), and not earlier
+  const lit = (it) => it.scene.controls.some((c) => c.type === 'light');
+  for (const it of items.filter(lit)) assert.match(it.id, /^panel[67]-/, `${it.id}: a light before Tricky Talk`);
+  const six = byLevel.get('panel6') || [];
+  for (const it of six) assert.ok(!it.hide, `${it.id}: nothing is covered in Tricky Talk`);
+  if (six.length) {
+    assert.ok(new Set(six.map((it) => it.v)).size <= 6, `panel6: ${new Set(six.map((it) => it.v)).size} kinds of sentence (six at most)`);
+    for (const word of ['unless', 'only if']) assert.ok(six.some((it) => lit(it) && it.say.includes(`${word} the light is`)), `panel6: no "${word} the light is" with the controls in view`);
+  }
 });
 
 test('panel: the oracle refuses a pattern it has no rule for, and notices a wrong answer key', () => {

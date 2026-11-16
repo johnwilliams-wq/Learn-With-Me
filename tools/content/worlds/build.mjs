@@ -4,8 +4,13 @@
 // The ladder, one new difficulty per level:
 //   1 two parts            2 three parts            3 "not" (work out which picture is left)
 //   4 numbers, four parts  5 comparing (longest, bigger, more, fewer, the same number)
-//   6 twisted sentences: before / after said backwards, neither / both, if / unless rules,
-//     "the second head", "twice as many"            7 five parts with the pictures hidden
+//     (also "twice as many", "one more than")
+//   6 thinking twice, four parts, one of: an if rule, an unless rule, neither / nor,
+//     "the second head", a change of plan ("Wait, no. Not wheels. Give it a jet.")
+//   7 five parts with the pictures hidden
+//
+// The workshop only looks at the finished robot, never at the order he chose the parts in, so
+// no sentence may claim an order ("before", "after", "then").
 //
 // Every generator builds its rows so that exactly ONE option in every row fits the sentence,
 // and so that each word is needed: two colour rows always show the same colours, and number
@@ -32,7 +37,15 @@ function np(part, v) {
   return `${NUM[v]} ${NOUN[part][v === 1 ? 0 : 1]}`;
 }
 const an = (word) => (/^[aeiou]/.test(word) ? 'an' : 'a');
-const list = (a) => (a.length === 1 ? a[0] : `${a.slice(0, -1).join(', ')} and ${a[a.length - 1]}`);
+/**
+ * "a, b and c". "No antennas" never stands right before a part that has no word of its own in
+ * front of it: "no antennas and wheels" could be heard as no wheels either, so it goes last.
+ */
+function list(a) {
+  const i = a.indexOf('no antennas');
+  if (i >= 0 && i < a.length - 1 && /^(legs|wheels|claws|short arms|long arms)$/.test(a[i + 1])) a = [...a.slice(0, i), ...a.slice(i + 1), a[i]];
+  return a.length === 1 ? a[0] : `${a.slice(0, -1).join(', ')} and ${a[a.length - 1]}`;
+}
 const again = (why) => new Error(`try again: ${why}`);
 const steps = (rows) => `steps${rows.length}`;
 
@@ -119,8 +132,10 @@ function negation(rng, i) {
   if (i % 2 === 0) {
     // two parts are said with a decoy after them: he must not grab the last word he heard
     const foil = (p) => rng.pick(options(p).filter((x) => x !== want[p]));
+    // nothing may follow a "not ..." inside its sentence: "legs, not wheels, and a blue body" could
+    // be heard as two things the robot must not have
     const say = i % 4 === 0
-      ? `Give the robot ${notThat(a, want[a], foil(a))}. It also needs ${notThat(b, want[b], foil(b))}, and ${np(c, want[c])}.`
+      ? `Give the robot ${notThat(a, want[a], foil(a))}. It also needs ${np(c, want[c])}, and ${notThat(b, want[b], foil(b))}.`
       : `Build a robot with ${np(c, want[c])} and ${notThat(a, want[a], foil(a))}. Give it ${notThat(b, want[b], foil(b))}.`;
     return draft(say, rows, want, ['not'], 'build-not');
   }
@@ -212,18 +227,30 @@ function sameNumber(rng) {
   return draft(`Give the robot ${list(said)}. It has the same number of ${x} as ${y}.`, rows, want, ['compare', 'count'], 'build-same');
 }
 
-// ----------------------------------------------------------------------------- 6: twisted sentences
-
-/** Five plain parts, but said out of order: "Before you give the robot B, give it A. Then ..." */
-function backwards(rng, before, extra) {
-  const parts = someParts(rng, 3, 2);
-  const want = targets(rng, parts);
-  const [a, b, ...rest] = parts.map((p) => np(p, want[p]));
-  const say = before
-    ? `Before you give the robot ${b}, give it ${a}. Then give it ${list(rest)}.`
-    : `Give the robot ${b} after you give it ${a}. It also needs ${list(rest)}.`;
-  return draft(say, plainRows(rng, want, 0.5), want, ['flip'], before ? 'build-before' : 'build-after', extra);
+/** "twice as many buttons as eyes" / "one more button than eyes": [said part, worked-out part, its number]. */
+function sum(rng) {
+  const [x, y] = rng.sample(COUNTS, 2);
+  const twice = rng.chance(0.5);
+  const ny = rng.pick(RANGE[y].filter((n) => n > 0 && RANGE[x].includes(twice ? n * 2 : n + 1)));
+  const nx = twice ? ny * 2 : ny + 1;
+  const text = twice ? `twice as many ${x} as ${y}` : `one more ${NOUN[x][0]} than ${y}`;
+  const xRow = { part: x, options: fill(rng, [nx, ny, twice ? ny + 1 : ny + 2, nx - 1].filter((n) => RANGE[x].includes(n)), RANGE[x], 3) };
+  return { x, y, nx, ny, text, xRow };
 }
+
+/** A number to work out, and `n` more parts: "This robot has two eyes and twice as many buttons as eyes. Give it ..." */
+function sumPlus(rng, n) {
+  const { x, y, nx, ny, text, xRow } = sum(rng);
+  const kinds = rng.sample(KINDS, n);
+  const want = targets(rng, kinds);
+  want[y] = ny;
+  const rows = plainRows(rng, want, 0.5, [nx]);
+  rows.push(xRow);
+  want[x] = nx;
+  return draft(`This robot has ${np(y, ny)} and ${text}. Give it ${list(kinds.map((p) => np(p, want[p])))}.`, rows, want, ['compare', 'count'], 'build-sum');
+}
+
+// ----------------------------------------------------------------------------- 6: thinking twice
 
 /** "The head is neither round nor square." / "The robot has neither legs nor a jet." */
 function neitherSentence(rng, part, want) {
@@ -232,18 +259,14 @@ function neitherSentence(rng, part, want) {
   return part === 'head' ? `The head is neither ${x} nor ${y}.` : `The robot has neither ${np(part, x)} nor ${np(part, y)}.`;
 }
 
-/** Neither / nor for one part, "both" for the two colour parts, and two more parts. */
-function neitherBoth(rng) {
-  const [n, k] = rng.sample(['head', 'arms', 'bottom'], 2);
-  const c = rng.pick(COUNTS);
-  const want = targets(rng, [n, k, c]);
-  const rows = plainRows(rng, want, 0.5);
-  const colours = rng.sample(COLORS, rng.pick([3, 4]));
-  want.body = colours[0];
-  want.nose = colours[0];
-  rows.push({ part: 'body', options: colours.slice() }, { part: 'nose', options: colours.slice() });
-  const say = `${neitherSentence(rng, n, want[n])} The body and the nose are both ${colours[0]}. Give the robot ${list(rng.shuffle([np(k, want[k]), np(c, want[c])]))}.`;
-  return draft(say, rows, want, ['logic'], 'build-neither');
+/** One part by "neither ... nor", the others (`kinds` by a describing word, `counts` by a number) simply named. */
+function neitherPlus(rng, kinds, counts) {
+  const n = rng.pick(['head', 'arms', 'bottom']);
+  const others = rng.shuffle([...rng.sample(KINDS.filter((k) => k !== n), kinds), ...rng.sample(COUNTS, counts)]);
+  const want = targets(rng, [n, ...others]);
+  // "it" after "The head is ..." would be the head
+  const say = `${neitherSentence(rng, n, want[n])} Give ${n === 'head' ? 'the robot' : 'it'} ${list(others.map((p) => np(p, want[p])))}.`;
+  return draft(say, plainRows(rng, want, 0.5), want, ['logic'], 'build-neither');
 }
 
 /** A rule to work out: "If the robot has wheels, it gets two antennas. If it has legs, it gets three antennas. Give it legs, ..." */
@@ -259,10 +282,12 @@ function rule(rng, unless) {
   rows.push({ part: q, options: fill(rng, [n1, n2], RANGE[q], rng.pick([3, 4])) });
   const given = `Give it ${list(rng.shuffle([p, ...kinds]).map((part) => np(part, want[part])))}.`;
   if (unless) {
-    // half the time the "unless" really happens, half the time it does not
+    // half the time the "unless" really happens, half the time it does not. The second sentence
+    // says the exception again with "if ... instead", so it cannot be heard as "and next ...".
     const happens = rng.chance(0.5);
     want[q] = happens ? n2 : n1;
-    const say = `The robot gets ${np(q, n1)}, unless it has ${np(p, happens ? want[p] : elsewhere)}. Then it gets ${np(q, n2)}. ${given}`;
+    const x = np(p, happens ? want[p] : elsewhere);
+    const say = `The robot gets ${np(q, n1)}, unless it has ${x}. If it has ${x}, it gets ${np(q, n2)} instead. ${given}`;
     return draft(say, rows, want, ['logic'], 'build-unless');
   }
   const branches = rng.shuffle([[want[p], n1], [elsewhere, n2]]);
@@ -271,27 +296,15 @@ function rule(rng, unless) {
   return draft(say, rows, want, ['logic'], 'build-if');
 }
 
-/** "twice as many buttons as eyes" / "one more button than eyes": [said part, worked-out part, its number]. */
-function sum(rng) {
-  const [x, y] = rng.sample(COUNTS, 2);
-  const twice = rng.chance(0.5);
-  const ny = rng.pick(RANGE[y].filter((n) => n > 0 && RANGE[x].includes(twice ? n * 2 : n + 1)));
-  const nx = twice ? ny * 2 : ny + 1;
-  const text = twice ? `twice as many ${x} as ${y}` : `one more ${NOUN[x][0]} than ${y}`;
-  const xRow = { part: x, options: fill(rng, [nx, ny, twice ? ny + 1 : ny + 2, nx - 1].filter((n) => RANGE[x].includes(n)), RANGE[x], 3) };
-  return { x, y, nx, ny, text, xRow };
-}
-
 const PLACE = ['first', 'second', 'third'];
-/** "Pick the last head and the second body." - a place in the row instead of a describing word. */
+/** "Pick the last head and the second body." - a place in the row instead of a describing word; two more parts simply named. */
 function places(rng) {
   const [a, b] = rng.sample(['head', 'body', 'nose'], 2);
-  const { x, y, nx, ny, text, xRow } = sum(rng);
-  const want = { [y]: ny };
-  const rows = plainRows(rng, want, 0.5, [nx]);
-  rows.push(xRow);
-  want[x] = nx;
-  const colours = rng.sample(COLORS, rng.pick([3, 4])); // both colour rows show the same colours
+  const others = rng.sample([...KINDS.filter((k) => k !== a && k !== b), ...COUNTS], 2);
+  const want = targets(rng, others);
+  const rows = plainRows(rng, want, 0.5);
+  // every colour row shows the same colours, whether its part is named by colour or by place
+  const colours = rows.find((r) => r.part === 'body' || r.part === 'nose')?.options ?? rng.sample(COLORS, rng.pick([3, 4]));
   const said = [a, b].map((part) => {
     const options = rng.shuffle(part === 'head' ? HEADS : colours);
     const at = rng.int(options.length);
@@ -299,33 +312,32 @@ function places(rng) {
     rows.push({ part, options, fixed: true }); // the order he sees is the order the sentence counts in
     return `the ${at === options.length - 1 ? 'last' : PLACE[at]} ${part}`;
   });
-  return draft(`Pick ${list(said)}. This robot has ${np(y, ny)} and ${text}.`, rows, want, ['ordinal', 'compare'], 'build-place');
+  return draft(`Pick ${list(said)}. The robot also needs ${list(others.map((p) => np(p, want[p])))}.`, rows, want, ['ordinal'], 'build-place');
+}
+
+/**
+ * A change of plan: "Give the robot four eyes, a green body and wheels. Wait, no. Not wheels. Give it a jet."
+ * One part is said, taken back and said again; the part that was taken back is a picture in the
+ * same row, so a listener who stops at the end of the list builds a robot that is on offer.
+ */
+function changeOfPlan(rng, i, parts) {
+  const want = targets(rng, parts);
+  const rows = plainRows(rng, want, 0.5);
+  const changed = rng.pick(parts);
+  // what he says first: another picture of that row, but not a colour or number that the list
+  // also gives to another part, and never "not no antennas"
+  const elsewhere = parts.filter((p) => p !== changed).map((p) => want[p]);
+  const firsts = rows.find((r) => r.part === changed).options.filter((v) => v !== want[changed] && v !== 0 && !elsewhere.includes(v));
+  if (!firsts.length) throw again('nothing else to say first');
+  const first = rng.pick(firsts);
+  const said = list(parts.map((p) => np(p, p === changed ? first : want[p])));
+  const say = `${FRAMES[i % 2](said)} Wait, no. Not ${np(changed, first)}. Give it ${np(changed, want[changed])}.`;
+  return draft(say, rows, want, ['end'], 'build-change');
 }
 
 // ----------------------------------------------------------------------------- 7: five parts, hidden
 
 const hidden = (d) => ({ ...d, hide: true, s: [...d.s, 'hidden'] });
-
-/** One part by "neither ... nor", four more simply named. */
-function neitherPlus(rng) {
-  const n = rng.pick(['head', 'arms', 'bottom']);
-  const others = rng.shuffle([...rng.sample(KINDS.filter((k) => k !== n), 2), ...rng.sample(COUNTS, 2)]);
-  const want = targets(rng, [n, ...others]);
-  const say = `${neitherSentence(rng, n, want[n])} Give the robot ${list(others.map((p) => np(p, want[p])))}.`;
-  return draft(say, plainRows(rng, want, 0.5), want, ['logic'], 'build-neither');
-}
-
-/** A number to work out, and three more parts. */
-function sumPlus(rng) {
-  const { x, y, nx, ny, text, xRow } = sum(rng);
-  const kinds = rng.sample(KINDS, 3);
-  const want = targets(rng, kinds);
-  want[y] = ny;
-  const rows = plainRows(rng, want, 0.5, [nx]);
-  rows.push(xRow);
-  want[x] = nx;
-  return draft(`This robot has ${np(y, ny)} and ${text}. Give it ${list(kinds.map((p) => np(p, want[p])))}.`, rows, want, ['compare', 'count'], 'build-sum');
-}
 
 // ----------------------------------------------------------------------------- the world
 
@@ -345,18 +357,25 @@ export default {
       tip: 'Now listen for numbers. How many eyes, how many antennas, how many buttons? Each number belongs to one part, so do not mix them up.',
       gen: numbers },
     { id: 'build5', title: 'Longest and Most', n: 18,
-      tip: 'Now you have to compare. Listen for words like longest, bigger, more and fewer. Look along the whole row before you choose.',
-      gen: (rng, i) => [() => sizes(rng, 4), moreFewer, mostFewest, sameNumber][i % 4](rng) },
-    { id: 'build6', title: 'Twisted Orders', n: 18,
-      tip: 'These are tricky. I may say the parts in a mixed up order, give you a rule to work out, or ask for the first or last picture in a row. Listen to every word, think, then build.',
-      gen: (rng, i) => [() => backwards(rng, true), neitherBoth, () => rule(rng, i % 10 >= 5), () => backwards(rng, false), places][i % 5](rng) },
+      tip: 'Now you have to compare. Listen for words like longest, bigger, more and fewer. Twice as many means two times as many. Look along the whole row before you choose.',
+      gen: (rng, i) => [() => sizes(rng, 4), moreFewer, mostFewest, sameNumber, () => sumPlus(rng, 2)][i % 5](rng) },
+    // five kinds of sentence, each announced by the tip; four rows and ONE of these ideas in every item
+    { id: 'build6', title: 'Think Twice', n: 18,
+      tip: 'Listen for if and unless. Unless means: but not when. Neither red nor blue means: not red and not blue. The first picture is on the left, like reading. If I change my mind, build the new part.',
+      gen: (rng, i) => [
+        () => rule(rng, false),
+        () => neitherPlus(rng, 2, 1),
+        () => changeOfPlan(rng, i, someParts(rng, 2, 2)),
+        places,
+        () => rule(rng, true),
+      ][i % 5](rng) },
     { id: 'build7', title: 'Blind Build', n: 18, holdMs: 800,
       tip: 'Now the pictures stay hidden while I talk. Listen to all five parts and keep them in your head. Build the robot when the pictures turn over.',
       gen: (rng, i) => hidden([
         () => listed(rng, i, someParts(rng, 3, 2), 0.5, ['detail']),
-        neitherPlus,
-        () => backwards(rng, i % 2 === 0),
-        sumPlus,
+        () => neitherPlus(rng, 2, 2),
+        () => changeOfPlan(rng, i, someParts(rng, 3, 2)),
+        () => sumPlus(rng, 3),
         () => sizes(rng, 5),
       ][i % 5](rng)) },
     { id: 'build-boss', title: 'Workshop Boss', boss: true, mix: ['build5', 'build6', 'build7'], holdMs: 800,

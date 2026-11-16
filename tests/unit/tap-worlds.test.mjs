@@ -43,9 +43,50 @@ test('each world is seven levels and a boss that mixes the hardest three', () =>
       assert.ok(level.id.startsWith(world.id), level.id);
       assert.ok(level.tip.length <= 200 && /[.!?]$/.test(level.tip), `${level.id}: tip`);
       assert.ok(!/\d/.test(level.tip), `${level.id}: numbers in a tip are written as words`);
-      if (level.gen) assert.equal(built.get(level.id).length, 18, level.id);
+      if (level.gen) {
+        // 18 items, or 15 where a level has only five sentences (each at most three times)
+        assert.equal(built.get(level.id).length, level.n, level.id);
+        assert.ok(level.n >= 15, `${level.id}: at least 15 items`);
+      }
+    }
+    // the world is introduced by its first level, and only there
+    assert.match(world.levels[0].tip, /^Welcome to /, `${world.id}: the first tip welcomes him`);
+    for (const level of world.levels.slice(1)) assert.ok(!/Welcome/.test(level.tip), `${level.id}: only the first level says welcome`);
+  }
+  // Logic Lab starts with the gentlest level (the ids are older than the order)
+  assert.deepEqual(logic.levels.map((l) => l.id), ['logic3', 'logic1', 'logic2', 'logic4', 'logic5', 'logic6', 'logic7', 'logic-boss']);
+});
+
+test('Memory Mountain: wherever the order is checked, the order is spoken', () => {
+  // Read straight from the stored answer (not through the oracle): more than one group = the
+  // game insists on that order, so the sentence has to say it.
+  const ORDER = /\bthen\b|^First, |\bbackwards\b|\bopposite order\b/;
+  let ordered = 0;
+  for (const level of memory.levels.filter((l) => l.gen)) {
+    for (const it of built.get(level.id)) {
+      if (it.expect.length < 2) continue;
+      ordered++;
+      assert.match(it.say, ORDER, `${it.id}: order is checked but never spoken: ${it.say}`);
+      // "Tap A, then B, then C": a list that is tapped as said names its order at EVERY step,
+      // unless it is the "A, B, and then C" or "First ... Last" form
+      if (/^Tap the /.test(it.say) && !/, and then /.test(it.say)) {
+        const list = it.say.replace(/, but .*$/, '').replace(/\. After that, tap /, ', then ');
+        assert.equal(list.split(', then ').length, mentions(list).length, `${it.id}: a step without "then": ${it.say}`);
+      }
     }
   }
+  assert.ok(ordered >= 7 * 18 - 1, `only ${ordered} ordered items`);
+  // ... and the oracle refuses the same lists said without an order
+  const refuse = (v, from, to) => {
+    const it = built.get('memory6').find((x) => x.v === v);
+    const say = it.say.replace(from, to);
+    assert.notEqual(say, it.say, v);
+    assert.throws(() => MEMORY_RULES[v]({ ...it, say }, mentions(say), helpers), `${v}: "${say}" should be refused`);
+  };
+  refuse('skip-nth', /, then /g, ', ');
+  refuse('skip-named', /, then /g, ', ');
+  refuse('count-each', /, then /g, ', ');
+  refuse('count-each', /, then (the \w+ (?:once|\w+ times))\.$/, ', and $1.');
 });
 
 test('every pattern is new, has its own rule, and the rule agrees with the generator', () => {
@@ -156,13 +197,15 @@ test('the ladders really get harder', () => {
   const taps = (id) => built.get(id).map((it) => it.expect.flat().length);
   const max = (id) => Math.max(...taps(id));
   const hidden = (id) => built.get(id).filter((it) => it.hide).length;
-  // Memory Mountain: 3, 4, 3 hidden, 5, backwards up to 4, skipping / counting, 6 and hidden detail
+  // Memory Mountain: 3, 4, 3 hidden, 5, backwards up to 4, skipping / counting, 6 and three hidden with full detail
   assert.deepEqual(['memory1', 'memory2', 'memory3', 'memory4'].map(max), [3, 4, 3, 5]);
   assert.equal(hidden('memory1') + hidden('memory2') + hidden('memory4'), 0);
   assert.equal(hidden('memory3'), 18);
   assert.equal(max('memory5'), 4);
   assert.ok(max('memory6') >= 4 && max('memory7') === 6);
   assert.ok(hidden('memory7') >= 6 && built.get('memory7').some((it) => it.hide && mentions(it.say).every((q) => q.size && q.color)));
+  // one new difficulty: the hidden items of the summit name as many things as the hidden level before, with one more word each
+  for (const it of built.get('memory7').filter((x) => x.hide)) assert.equal(it.expect.length, 3, `${it.id}: three hidden things`);
   for (const id of ['memory5', 'memory6', 'memory7']) assert.ok(built.get(id).every((it) => it.expect.flat().length >= 2), id);
   // Logic Lab: both branches of every decision come up
   for (const id of ['logic5', 'logic7']) {

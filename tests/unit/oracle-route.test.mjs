@@ -84,14 +84,18 @@ const RULES = {
   legs2: (it) => drive(it, ...rx(it, legs(2))),
   'legs2-first': (it) => drive(it, ...rx(it, new RegExp(`^First go ${D} ${N} squares?\\. Then go ${D} ${N} squares?\\.$`))),
   legs3: (it) => drive(it, ...rx(it, legs(3))),
+  'legs3-hidden': (it) => drive(it, ...rx(it, legs(3))), // the same words as legs3, but the map is covered while he listens
   legs4: (it) => drive(it, ...rx(it, legs(4))),
   legs5: (it) => drive(it, ...rx(it, legs(5))),
 
   // places: where to finish, what to come past first (in order), what to drive over, what to keep off
   to: (it) => stops(it, ...rx(it, new RegExp(`^Go to ${T}\\.$`))),
-  'to-drive': (it) => stops(it, ...rx(it, new RegExp(`^Drive the rover to ${T}\\.$`))),
   'to-flag': (it) => {
     const [flag] = rx(it, new RegExp(`^Go to (the (?:${COLOUR}) flag)\\.$`));
+    return stops(it, flag);
+  },
+  'to-flag-drive': (it) => {
+    const [flag] = rx(it, new RegExp(`^Drive the rover to (the (?:${COLOUR}) flag)\\.$`));
     return stops(it, flag);
   },
   chain2: (it) => stops(it, ...rx(it, new RegExp(`^Go to ${T}, then to ${T}\\.$`))),
@@ -107,28 +111,34 @@ const RULES = {
     const [a, b, no] = rx(it, new RegExp(`^Go to ${T}, then to ${T}, but do not touch ${T}\\.$`));
     return { ...stops(it, a, b), avoid: [place(it, no)] };
   },
-  neither: (it) => {
-    const [a, b, no1, no2] = rx(it, new RegExp(`^Go to ${T}, then to ${T}\\. Touch neither ${T} nor ${T}\\.$`));
+  // "do not touch A or B": keep off both
+  'chain-avoid-two': (it) => {
+    const [a, b, no1, no2] = rx(it, new RegExp(`^Go to ${T}, then to ${T}\\. Do not touch ${T} or ${T}\\.$`));
     return { ...stops(it, a, b), avoid: [place(it, no1), place(it, no2)] };
   },
+  // Sentences that say "on the way" also return `onWay`: the squares of the things they say are on the way.
   // "only": everything else that could be picked up must be left where it is
   'pickup-only': (it) => {
     const [end, get] = rx(it, new RegExp(`^Go to ${T}\\. On the way, pick up only ${T}\\.$`));
     const need = [pickup(it, get)];
     const rest = it.scene.loot.map((o) => o.at).filter((p) => str(p) !== str(need[0]));
     assert.ok(rest.length >= 1, `"${it.say}": the word only needs something to leave behind`);
-    return { ...stops(it, end), need, avoid: rest };
+    return { ...stops(it, end), need, avoid: rest, onWay: need };
   },
   'pickup-not': (it) => {
     const [end, yes, kind, no] = rx(it, new RegExp(`^Go to ${T}\\. Pick up (the (?:${COLOUR}) (${PICKUP})) on the way, but not the (${COLOUR}) one\\.$`));
-    return { ...stops(it, end), need: [pickup(it, yes)], avoid: [pickup(it, `the ${no} ${kind}`)] };
+    const need = [pickup(it, yes)];
+    return { ...stops(it, end), need, avoid: [pickup(it, `the ${no} ${kind}`)], onWay: need };
   },
   'pickup-two': (it) => {
     const [end, a, b] = rx(it, new RegExp(`^Go to ${T}\\. On the way, pick up ${T} and ${T}, but nothing else\\.$`));
     const need = [pickup(it, a), pickup(it, b)];
     const rest = it.scene.loot.map((o) => o.at).filter((p) => !need.map(str).includes(str(p)));
     assert.ok(rest.length >= 1, `"${it.say}": "nothing else" needs something to leave behind`);
-    return { ...stops(it, end), need, avoid: rest };
+    // he may fetch them in either order, but they are named in the order that is the shorter drive
+    const round = (x, y) => dist(it.scene.start, x) + dist(x, y) + dist(y, place(it, end));
+    assert.ok(round(need[0], need[1]) < round(need[1], need[0]), `"${it.say}": the thing he comes to first should be named first`);
+    return { ...stops(it, end), need, avoid: rest, onWay: need };
   },
 
   // said backwards
@@ -179,11 +189,12 @@ const RULES = {
     const it2 = it.scene.loot.find((o) => str(o.at) === str(at));
     // the colour word and the thing word are both needed: something else has the colour that was asked for, or does not
     assert.ok(it.scene.loot.some((o) => o !== it2 && (o.color === colour) !== (it2.color === colour)), `"${it.say}": needs a second thing of the other colour`);
-    return it2.color === colour ? { ...stops(it, end), need: [at] } : { ...stops(it, end), avoid: [at] };
+    return it2.color === colour ? { ...stops(it, end), need: [at], onWay: [at] } : { ...stops(it, end), avoid: [at], onWay: [at] };
   },
 };
 
-const tidy = (e) => ('path' in e ? e : { ...e, need: e.need.map(str).sort(), avoid: e.avoid.map(str).sort() });
+// (need and avoid are sets; `onWay` is not part of the answer - the fairness test below uses it)
+const tidy = (e) => ('path' in e ? { path: e.path } : { end: e.end, via: e.via, need: e.need.map(str).sort(), avoid: e.avoid.map(str).sort() });
 
 test('every route item: the answer worked out from the sentence matches the stored answer', (t) => {
   if (!items.length && !process.env.LWM_ITEMS_DIR) return t.skip('the route world is not in the game data yet');
@@ -250,7 +261,9 @@ test('every map is well formed: one thing per square, no doubles, sound-alikes k
     assert.ok(it.scene.cols >= 5 && it.scene.cols <= 6 && it.scene.rows >= 4 && it.scene.rows <= 5, `${it.id}: map size`);
     assert.ok(it.s.includes('route') && !it.auto, it.id);
     assert.ok(it.say.split(' ').length <= 35, `${it.id}: sentence too long`);
-    assert.equal(!!it.hide, ['legs4', 'legs5', 'mem-chain'].includes(it.v), `${it.id}: only the memory routes are covered`);
+    assert.equal(!!it.hide, ['legs3-hidden', 'legs4', 'legs5', 'mem-chain'].includes(it.v), `${it.id}: only the memory routes are covered`);
+    // "three" and "tree" sound alike
+    if (/\bthree\b/.test(it.say)) assert.ok(!things.some((o) => o.kind === 'tree'), `${it.id}: "${it.say}" - the word three is spoken and there is a tree on the map`);
   }
 });
 
@@ -295,11 +308,48 @@ test('places: enough look-alikes, a way to do it, and every "do not" really is i
       assert.ok(e.avoid.some((p) => tempting.has(str(p))), `${it.id}: "${it.say}" - nothing that must be left alone is on a natural way there`);
       assert.ok(shortest(it, free) > 0, it.id);
     }
-    if (it.v === 'neither') {
+    if (it.v === 'chain-avoid-two') {
       // one of the two is in the way on the first part of the drive, the other on the second part
       const first = corners(it.scene.start, e.via[0]);
       const second = corners(e.via[0], e.end);
       assert.ok(e.avoid.some((p) => first.has(str(p))) && e.avoid.some((p) => second.has(str(p))), `${it.id}: one of the two is not in the way`);
+    }
+  }
+});
+
+/** p lies in the block of squares between a and b: some shortest drive from a to b comes past it. */
+const inBlock = (a, b, p) => p[0] >= Math.min(a[0], b[0]) && p[0] <= Math.max(a[0], b[0]) && p[1] >= Math.min(a[1], b[1]) && p[1] <= Math.max(a[1], b[1]);
+
+test('stops in order: no later stop lies on a short way to an earlier one (the numbers on the map would contradict the order)', () => {
+  for (const it of items.filter((x) => 'end' in x.expect)) {
+    const read = RULES[it.v](it);
+    const order = [it.scene.start, ...read.via, read.end];
+    for (let k = 1; k < order.length - 1; k++) for (let j = k + 1; j < order.length; j++) {
+      assert.ok(!inBlock(order[k - 1], order[k], order[j]), `${it.id}: "${it.say}" - stop ${j} is on the way to stop ${k}`);
+    }
+    if (it.v === 'after-both') {
+      // the two first stops may come in either order; the last one is on no short way to either
+      const [a, b] = read.need;
+      for (const [x, y] of [[it.scene.start, a], [it.scene.start, b], [a, b]]) assert.ok(!inBlock(x, y, read.end), `${it.id}: "${it.say}" - the last stop is on the way to an earlier one`);
+    }
+  }
+});
+
+test('"on the way" is true: the things it names are near the way, and each one has to be listened for', () => {
+  for (const it of items.filter((x) => 'end' in x.expect)) {
+    const read = RULES[it.v](it);
+    assert.equal(/\bon the way\b/i.test(it.say), !!read.onWay, `${it.id}: "${it.say}" - a sentence that says "on the way" needs the on-the-way check`);
+    if (!read.onWay) continue;
+    const direct = dist(it.scene.start, read.end);
+    // each thing on its own: going past it costs at most two extra moves
+    for (const p of read.onWay) assert.ok(dist(it.scene.start, p) + dist(p, read.end) <= direct + 2, `${it.id}: "${it.say}" - a thing is not on the way (${dist(it.scene.start, p) + dist(p, read.end)} moves past it, ${direct} direct)`);
+    // the whole right drive (keeping off what must be left alone): at most two extra moves per thing
+    const best = shortest(it, read);
+    assert.ok(best > 0 && best <= direct + 2 * read.onWay.length, `${it.id}: "${it.say}" - the right drive is ${best} moves, the direct one ${direct}`);
+    // a drive that is no longer could miss each thing to fetch - so its name must be heard
+    for (const p of read.need) {
+      const lazy = shortest(it, { ...read, need: read.need.filter((q) => q !== p), avoid: [...read.avoid, p] });
+      assert.ok(lazy > 0 && lazy <= best, `${it.id}: "${it.say}" - every short way there comes past a thing to fetch anyway`);
     }
   }
 });
@@ -316,4 +366,10 @@ test('each level rotates several sentence patterns, and "if" items go both ways'
   if (unless.length >= 3) assert.ok(unless.includes(true) && unless.includes(false), '"unless" must sometimes apply and sometimes not');
   const iff = items.filter((it) => it.v === 'pickup-if').map((it) => it.expect.need.length > 0);
   if (iff.length >= 3) assert.ok(iff.includes(true) && iff.includes(false), '"only if" must sometimes apply and sometimes not');
+  // the memory level starts with three counted moves; five is the top, not the rule
+  const covered = items.filter((it) => it.hide && 'path' in it.expect);
+  if (covered.length) {
+    assert.ok(covered.some((it) => it.v === 'legs3-hidden'), 'the covered counted routes should start with three moves');
+    assert.ok(covered.filter((it) => it.v === 'legs5').length * 3 <= covered.length, 'at most one covered counted route in three has five moves');
+  }
 });

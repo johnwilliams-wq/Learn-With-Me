@@ -51,24 +51,24 @@
    "file": "a05b63203078.mp3"
   },
   "tip-memory7": {
-   "text": "The top of the mountain! Six steps in a row. And sometimes four hidden things, with a size and a color for each one. Breathe, listen to the end, and picture them.",
-   "file": "c7224414d447.mp3"
+   "text": "The top of the mountain! Six steps in a row. And sometimes three hidden things, with a size and a color for each one. Breathe, listen to the end, and picture them.",
+   "file": "e3f51915f0ad.mp3"
   },
   "tip-memory-boss": {
    "text": "Summit boss! Backwards lists, skipping, counting, and six steps. Listen all the way to the end. Then go one step at a time.",
    "file": "82619765d921.mp3"
   },
+  "tip-logic3": {
+   "text": "Welcome to the Logic Lab! First, think about groups. Things you can wear, like a hat or a ring. Animals, like a cat. Things that can fly. Tap every one that fits. Then press the green check mark.",
+   "file": "f238627399c1.mp3"
+  },
   "tip-logic1": {
-   "text": "Welcome to the Logic Lab! Everything is in one row. Count along the row to find the right one. Listen for which side to start from: the left, or the right.",
-   "file": "591e16312968.mp3"
+   "text": "Now everything is in one row. Listen for the side to start counting from: the left, or the right. If I say the second red one, count only the red ones.",
+   "file": "2429195e4efd.mp3"
   },
   "tip-logic2": {
-   "text": "Now some things look the same. Listen for what is beside each one. Next to. Between. To the left of. Only one of them fits.",
-   "file": "ce5bf3a69d36.mp3"
-  },
-  "tip-logic3": {
-   "text": "Now think about groups. Things you can wear, like a hat or a ring. Animals, like a cat. Things that can fly. Tap every one that fits. Then press the green check mark.",
-   "file": "cb615896908c.mp3"
+   "text": "One row again, but now some things look the same. Listen for what is beside each one. Next to. Between. To the left of. Only one of them fits.",
+   "file": "173fbb0cd5a9.mp3"
   },
   "tip-logic4": {
    "text": "Two clues at once. Red and small means it must be both. Neither blue nor big means it is not blue, and it is not big. Tap all that fit. Then the green check mark.",
@@ -79,8 +79,8 @@
    "file": "19c94db422f4.mp3"
   },
   "tip-logic6": {
-   "text": "Tricky words: unless, and only if. Tap the star, unless there is a dragon. So if you see a dragon, do not tap anything. Press the hand instead.",
-   "file": "bd9cac7eca89.mp3"
+   "text": "Tricky words: unless, and only if. Tap the star, unless there is a dragon. So if you see a dragon, do not tap anything. Press the hand instead. Only if means: do it just when that is true.",
+   "file": "3351346a061b.mp3"
   },
   "tip-logic7": {
    "text": "I will give you two orders, but only one is right. Check what is true. Then do only that one, in the right order, and press the green check mark.",
@@ -107,12 +107,12 @@
    "file": "53c672146c76.mp3"
   },
   "tip-pack5": {
-   "text": "Now the order matters. Listen for first, then, before, and after. Sometimes I say it backwards. So stop and think: which one do I move first? The little numbers show your order.",
-   "file": "6963feeab6fe.mp3"
+   "text": "Now the order matters. Listen for first, then, before, after, and not until. Sometimes I say it backwards. So stop and think: which one do I move first? The little numbers show your order.",
+   "file": "6c699e5712f2.mp3"
   },
   "tip-pack6": {
-   "text": "Now there is an if. Look at the shelf before you move anything. And if there is nothing you should move, tap the hand.",
-   "file": "cafbfb199594.mp3"
+   "text": "Now there is an if. Look at the shelf before you move anything. Unless there is a crown means: if you see a crown, move nothing. And if there is nothing you should move, tap the hand.",
+   "file": "37ee603aafd4.mp3"
   },
   "tip-pack7": {
    "text": "Memory time! Everything hides while I talk. Say the list back in your head. Then pack it all, and press the green check mark.",
@@ -139,12 +139,12 @@
    "file": "82055e9246f6.mp3"
   },
   "tip-paint5": {
-   "text": "Now they stand in one row. The row starts on the left, like reading. Listen for where: second, last, in the middle, between, next to.",
-   "file": "7f1ca471d272.mp3"
+   "text": "Now they stand in one row. The first one is on the left, like reading. The last one is on the right. Listen for where: second from the right, in the middle, between, next to.",
+   "file": "79f929fc3b0c.mp3"
   },
   "tip-paint6": {
-   "text": "Listen for NOT, IF, and UNLESS. They tell you which things get paint, and which things you must leave alone.",
-   "file": "c5ec73946343.mp3"
+   "text": "Tricky words. Unless they are keys means: the keys do not get that paint. Neither a drum nor a gem means: not a drum, and not a gem. Listen for NOT and IF too. Some things get no paint at all.",
+   "file": "4d1249a48d87.mp3"
   },
   "tip-paint7": {
    "text": "Now the things are hidden while I talk, and there are three or four paint jobs. Say each one back in your head. Then paint.",
@@ -171,12 +171,12 @@
    "file": "8eabd5418223.mp3"
   },
   "tip-build5": {
-   "text": "Now you have to compare. Listen for words like longest, bigger, more and fewer. Look along the whole row before you choose.",
-   "file": "9d35978182f5.mp3"
+   "text": "Now you have to compare. Listen for words like longest, bigger, more and fewer. Twice as many means two times as many. Look along the whole row before you choose.",
+   "file": "8eb348023049.mp3"
   },
   "tip-build6": {
-   "text": "These are tricky. I may say the parts in a mixed up order, give you a rule to work out, or ask for the first or last picture in a row. Listen to every word, think, then build.",
-   "file": "55ebc7791397.mp3"
+   "text": "Listen for if and unless. Unless means: but not when. Neither red nor blue means: not red and not blue. The first picture is on the left, like reading. If I change my mind, build the new part.",
+   "file": "4f7917e2116b.mp3"
   },
   "tip-build7": {
    "text": "Now the pictures stay hidden while I talk. Listen to all five parts and keep them in your head. Build the robot when the pictures turn over.",
@@ -191,32 +191,32 @@
    "file": "5b01b16188a8.mp3"
   },
   "tip-route2": {
-   "text": "Now the route has a turn in it. Drive the first part, then turn and drive the next part. Made a slip? The arrow at the bottom of the screen takes one move back.",
-   "file": "93e76733f28d.mp3"
+   "text": "Now the route has a turn in it. Drive the first part, then turn and drive the next part. Made a slip? The thin arrow next to the round arrow takes one move back.",
+   "file": "4c40f658abf0.mp3"
   },
   "tip-route3": {
    "text": "Now I name a place on the map. Drive the rover there any way you like, and stop on its square. Then press the green check mark.",
    "file": "de7f40fde65c.mp3"
   },
   "tip-route4": {
-   "text": "Now there are stops on the way. Drive to each place in the order I say, and finish on the last one. You can see a number on every place you have been.",
-   "file": "9638281f0acd.mp3"
+   "text": "Now there are stops on the way. Drive to each place in the order I say, and finish on the last one. Driving past other places is fine. The numbers show where you have been.",
+   "file": "c7e653924c85.mp3"
   },
   "tip-route5": {
-   "text": "Now there are rules. Do not touch means: never drive onto that square. To pick a thing up, drive over it. Listen for the words not and only.",
-   "file": "b78a638ec578.mp3"
+   "text": "Now there are rules. Do not touch means: never drive onto that square. To pick a thing up, drive over it. Except means: leave that one out. Listen for the words not and only.",
+   "file": "6ffad1d6bfb0.mp3"
   },
   "tip-route6": {
-   "text": "Tricky orders! Sometimes I say the last stop first. Sometimes the map decides where you go. Think before you drive: what comes first?",
-   "file": "460a0231a33e.mp3"
+   "text": "Tricky orders! Sometimes I say the last stop first. Think: what comes first? Sometimes the map decides. Only if it is red means: when it is red, do it. When it is not red, leave it alone.",
+   "file": "0e9512d77a0d.mp3"
   },
   "tip-route7": {
    "text": "Long routes from memory! The map hides while I talk. Say the route in your head, then drive it. The round arrow lets you hear it one more time.",
    "file": "b0208c62a0b8.mp3"
   },
   "tip-route-boss": {
-   "text": "Route Boss! Rules, tricky orders and long routes from memory. Take your time, and think before you drive.",
-   "file": "15f7b73cf69b.mp3"
+   "text": "Route Boss! Rules, tricky orders and long routes from memory. To pick a thing up, drive over it. Do not touch means never drive onto it. Think before you drive.",
+   "file": "a70de7b60a12.mp3"
   },
   "tip-panel1": {
    "text": "Welcome to the Control Room! Round buttons are for pressing. Switches flip up and down. Listen for the color, and for button or switch. Then do it.",
@@ -239,12 +239,12 @@
    "file": "acfa433ebd9d.mp3"
   },
   "tip-panel6": {
-   "text": "Tricky words now. Before and after can be said backwards. Except means leave that one out. Backwards means start with the last number. Think first, then press.",
-   "file": "178f12287786.mp3"
+   "text": "Tricky words now. Before and after can be said backwards. Except means leave that one out. Backwards means start with the last number. The light is red or green. Sometimes it decides what you do.",
+   "file": "70cd1f709f1d.mp3"
   },
   "tip-panel7": {
-   "text": "Blackout! The controls stay covered while I talk, so remember everything. Sometimes the light decides what you do. Look at it when the cover opens.",
-   "file": "07dede1f51cf.mp3"
+   "text": "Blackout! The controls stay covered while I talk, so remember everything. The light is red or green, and sometimes it decides what you do. Look at it when the cover opens.",
+   "file": "427a9c7a9044.mp3"
   },
   "tip-panel-boss": {
    "text": "Control Room Boss! Long codes, tricky words, and covered controls. Listen to every word. Then take your time and check your work before the green check mark.",
@@ -267,16 +267,16 @@
    "file": "4079af1f25a9.mp3"
   },
   "tip-truth5": {
-   "text": "Everything stands in one row now. Listen for where things are: next to, between, left, right, the end, and the middle. Find the place, then choose.",
-   "file": "7ca2660f4648.mp3"
+   "text": "Everything stands in one row now. Listen for where things are: next to, between, left, right, the end, and the middle. Exactly in the middle means the same number on each side.",
+   "file": "2438d50d6f11.mp3"
   },
   "tip-truth6": {
-   "text": "Now I say two things in one sentence. Check them both. Listen for the little words that change everything: and, but, not, either, neither, and except.",
-   "file": "1f9c0d57f9e9.mp3"
+   "text": "Now I say two things in one sentence. Check them both. Listen for the little words: and, but, not, either, neither, except. Neither means not this one, and not that one.",
+   "file": "adf113523f5d.mp3"
   },
   "tip-truth7": {
-   "text": "The hardest test. The picture is covered while I talk, so hold the whole sentence in your head. It has two parts, and both must be true. Then look, count and choose.",
-   "file": "0166fab5b1f7.mp3"
+   "text": "The hardest test. The picture is covered while I talk, so hold the whole sentence in your head. Both parts must be true. All but one means every one except one. Then look and choose.",
+   "file": "098d3611b2ff.mp3"
   },
   "tip-truth-boss": {
    "text": "Truth Boss! Rows, two facts at once, and covered pictures. Listen to every word, check every part, and then decide. You can do it.",
@@ -303,8 +303,8 @@
    "file": "03ed806bc575.mp3"
   },
   "tip-stories6": {
-   "text": "Two new jobs. Sometimes, tap the one thing that was not in the story. Sometimes, tap everything on my list, and then press the green check mark.",
-   "file": "750a54629527.mp3"
+   "text": "Sometimes the cards are hidden while I talk. Then tap the one thing that was not in the story. Other times, tap only the ones that fit my question, not the rest, and press the green check mark.",
+   "file": "1a672eb42e33.mp3"
   },
   "tip-stories7": {
    "text": "The hardest stories. Tap the things in the order they really happened. Then press the green check mark. The arrow takes back a slip. Listen to the very end. Plans can change!",

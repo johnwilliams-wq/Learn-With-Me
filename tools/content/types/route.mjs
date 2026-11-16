@@ -20,6 +20,25 @@ export const MARK_KINDS = [...LANDMARK_KINDS, 'flag'];
 export const MAX_PATH = 16;
 
 const same = (a, b) => a[0] === b[0] && a[1] === b[1];
+
+/**
+ * What is wrong with the tidiest drive (the one the guide shows), if anything: it crosses a place
+ * nobody named, a stop out of turn, or the last stop too soon. Such a map would show number badges
+ * that contradict the sentence, so it is never used.
+ */
+export function untidy(item, best) {
+  const { scene, expect } = item;
+  const things = [...(scene.marks || []), ...(scene.loot || [])];
+  let v = 0;
+  for (let i = 0; i < best.length - 1; i++) {
+    const p = best[i];
+    if (same(p, expect.end)) return 'reaches the last stop too soon';
+    if (!things.some((o) => same(o.at, p))) continue;
+    if (v < expect.via.length && same(p, expect.via[v])) v++;
+    else if (!expect.need.some((q) => same(q, p))) return 'drives over something that was not named, or a stop out of turn';
+  }
+  return '';
+}
 const inside = (scene, p) => Number.isInteger(p?.[0]) && Number.isInteger(p?.[1]) && p[0] >= 0 && p[1] >= 0 && p[0] < scene.cols && p[1] < scene.rows;
 
 /** The squares a counted route drives onto. Throws "try again" when it would leave the map. */
@@ -65,6 +84,8 @@ export default {
       const best = solve(item);
       if (!best.length) throw new Error('try again: no way to do this');
       if (best.length > MAX_PATH) throw new Error('try again: the drive is too long');
+      const wrong = untidy(item, best);
+      if (wrong) throw new Error(`try again: the tidy way ${wrong}`);
     }
     return item;
   },
@@ -116,6 +137,7 @@ export default {
       const best = solve(item);
       if (!best.length || best.length > MAX_PATH) fail(`there must be a way to do it in at most ${MAX_PATH} moves`);
       if (!check(best, item).correct) fail('the demo path is not accepted by the checker');
+      if (untidy(item, best)) fail(`the tidy way ${untidy(item, best)}`);
     }
     if (check([], item).correct) fail('an empty answer must never be right');
   },

@@ -1,5 +1,8 @@
 // The collection: one new card is earned for every finished mission (never random
-// duplicates, never a blank - effort is always rewarded).
+// duplicates, never a blank - effort is always rewarded). 180 cards: every thing and
+// every friend in every colour.
+
+import { OBJECT_KINDS, CHARACTER_KINDS } from '../art/sprites.js';
 
 const TITLE = { red: 'Ember', blue: 'Frost', green: 'Forest', yellow: 'Sun', purple: 'Mystic', orange: 'Blaze' };
 const cap = (s) => s[0].toUpperCase() + s.slice(1);
@@ -19,23 +22,55 @@ const FRIENDS = [
   ['robot', 'green', 'Gears the Robot'], ['cat', 'purple', 'Shadow the Cat'], ['owl', 'yellow', 'Blink the Owl'],
 ];
 
-/** Friends are sprinkled in every third card so there is always something special coming up. */
-export const CARDS = (() => {
+// Every other colour of every thing and every friend follows the first cards, so the collection
+// lasts as long as the game does. (Names are only decoration; nothing here has to be read.)
+const NAMES = {
+  robot: { red: 'Sparks', yellow: 'Beep', purple: 'Widget', orange: 'Rusty' },
+  cat: { red: 'Ruby', blue: 'Misty', green: 'Clover', yellow: 'Sunny' },
+  owl: { red: 'Rosie', blue: 'Sky', green: 'Moss', orange: 'Amber' },
+  fox: { blue: 'Frosty', green: 'Fern', yellow: 'Goldie', purple: 'Plum', orange: 'Maple' },
+  dragon: { blue: 'Splash', yellow: 'Flash', purple: 'Storm', orange: 'Cinder' },
+  ghost: { red: 'Rascal', green: 'Glow', yellow: 'Wisp', purple: 'Spook', orange: 'Pumpkin' },
+  knight: { red: 'Sir Bold', blue: 'Sir Dent', green: 'Sir Rattle', purple: 'Sir Shine', orange: 'Sir Brave' },
+  wizard: { red: 'Fizz', blue: 'Twinkle', green: 'Sprout', yellow: 'Zap', orange: 'Pop' },
+};
+const COLORS = Object.keys(TITLE);
+const gear = ([kind, color]) => ({ id: `g-${kind}-${color}`, kind, color, name: `${TITLE[color]} ${cap(kind)}`, rare: false });
+const friend = ([kind, color, name]) => ({ id: `f-${kind}-${color}`, kind, color, name, rare: true });
+
+/** Each kind once per round, in a different colour every round, leaving out what is already in `first`. */
+function others(kinds, first) {
+  const taken = new Set(first.map(([kind, color]) => `${kind}-${color}`));
+  const out = [];
+  for (let r = 0; r < COLORS.length; r++) {
+    kinds.forEach((kind, i) => {
+      const color = COLORS[(i + r) % COLORS.length];
+      if (!taken.has(`${kind}-${color}`)) out.push([kind, color]);
+    });
+  }
+  return out;
+}
+
+/** `each` things, then a friend, and so on: there is always something special coming up. */
+function deal(things, friends, each) {
   const out = [];
   let g = 0;
   let f = 0;
-  while (g < GEAR.length || f < FRIENDS.length) {
-    for (let k = 0; k < 2 && g < GEAR.length; k++, g++) {
-      const [kind, color] = GEAR[g];
-      out.push({ id: `g-${kind}-${color}`, kind, color, name: `${TITLE[color]} ${cap(kind)}`, rare: false });
-    }
-    if (f < FRIENDS.length) {
-      const [kind, color, name] = FRIENDS[f++];
-      out.push({ id: `f-${kind}-${color}`, kind, color, name, rare: true });
-    }
+  while (g < things.length || f < friends.length) {
+    for (let k = 0; k < each && g < things.length; k++, g++) out.push(gear(things[g]));
+    if (f < friends.length) out.push(friend(friends[f++]));
   }
   return out;
-})();
+}
+
+/** The first 42 cards keep the order they have always had (he may already own some of them). */
+export const CARDS = [
+  ...deal(GEAR, FRIENDS, 2),
+  ...deal(
+    others(OBJECT_KINDS, GEAR),
+    others(CHARACTER_KINDS, FRIENDS).map(([kind, color]) => [kind, color, kind === 'knight' ? NAMES[kind][color] : `${NAMES[kind][color]} the ${cap(kind)}`]),
+    3),
+];
 
 /** The next card he does not own yet (null once the collection is complete). */
 export function nextCard(owned) {

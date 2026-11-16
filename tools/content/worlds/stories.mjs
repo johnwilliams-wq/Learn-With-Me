@@ -12,9 +12,15 @@
 // Every pattern name `v` has its own rule in tests/unit/oracles/tap-stories.mjs, which works the
 // answer out again from the spoken text alone. Rules of thumb for anything added here:
 //   - a thing that can be on screen is only ever named when it is really part of the story
-//     (so no "the stars came out", no "ring the bell" in a scene that could show a ring);
+//     (so no "the stars came out");
+//   - no word that SOUNDS like a colour or like something that can be on screen: no "read" (red),
+//     no "blew" (blue), no "rang" beside a ring, no "night" beside the knight, no "crow" beside a crown,
+//     no "boat" beside a boot, no "dream" beside a drum, no "flat" beside a flag;
+//   - two characters whose names sound alike never share a story (castOf);
 //   - the question is always the last sentence; the clip stays under 420 characters;
-//   - no colour words unless the colour is a clue; no possessive names (hard for the voice).
+//   - no colour words unless the colour is a clue; no possessive names (hard for the voice);
+//   - when a story is told out of order, its sentences must leave exactly ONE possible order
+//     (the oracle tries every order of the events against what each sentence says).
 
 import { OBJECTS, obj, pickKinds, pickColors, plural, an, cap } from '../lib.mjs';
 
@@ -30,6 +36,15 @@ const CAST = [
   { name: 'Boo', kind: 'ghost', color: 'blue', he: 'he', him: 'him', his: 'his' },
   { name: 'Dash', kind: 'fox', color: 'orange', he: 'she', him: 'her', his: 'her' },
 ];
+// Names that are too close by ear never meet in one story: he must not have to tell them apart.
+const NAME_CLASH = [['Zip', 'Zazz'], ['Boo', 'Hoot']];
+/** n different members of the cast whose names do not sound alike. */
+function castOf(rng, n) {
+  const cast = rng.sample(CAST, n);
+  const has = (name) => cast.some((c) => c.name === name);
+  if (NAME_CLASH.some(([x, y]) => has(x) && has(y))) throw new Error('names that sound alike: try again');
+  return cast;
+}
 const full = (c) => `${c.name} the ${c.kind}`;
 const a = (word) => `${an(word)} ${word}`; // "a key", "an egg", "an orange flag"
 /** "a key and a gem" / "a key, a gem, and a star" */
@@ -54,7 +69,7 @@ function whoHasWhat(rng, i) {
   const s = ['story', 'detail'];
   switch (i % 4) {
     case 0: { // each finds a thing, they swap
-      const [p, q] = rng.sample(CAST, 2);
+      const [p, q] = castOf(rng, 2);
       const [K1, K2] = pickKinds(rng, 2);
       const [C1, C2] = pickColors(rng, 2);
       const x = obj(K1, C1);
@@ -69,7 +84,7 @@ function whoHasWhat(rng, i) {
         [x, y, obj(K1, C2), obj(K2, C1)], ask === p ? y : x, s, 'st-swap-what');
     }
     case 1: { // two carriers swap loads, a third only watches: who has it now?
-      const cast = rng.sample(CAST, 3);
+      const cast = castOf(rng, 3);
       const [p, q, w] = cast;
       const [K1, K2] = pickKinds(rng, 2);
       const objects = faces(cast);
@@ -78,7 +93,7 @@ function whoHasWhat(rng, i) {
         objects, objects[askFirst ? 1 : 0], ['story'], 'st-swap-who');
     }
     case 2: { // two of the same thing: one is given away, "the other" is kept
-      const [p, q] = rng.sample(CAST, 2);
+      const [p, q] = castOf(rng, 2);
       const [K, K2] = pickKinds(rng, 2);
       const [C1, C2, C3] = pickColors(rng, 3);
       const given = obj(K, C1);
@@ -89,7 +104,7 @@ function whoHasWhat(rng, i) {
         [given, kept, obj(K, C3), obj(K2, t.color)], t, s, 'st-gave-kept');
     }
     default: { // each goes home with the other one's thing
-      const [p, q] = rng.sample(CAST, 2);
+      const [p, q] = castOf(rng, 2);
       const [K1, K2] = pickKinds(rng, 2);
       const [C1, C2] = pickColors(rng, 2);
       const x = obj(K1, C1);
@@ -105,6 +120,7 @@ function whoHasWhat(rng, i) {
 
 // A theme is a small job with many things to do, in any order. In an act, "@" stands for the
 // thing with its article: "a coin" when the story tells it, "the coin" when the question asks.
+// ("rang the bell" is only in the parade, which has no ring; the market has a ring, so its bell is jingled.)
 const THEMES = [
   {
     setup: (c) => `${full(c)} was getting ready for the big parade.`,
@@ -124,12 +140,12 @@ const THEMES = [
   {
     setup: (c) => `${full(c)} spent the morning at the village market.`,
     end: (c) => `Then ${c.he} walked home for lunch.`,
-    acts: { mushroom: 'bought @', hat: 'tried on @', potion: 'sniffed @', bell: 'rang @', map: 'looked at @', ring: 'tried on @', drum: 'tapped on @', egg: 'bought @', flag: 'waved @', book: 'flipped through @' },
+    acts: { mushroom: 'bought @', hat: 'tried on @', potion: 'sniffed @', bell: 'jingled @', map: 'looked at @', ring: 'tried on @', drum: 'tapped on @', egg: 'bought @', flag: 'waved @', book: 'flipped through @' },
   },
   {
     setup: (c) => `${full(c)} set up camp in the forest at sunset.`,
     end: (c) => `Then ${c.he} fell fast asleep by the fire.`,
-    acts: { torch: 'lit the torch', map: 'checked the map', flag: 'put up the flag', chest: 'unpacked the chest', drum: 'played the drum', book: 'read the book', mushroom: 'picked @', bell: 'hung up the bell', potion: 'sipped the potion' },
+    acts: { torch: 'lit the torch', map: 'checked the map', flag: 'put up the flag', chest: 'unpacked the chest', drum: 'played the drum', book: 'opened the book', mushroom: 'picked @', bell: 'hung up the bell', potion: 'sipped the potion' },
   },
 ];
 const STEP_WORDS = [['First,', 'Then', 'After that,', 'Last of all,'], ['To start with,', 'Next,', 'Then', 'At the very end,'], ['First,', 'Next,', 'After that,', 'Finally,']];
@@ -178,13 +194,16 @@ const WHERE = {
   chest: 'inside the chest', boot: 'inside the boot', hat: 'under the hat', shield: 'behind the shield', drum: 'behind the drum', bell: 'under the bell',
   book: 'behind the book', crown: 'under the crown', rocket: 'inside the rocket', flag: 'under the flag', map: 'under the map',
 };
-const HIDEABLE = ['gem', 'key', 'coin', 'ring', 'star', 'egg'];
-const WORRIES = ['A crow was watching', 'That did not feel safe enough', 'Then it started to rain', 'The wind began to blow', 'A mouse came sniffing around', 'Somebody walked by'];
+// No star: the book and the hat have stars drawn on them, and the hidden thing is never shown.
+const HIDEABLE = ['gem', 'key', 'coin', 'ring', 'egg'];
+/** Things that must not be hidden in these places (the crown has a jewel drawn on it). */
+const notHiddenIn = (places) => [...places, ...(places.includes('crown') ? ['gem'] : [])];
+const WORRIES = ['A bird was watching', 'That did not feel safe enough', 'Then it started to rain', 'The wind began to blow', 'A mouse came sniffing around', 'Somebody walked by'];
 
 function whereDidItGo(rng, i) {
   const s = ['story'];
   if (i % 4 === 3) { // handed from friend to friend
-    const cast = rng.sample(CAST, 3);
+    const cast = castOf(rng, 3);
     const [p, q, r] = cast;
     const k = rng.pick(OBJECTS);
     const objects = faces(cast);
@@ -203,24 +222,24 @@ function whereDidItGo(rng, i) {
   const [w1, w2] = rng.sample(WORRIES, 2);
   switch (i % 4) {
     case 0: { // one thing, three hiding places
-      const [k] = pickKinds(rng, 1, { from: HIDEABLE, avoid: places });
+      const [k] = pickKinds(rng, 1, { from: HIDEABLE, avoid: notHiddenIn(places) });
       const [q, at] = [
         [`Where is the ${k} now?`, 2],
-        [`Where did ${c.name} hide the ${k} at the very start?`, 0],
+        [`Where did ${c.name} put the ${k} at the very start?`, 0],
         [`Where was the ${k} before the very last move?`, 1],
       ][Math.floor(i / 4) % 3];
-      return single(`${full(c)} hid ${a(k)} ${WHERE[p1]}. ${w1}, so ${c.he} moved it ${WHERE[p2]}. ${w2}, so ${c.he} moved it one more time, ${WHERE[p3]}. ${q}`,
+      return single(`${full(c)} put ${a(k)} ${WHERE[p1]}. ${w1}, so ${c.he} moved it ${WHERE[p2]}. ${w2}, so ${c.he} moved it one more time, ${WHERE[p3]}. ${q}`,
         objects, objects[at], s, 'st-move-twice');
     }
     case 1: { // moved once, a third place only thought about, then back - or left alone
-      const [k] = pickKinds(rng, 1, { from: HIDEABLE, avoid: places });
+      const [k] = pickKinds(rng, 1, { from: HIDEABLE, avoid: notHiddenIn(places) });
       const back = Math.floor(i / 4) % 2 === 0;
       const ending = back ? `In the end, ${c.he} put it back where it was at the start.` : `In the end, ${c.he} left it right where it was.`;
-      return single(`${full(c)} hid ${a(k)} ${WHERE[p1]}. ${w1}, so ${c.he} moved it ${WHERE[p2]}. ${cap(c.he)} thought about putting it ${WHERE[p3]}, but ${c.he} did not. ${ending} Where is the ${k} now?`,
+      return single(`${full(c)} put ${a(k)} ${WHERE[p1]}. ${w1}, so ${c.he} moved it ${WHERE[p2]}. ${cap(c.he)} thought about putting it ${WHERE[p3]}, but ${c.he} did not. ${ending} Where is the ${k} now?`,
         objects, objects[back ? 0 : 1], s, 'st-move-back');
     }
     default: { // two things; the second goes where the first one used to be
-      const [k1, k2] = pickKinds(rng, 2, { from: HIDEABLE, avoid: places });
+      const [k1, k2] = pickKinds(rng, 2, { from: HIDEABLE, avoid: notHiddenIn(places) });
       const askFirst = rng.chance(0.5);
       return single(`${full(c)} put ${a(k1)} ${WHERE[p1]} and ${a(k2)} ${WHERE[p2]}. Later, ${c.he} moved the ${k1} ${WHERE[p3]}. Then ${c.he} moved the ${k2} to the place where the ${k1} was at the start. Where is the ${askFirst ? k1 : k2} now?`,
         objects, objects[askFirst ? 2 : 0], s, 'st-move-two');
@@ -237,7 +256,7 @@ const SAVED = [
   (k, c) => `the ${k} fell in the mud, but ${c.he} wiped it clean`,
   (k, c) => `the ${k} rolled down a hill, but ${c.he} got it back`,
   (k, c) => `${c.he} dropped the ${k} in a puddle, but ${c.he} fished it out`,
-  (k, c) => `the wind blew the ${k} away, but ${c.he} found it in a bush`,
+  (k, c) => `the wind carried the ${k} away, but ${c.he} found it in a bush`,
 ];
 // ... and a loss that does not
 const LOST = [
@@ -276,12 +295,12 @@ function whyDidItHappen(rng, i) {
         objects, lost, s, 'st-why-lost');
     }
     case 1: { // three presents, one that delights
-      const [p, ...givers] = rng.sample(CAST, 4);
+      const [p, ...givers] = castOf(rng, 4);
       const kinds = pickKinds(rng, 4);
       const objects = things(rng, kinds);
       const how = oneOfThree(rng, kinds.slice(0, 3), p, at, DULL.map((f) => (k, x) => f(x)), JOY.map((f) => (k, x) => f(x)));
       const gifts = givers.map((g, n) => `${full(g)} gave ${p.him} ${a(kinds[n])}, and ${how[n]}.`).join(' ');
-      const q = rng.pick([`What made ${p.name} so happy?`, `Which present did ${p.name} like best?`]);
+      const q = rng.pick([`What made ${p.name} so happy?`, `Which present made ${p.name} the happiest?`]);
       return single(`${full(p)} had a birthday party. ${gifts} ${q}`, objects, objects[at], s, 'st-why-glad');
     }
     case 2: { // creeping through the castle at night: one thing makes the noise
@@ -308,7 +327,7 @@ function whyDidItHappen(rng, i) {
 // (The oracle has its own list of telling clues per thing and checks that the story points to
 // exactly one of the four choices.)
 const RIDDLES = [
-  ['Boo the ghost found something in the attic. It was made of metal, and it was much too big to wear on a finger. When he shook it, it rang so loudly that the bats flew away. What did Boo find?', 'bell', ['ring', 'drum', 'key']],
+  ['Boo the ghost found something in the attic. It was made of metal, and it was much too big to wear on a finger. When he shook it, it went ding dong so loudly that the bats flew away. What did Boo find?', 'bell', ['ring', 'drum', 'key']],
   ['Somebody took the pie from the kitchen window. There were feathers on the floor. The thief had flown away over the wall without a sound, long after dark. Who took the pie?', 'owl', ['dragon', 'cat', 'fox']],
   ['Sir Clank the knight stood in front of a locked gate. He pushed it, and he kicked it, but it would not open. Then a friend dropped something small and metal into his hand. He turned it in the lock, and the gate swung open. What did the friend bring?', 'key', ['coin', 'ring', 'sword']],
   ['Dash the fox walked into a cave. It was so dark that she could not see her own paws. Then a friend handed her a stick with a flame on top, and at last she could see the way. What did the friend give Dash?', 'torch', ['star', 'potion', 'map']],
@@ -317,7 +336,7 @@ const RIDDLES = [
   ['The band was ready to march, but something was missing. Nobody was keeping the beat. Then Pounce the cat picked up two sticks and went boom, boom, boom. Now everyone could march in step. What was Pounce playing?', 'drum', ['bell', 'flag', 'boot']],
   ['The cookie jar was empty, but the kitchen door was still locked from the inside. Nobody had opened the window. The only one who can float straight through a wall was smiling. Who took the cookies?', 'ghost', ['cat', 'wizard', 'robot']],
   ['It rained all night, and the path was full of puddles. Zip the robot did not want rusty feet. So he pulled something tall and rubbery onto each foot and splashed all the way to school. What did Zip put on?', 'boot', ['hat', 'ring', 'crown']],
-  ['Snowballs were flying across the castle yard. Sir Clank the knight did not want a cold, wet face. He picked up something big, flat and strong, and held it in front of him. Every snowball went splat against it. What was Sir Clank holding?', 'shield', ['sword', 'hat', 'flag']],
+  ['Snowballs were flying across the castle yard. Sir Clank the knight did not want a cold, wet face. He picked up something big, wide and strong, and held it in front of him. Every snowball went splat against it. What was Sir Clank holding?', 'shield', ['sword', 'hat', 'flag']],
   ['Somebody tidied the whole workshop while everyone slept. There were drops of oil on the floor. A low beeping sound came from the corner, where someone was plugged into the wall to charge. Who tidied the workshop?', 'robot', ['knight', 'wizard', 'cat']],
   ['The old king was sad, because nobody at the market knew who he was. So he went home and came back with something golden and shiny on his head. Now everybody bowed. What did the king put on?', 'crown', ['hat', 'ring', 'gem']],
   ['Zip the robot wanted to visit the moon. Walking was no good, and even his friends with wings could not fly that high. So Zip built something tall with fire coming out of the bottom, climbed inside, and counted down from ten. What did Zip build?', 'rocket', ['torch', 'chest', 'star']],
@@ -325,14 +344,18 @@ const RIDDLES = [
   ['Hoot the owl sat on her nest all week to keep something warm. It was smooth and round, and she had to be very gentle with it. On Sunday it cracked open, and a tiny beak poked out. What was Hoot sitting on?', 'egg', ['coin', 'gem', 'mushroom']],
   ['Zazz the wizard was so small that he could not reach his own door handle. So he mixed something fizzy in a bottle and drank it all in one gulp. In a blink, he was as tall as a tree. What did Zazz drink?', 'potion', ['mushroom', 'egg', 'book']],
   ['The hens were upset. Someone with a bushy tail and pointed ears had sneaked through a hole in the fence and run off into the woods. She did not purr, and she did not fly. Who scared the hens?', 'fox', ['cat', 'owl', 'dragon']],
-  ['Pounce the cat could not sleep. So a friend sat beside her, opened something with lots of pages, and read out loud about a brave little mouse. Before the end, Pounce was snoring. What did the friend open?', 'book', ['map', 'chest', 'bell']],
+  ['Pounce the cat could not sleep. So a friend sat beside her, opened something with lots of pages, and told her a story about a brave little mouse. Before the end, Pounce was snoring. What did the friend open?', 'book', ['map', 'chest', 'bell']],
 ];
 const isCast = (k) => CAST.some((c) => c.kind === k);
 
 function detective(rng, i) {
   const [say, answer, wrong] = RIDDLES[i % RIDDLES.length];
   const kinds = [answer, ...wrong];
-  const objects = isCast(answer) ? faces(kinds.map((k) => CAST.find((c) => c.kind === k))) : things(rng, kinds);
+  let objects;
+  if (isCast(answer)) objects = faces(kinds.map((k) => CAST.find((c) => c.kind === k)));
+  // "golden" is a clue: the crown is the yellow one, and nothing else looks gold
+  else if (/\bgolden\b/.test(say)) objects = [obj(answer, 'yellow'), ...things(rng, wrong, { avoid: ['yellow', 'orange'] })];
+  else objects = things(rng, kinds);
   return single(say, objects, objects[0], ['story', 'infer'], isCast(answer) ? 'st-detect-who' : 'st-detect-thing');
 }
 
@@ -340,12 +363,13 @@ function detective(rng, i) {
 
 // four things are told, five are shown (face-down while he listens)
 const FOUR_THINGS = [
-  (c, k) => `${full(c)} tidied up the playroom. ${cap(c.he)} put ${a(k[0])} on the shelf and ${a(k[1])} in the toy box. Under the bed, ${c.he} found ${a(k[2])} and ${a(k[3])}, both covered in dust. Then ${c.he} lay down for a nap. Which one of these was not in the story?`,
+  (c, k) => `${full(c)} tidied up the playroom. ${cap(c.he)} put ${a(k[0])} on the shelf and ${a(k[1])} in the toy box. Under the bed, ${c.he} found ${a(k[2])} and ${a(k[3])}, both covered in dust. Then ${c.he} lay down for a rest. Which one of these was not in the story?`,
   (c, k) => `${full(c)} had a stall at the market. By lunch time, ${c.he} had sold ${a(k[0])} and ${a(k[1])}. A farmer bought ${a(k[2])}. At the end of the day, only ${a(k[3])} was left on the table. Which one of these was not in the story?`,
   (c, k) => `${full(c)} had a very silly dream. In the dream, ${a(k[0])} was chasing ${a(k[1])} around the castle. ${cap(a(k[2]))} was singing a song, and ${a(k[3])} was dancing on the table. Then ${c.he} woke up. Which one of these was not in the dream?`,
   (c, k) => `${full(c)} climbed up into the dusty attic. Behind the door, ${c.he} saw ${a(k[0])}. On the floor lay ${a(k[1])} and ${a(k[2])}. Hanging from the roof was ${a(k[3])}. ${cap(c.he)} sneezed three times and climbed back down. Which one of these was not in the attic?`,
 ];
-const BAG_TRIPS = ['a camping trip', 'a trip to the beach', 'a long boat ride', 'a night at the castle'];
+const DREAM = 2; // the place of the dream story in FOUR_THINGS
+const BAG_TRIPS = ['a camping trip', 'a trip to the beach', 'a long train ride', 'a night at the castle'];
 const IN_A_BAG = OBJECTS.filter((k) => k !== 'chest' && k !== 'rocket'); // things that fit in a bag
 // packing: every sentence with "but" is about things that did NOT go in the bag
 const PACKING = [
@@ -353,7 +377,7 @@ const PACKING = [
   (c, p, r) => `${cap(c.he)} picked up ${a(r[0])}, but then ${c.he} put it down again. So ${c.he} put in ${a(p[0])} and ${a(p[1])}. ${cap(c.he)} also packed ${series(p.slice(2).map(a))}. ${cap(c.he)} looked at ${a(r[1])}, but ${c.he} left it on the bed.`,
   (c, p, r) => `First, ${c.he} packed ${a(p[0])}. ${cap(c.he)} wanted ${a(r[0])} and ${a(r[1])} as well, but they would not fit. Then ${c.he} added ${series(p.slice(1).map(a))}.`,
 ];
-const CAME = [(c) => `${full(c)} came early and helped with the food`, (c) => `${full(c)} danced all night long`, (c) => `${full(c)} brought a huge cake`, (c) => `${full(c)} arrived late and stayed to the end`, (c) => `${full(c)} played music for everyone`];
+const CAME = [(c) => `${full(c)} came early and helped with the food`, (c) => `${full(c)} danced for hours and hours`, (c) => `${full(c)} brought a huge cake`, (c) => `${full(c)} arrived late and stayed to the end`, (c) => `${full(c)} played music for everyone`];
 const STAYED_AWAY = [(c) => `${full(c)} was sick in bed and could not come`, (c) => `${full(c)} got lost and never got there`, (c) => `${full(c)} forgot all about it and stayed home`, (c) => `${full(c)} wanted to come, but ${c.he} had to work`];
 // moving house: three things go on the cart, three do not
 const MOVING = [
@@ -367,9 +391,10 @@ function inOrOut(rng, i) {
   const turn = Math.floor(i / 4);
   switch (i % 4) {
     case 0: { // which one was NOT in the story
-      const kinds = pickKinds(rng, 5);
+      const which = turn % FOUR_THINGS.length;
+      const kinds = pickKinds(rng, 5, { avoid: which === DREAM ? ['drum'] : [] }); // "dream" and "drum" are too close by ear
       const objects = things(rng, kinds);
-      return single(FOUR_THINGS[turn % FOUR_THINGS.length](c, kinds), objects, objects[4], ['story', 'not', 'hidden'], 'st-not-in', { hide: true });
+      return single(FOUR_THINGS[which](c, kinds), objects, objects[4], ['story', 'not', 'hidden'], 'st-not-in', { hide: true });
     }
     case 1: { // everything that went into the bag
       const n = 3 + (turn % 2);
@@ -380,13 +405,13 @@ function inOrOut(rng, i) {
         objects, [objects.slice(0, n)], ['story', 'all'], 'st-all-packed', { mode: 'pick' });
     }
     case 2: { // everyone who was really there
-      const cast = rng.sample(CAST, 5);
+      const cast = castOf(rng, 5);
       const n = 2 + (turn % 3);
       const objects = faces(cast);
       const came = rng.sample(CAME, n).map((f, k) => [f(cast[k]), k]);
       const away = rng.sample(STAYED_AWAY, 5 - n).map((f, k) => [f(cast[n + k]), n + k]);
       const told = rng.shuffle([...came, ...away]);
-      return several(`There was a big party at the castle last night. ${told.map(([text]) => `${text}.`).join(' ')} Tap everyone who was at the party.`,
+      return several(`There was a big party at the castle yesterday. ${told.map(([text]) => `${text}.`).join(' ')} Tap everyone who was at the party.`,
         objects, [objects.slice(0, n)], ['story', 'all', 'not'], 'st-all-came', { mode: 'pick' });
     }
     default: { // everything that was left behind
@@ -412,20 +437,20 @@ function tellItBack(rng, i) {
       return several(`${theme.setup(c)} ${kinds.map((k, at) => `${words[at]} ${c.he} ${told(k)}.`).join(' ')} ${theme.end(c)} Tap the ${n === 5 ? 'five' : 'four'} things in the order they happened.`,
         objects, objects.slice(0, n).map((o) => [o]), ['story', 'order', 'hidden'], n === 5 ? 'st-retell-5' : 'st-retell-4', { hide: true });
     }
-    case 1: { // four events, NOT told in the order they happened
+    case 1: { // four events, NOT told in the order they happened (each telling leaves exactly one possible order)
       const { c, theme, kinds, told } = routine(rng, 4);
       const [e1, e2, e3, e4] = kinds.map(told);
       const story = [
         `${cap(c.he)} ${e2}. But before ${c.he} did that, ${c.he} ${e1}. After those two things, ${c.he} ${e3}. Last of all, ${c.he} ${e4}.`,
         `First, ${c.he} ${e1}. Then ${c.he} ${e2}. At the very end, ${c.he} ${e4}. But just before the end, ${c.he} ${e3}.`,
-        `Before ${c.he} ${e2}, ${c.he} ${e1}. Then ${c.he} ${e4}, but only after ${c.he} ${e3}.`,
+        `Before ${c.he} ${e2}, ${c.he} ${e1}. Last of all, ${c.he} ${e4}. But right before that, ${c.he} ${e3}.`,
       ][turn % 3];
       const objects = things(rng, kinds);
       return several(`${theme.setup(c)} ${story} Tap the four things in the order they really happened.`,
         objects, objects.map((o) => [o]), ['story', 'order'], 'st-retell-back');
     }
     case 2: { // a plan for three visits, and then the plan changes
-      const cast = rng.sample(CAST, 4);
+      const cast = castOf(rng, 4);
       const [c, p, q, r] = cast;
       const objects = faces(cast);
       const [, P, Q, R] = objects;
@@ -433,7 +458,7 @@ function tellItBack(rng, i) {
         [`But ${p.name} was not home in the morning, so ${c.name} went back and saw ${p.him} last of all.`, [Q, R, P]],
         [`But on the way, ${c.name} bumped into ${r.name}, so ${r.name} was the first one ${c.he} saw.`, [R, P, Q]],
         [`But ${q.name} was fast asleep, so ${c.name} skipped ${q.him} and saw the other two.`, [P, R]],
-        [`But ${c.name} read the list from the bottom, so ${c.he} visited them the other way around.`, [R, Q, P]],
+        [`But ${c.name} started with the last friend, so ${c.he} visited them the other way around.`, [R, Q, P]],
       ][turn % 4];
       return several(`${full(c)} had three friends to visit. ${cap(c.he)} planned to see ${full(p)} first, then ${full(q)}, and ${full(r)} last. ${change} Tap the friends in the order ${c.name} really saw them.`,
         objects, order.map((o) => [o]), ['story', 'order', 'steps3', 'hidden'], 'st-plan-visit', { hide: true });
@@ -479,7 +504,7 @@ export default {
     { id: 'stories5', title: 'Story Detective', n: RIDDLES.length, gen: detective,
       tip: 'Be a detective. I will never say the name of the answer. Listen to every clue, and rule out what does not fit. Then tap what it must be.' },
     { id: 'stories6', title: 'In or Out', n: 18, gen: inOrOut,
-      tip: 'Two new jobs. Sometimes, tap the one thing that was not in the story. Sometimes, tap everything on my list, and then press the green check mark.' },
+      tip: 'Sometimes the cards are hidden while I talk. Then tap the one thing that was not in the story. Other times, tap only the ones that fit my question, not the rest, and press the green check mark.' },
     { id: 'stories7', title: 'Tell It Back', n: 18, gen: tellItBack,
       tip: 'The hardest stories. Tap the things in the order they really happened. Then press the green check mark. The arrow takes back a slip. Listen to the very end. Plans can change!' },
     { id: 'stories-boss', title: 'Story Boss', boss: true, mix: ['stories5', 'stories6', 'stories7'],

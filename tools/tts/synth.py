@@ -6,6 +6,10 @@ is always up to date and is skipped. Run tools/tts/setup.sh once first.
 
   python tools/tts/synth.py            # make whatever is missing
   python tools/tts/synth.py --prune    # ...and delete clips that are no longer used
+
+tools/tts/tweaks.json (optional) is for the rare sentence whose rendering has a glitch that
+verify.py catches: { "The sentence.": { "speed": 0.9 } } renders that one sentence at another
+speed, which gives a different take. The file name does not change, so delete the old clip.
 """
 import argparse
 import json
@@ -92,6 +96,8 @@ def main():
     args = ap.parse_args()
 
     manifest = json.loads(Path(args.manifest).read_text())
+    tweaks_path = ROOT / "tools" / "tts" / "tweaks.json"
+    tweaks = json.loads(tweaks_path.read_text()) if tweaks_path.exists() else {}
     todo = [c for c in manifest if not (ROOT / c["file"]).exists()]
     if args.limit:
         todo = todo[: args.limit]
@@ -103,7 +109,8 @@ def main():
         seconds = 0.0
         for n, c in enumerate(todo, 1):
             phonemes, _ = g2p(clean(c["text"]))
-            samples, sr = kokoro.create(phonemes, voice=c["voice"], speed=float(c["speed"]), is_phonemes=True)
+            speed = float(tweaks.get(c["text"], {}).get("speed", c["speed"]))
+            samples, sr = kokoro.create(phonemes, voice=c["voice"], speed=speed, is_phonemes=True)
             assert sr == SR, sr
             out = polish(samples)
             encode(out, ROOT / c["file"])

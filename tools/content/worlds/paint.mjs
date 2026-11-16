@@ -147,72 +147,80 @@ export default {
       },
     },
     // ------------------------------------------------------------------ 5: where it is in a row
+    // Two paint jobs per sentence (as in level 4): the new thing is the position words. Rules for every row sentence:
+    //   - a bare "the first one / the last one / the one in the middle" is said BEFORE any "from the left / right",
+    //     so it can never be heard as counted from the side that was just named;
+    //   - a counted place is never the middle of what is counted (then the side word would not be needed);
+    //   - a colour word never comes straight after the name of a thing that gets a different colour (or none).
     {
       id: 'paint5', title: 'In a Row', n: 18,
-      tip: 'Now they stand in one row. The row starts on the left, like reading. Listen for where: second, last, in the middle, between, next to.',
+      tip: 'Now they stand in one row. The first one is on the left, like reading. The last one is on the right. Listen for where: second from the right, in the middle, between, next to.',
       gen(rng, i) {
         const [K1, K2, K3, K4] = kindsOf(rng, 4);
-        const [C1, C2, C3] = pickColors(rng, 3);
+        const [C1, C2] = pickColors(rng, 2);
         const n = rng.range(5, 7);
-        const cols = [C1, C2, C3];
+        const cols = [C1, C2];
         const say = (parts) => `Paint ${list(parts.map(([p], j) => `${p} ${cols[j]}`))}.`;
         const jobs = (parts) => parts.map(([, o], j) => [o, cols[j]]);
         const apart = (parts) => { if (new Set(parts.flatMap(([, o]) => o)).size !== parts.flatMap(([, o]) => o).length) retry('same place twice'); return parts; };
+        /** A place counted from one side - never the middle one, where the side would not matter. */
+        const counted = (count, len) => { const k = rng.range(...count); if (2 * k === len + 1) retry('the side must matter'); return k; };
         switch (i % 5) {
-          case 0: { // counting from each end, and one more place
+          case 0: {
             const objects = rowOf(rng, n, [K1, K2, K3]);
-            const a = rng.range(2, 4);
-            const b = rng.range(2, 4);
-            const more = [['the first one', objects[0]], ['the last one', objects[n - 1]]];
-            if (n % 2) more.push(['the one in the middle', objects[(n - 1) / 2]]);
-            const parts = apart([[`the ${ORD[a - 1]} one from the left`, objects[a - 1]], [`the ${ORD[b - 1]} one from the right`, objects[n - b]], rng.pick(more)]);
-            return row(say(parts), objects, jobs(parts), ['paint', 'ordinal', 'where', 'steps3'], 'row-ord');
+            if (i % 10 === 0) { // one end (or the middle), said first, and one counted place
+              const ends = [['the first one', objects[0]], ['the last one', objects[n - 1]]];
+              if (n % 2) ends.push(['the one in the middle', objects[(n - 1) / 2]]);
+              const k = counted([2, 3], n);
+              const fromLeft = rng.chance(0.5);
+              const parts = apart([rng.pick(ends), [`the ${ORD[k - 1]} one from the ${fromLeft ? 'left' : 'right'}`, objects[fromLeft ? k - 1 : n - k]]]);
+              return row(say(parts), objects, jobs(parts), ['paint', 'ordinal', 'where', 'steps2'], 'row-ord');
+            }
+            // counting from each end
+            const a = counted([2, 3], n);
+            const b = counted([2, 3], n);
+            const parts = rng.shuffle(apart([[`the ${ORD[a - 1]} one from the left`, objects[a - 1]], [`the ${ORD[b - 1]} one from the right`, objects[n - b]]]));
+            return row(say(parts), objects, jobs(parts), ['paint', 'ordinal', 'where', 'steps2'], 'row-both');
           }
-          case 1: { // the two ends (one thing or two) and the middle
+          case 1: { // two of: the first (one or two), the last (one or two), the middle
             const m = rng.pick([5, 7]);
             const objects = rowOf(rng, m, [K1, K2, K3]);
             const parts = rng.shuffle([
               rng.chance(0.5) ? ['the first one', objects[0]] : ['the first two', objects.slice(0, 2)],
               rng.chance(0.5) ? ['the last one', objects[m - 1]] : ['the last two', objects.slice(m - 2)],
               ['the one in the middle', objects[(m - 1) / 2]],
-            ]);
-            return row(say(parts), objects, jobs(parts), ['paint', 'ordinal', 'where', 'steps3'], 'row-ends');
+            ]).slice(0, 2);
+            return row(say(parts), objects, jobs(parts), ['paint', 'ordinal', 'where', 'steps2'], 'row-ends');
           }
-          case 2: { // between two named things, one of those two, and one counted
+          case 2: { // the one between two named things - and one of those two gets another colour
             const objects = rowOf(rng, n, [K3, K4]);
             const p = rng.range(0, n - 3);
             const [A, B] = rng.shuffle([K1, K2]);
             objects[p] = thing(A);
             objects[p + 2] = thing(B);
-            const fromLeft = rng.chance(0.5);
-            const k = rng.range(1, 3);
             const which = rng.pick([p, p + 2]);
             const [x, y] = rng.chance(0.5) ? [A, B] : [B, A]; // either one may be named first
-            const parts = apart([[`the one between the ${x} and the ${y}`, objects[p + 1]], [`the ${objects[which].kind}`, objects[which]],
-              [`the ${ORD[k - 1]} one from the ${fromLeft ? 'left' : 'right'}`, objects[fromLeft ? k - 1 : n - k]]]);
-            return row(say(parts), objects, jobs(parts), ['paint', 'where', 'ordinal', 'steps3'], 'row-between');
+            return row(`Use ${C1} on the one between the ${x} and the ${y}. Paint the ${objects[which].kind} ${C2}.`, objects,
+              [[objects[p + 1], C1], [objects[which], C2]], ['paint', 'where', 'steps2'], 'row-between');
           }
-          case 3: { // both neighbours of a named thing, the thing itself, and one end of the row
+          case 3: { // a named thing, and both its neighbours
             const objects = rowOf(rng, n, [K2, K3]);
             const p = rng.range(1, n - 2);
             objects[p] = thing(K1);
-            const ends = [];
-            if (p >= 2) ends.push(['the first one', objects[0]]);
-            if (p <= n - 3) ends.push(['the last one', objects[n - 1]]);
-            const parts = [[`both things next to the ${K1}`, [objects[p - 1], objects[p + 1]]], [`the ${K1}`, objects[p]], rng.pick(ends)];
-            return row(say(parts), objects, jobs(parts), ['paint', 'where', 'steps4'], 'row-sides');
+            return row(`Paint the ${K1} ${C1}. Use ${C2} on both things next to it.`, objects,
+              [[objects[p], C1], [[objects[p - 1], objects[p + 1]], C2]], ['paint', 'where', 'steps3'], 'row-sides');
           }
-          default: { // counting only one kind of thing, and a thing that is the only one of its kind
+          default: { // counting only one kind of thing, from each end
             const m = rng.range(3, 4);
             const objects = rng.shuffle([...Array.from({ length: m }, () => thing(K1)), thing(K2), ...Array.from({ length: rng.range(1, 6 - m) }, () => thing(K3))]);
             const mine = objects.filter((o) => o.kind === K1);
-            const a = rng.range(1, m);
-            const b = rng.range(1, m);
+            const a = counted([1, 3], m);
+            const b = counted([1, 3], m);
             const len = objects.length;
             // counting the kind must give a different answer from counting every thing, or the kind word is not needed
             if (objects[a - 1] === mine[a - 1] && objects[len - b] === mine[m - b]) retry('the kind word must matter');
-            const parts = apart([[`the ${ORD[a - 1]} ${K1} from the left`, mine[a - 1]], [`the ${ORD[b - 1]} ${K1} from the right`, mine[m - b]], [`the ${K2}`, objects.find((o) => o.kind === K2)]]);
-            return row(say(parts), objects, jobs(parts), ['paint', 'ordinal', 'where', 'detail', 'steps3'], 'row-kind');
+            const parts = rng.shuffle(apart([[`the ${ORD[a - 1]} ${K1} from the left`, mine[a - 1]], [`the ${ORD[b - 1]} ${K1} from the right`, mine[m - b]]]));
+            return row(say(parts), objects, jobs(parts), ['paint', 'ordinal', 'where', 'detail', 'steps2'], 'row-kind');
           }
         }
       },
@@ -220,7 +228,7 @@ export default {
     // ------------------------------------------------------------------ 6: not, neither, unless, if
     {
       id: 'paint6', title: 'Not and If', n: 18,
-      tip: 'Listen for NOT, IF, and UNLESS. They tell you which things get paint, and which things you must leave alone.',
+      tip: 'Tricky words. Unless they are keys means: the keys do not get that paint. Neither a drum nor a gem means: not a drum, and not a gem. Listen for NOT and IF too. Some things get no paint at all.',
       gen(rng, i) {
         const [K1, K2, K3, K4] = kindsOf(rng, 4);
         const [C1, C2] = pickColors(rng, 2);
@@ -246,7 +254,7 @@ export default {
             const mine = [thing(K3, 'big'), thing(K3, 'small'), thing(K4, size(rng))];
             const [first, last] = rng.chance(0.5) ? [K1, K2] : [K2, K1]; // which of the two is named first
             const others = second.length > 1 ? `the ${plural(K2)}` : `the ${K2}`;
-            return draft(`Paint everything that is neither ${an(first)} ${first} nor ${an(last)} ${last} ${C1}. Paint ${others} ${C2}.`, [...quiet, ...second, ...mine],
+            return draft(`Use ${C1} on everything that is neither ${an(first)} ${first} nor ${an(last)} ${last}. Paint ${others} ${C2}.`, [...quiet, ...second, ...mine],
               [[mine, C1], [second, C2]], ['paint', 'not', 'all', 'steps4'], 'neither');
           }
           case 3: { // unless - and the big ones of that kind get their own colour
@@ -314,7 +322,11 @@ export default {
             const at = fromLeft ? k - 1 : 5 - k;
             const spot = rng.pick([0, 1, 3, 4].filter((x) => x !== at));
             objects[spot] = thing(K1);
-            const parts = rng.shuffle([[`the ${ORD[k - 1]} one from the ${fromLeft ? 'left' : 'right'}`, objects[at]], ['the one in the middle', objects[2]], [`the ${K1}`, objects[spot]]]);
+            // any order - but the middle one is always said before the counted one (never a bare place after "from the left / right")
+            const order = rng.shuffle(['middle', 'counted', 'named']);
+            if (order.indexOf('middle') > order.indexOf('counted')) order.reverse();
+            const phrase = { counted: [`the ${ORD[k - 1]} one from the ${fromLeft ? 'left' : 'right'}`, objects[at]], middle: ['the one in the middle', objects[2]], named: [`the ${K1}`, objects[spot]] };
+            const parts = order.map((key) => phrase[key]);
             const cols = [C1, C2, C3];
             return row(`Paint ${list(parts.map(([p], j) => `${p} ${cols[j]}`))}.`, objects, parts.map(([, o], j) => [o, cols[j]]), ['paint', 'hidden', 'where', 'ordinal', 'steps3'], 'mem-row', hide);
           }

@@ -19,7 +19,7 @@ const COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
 const THINGS = ['gem', 'key', 'potion', 'shield', 'sword', 'map', 'star', 'coin', 'crown', 'bell', 'drum', 'torch', 'boot', 'book', 'mushroom', 'hat', 'ring', 'rocket', 'egg', 'flag', 'heart'];
 const CONTAINERS = ['chest', 'bag', 'basket', 'pot', 'cart'];
 const NUMBER = { one: 1, two: 2, three: 3, four: 4, five: 5 };
-const SOUND_ALIKE = [['boot', 'book'], ['heart', 'hat'], ['coin', 'crown'], ['pot', 'potion'], ['cart', 'heart'], ['bag', 'flag']];
+const SOUND_ALIKE = [['boot', 'book'], ['heart', 'hat'], ['coin', 'crown'], ['pot', 'potion'], ['cart', 'heart'], ['bag', 'flag'], ['bag', 'basket']];
 const ROOM = { in: 6, on: 6, under: 3 };
 
 const more = (kind) => (kind === 'torch' ? 'torches' : `${kind}s`);
@@ -205,7 +205,7 @@ const ORACLE = {
     return free(to(every(it, { kind, size: s1 }), place(it, p1, w1)), to(every(it, { kind, size: s2 }), place(it, p2, w2)));
   },
   'all-but-one': (it) => {
-    const [ks, p, w] = parse(it, `Put all but one of the ${KINDS} ${WHERE}\\.`);
+    const [ks, p, w] = parse(it, `Put all the ${KINDS} ${WHERE} except one\\.`);
     const group = every(it, { kind: ONE_OF.get(ks) });
     assert.ok(group.length >= 3, it.id);
     return free({ ids: group, n: group.length - 1, to: place(it, p, w) });
@@ -224,8 +224,8 @@ const ORACLE = {
     return inOrder(to(single(it, s3, c3, k3), place(it, p1, w1)), to([single(it, s1, c1, k1), single(it, s2, c2, k2)], place(it, p2, w2)));
   },
   'not-until': (it) => {
-    // "Do not put three coins there until you have put A here."  ->  A, then the coins
-    const [n, s2, c2, k2, p2, w2, s1, c1, k1, p1, w1] = parse(it, `Do not put ${COUNT} ${WHERE} until you have put ${THE} ${WHERE}\\.`);
+    // "Put three coins there, but not until you have put A here."  ->  A, then the coins
+    const [n, s2, c2, k2, p2, w2, s1, c1, k1, p1, w1] = parse(it, `Put ${COUNT} ${WHERE}, but not until you have put ${THE} ${WHERE}\\.`);
     return inOrder(to(single(it, s1, c1, k1), place(it, p1, w1)), nOf(some(it, n, s2, c2, k2), place(it, p2, w2)));
   },
   'after-flip-two': (it) => {
@@ -270,13 +270,16 @@ const ORACLE = {
     const [yes, no] = [nOf(some(it, n1, s1, c1, k1), place(it, p1, w1)), nOf(some(it, n2, s2, c2, k2), place(it, p2, w2))];
     return free(na > nb ? yes : no);
   },
-  neither: (it) => {
-    const [c1, c2, p, w] = parse(it, `Put everything that is neither ${COLOR} nor ${COLOR} ${WHERE}\\.`);
-    assert.notEqual(c1, c2, it.id);
-    for (const color of [c1, c2]) assert.ok(all(it, { color }).length >= 1, `${it.id}: nothing is ${color}`);
-    const rest = it.scene.objects.filter((o) => o.color !== c1 && o.color !== c2);
-    assert.ok(rest.length >= 2 && new Set(rest.map((o) => o.color)).size >= 2, `${it.id}: "neither" could be heard as one colour word`);
-    return free(to(ids(rest), place(it, p, w)));
+  'if-one': (it) => {
+    // "If there is a red key on the shelf, put it in the chest."  ->  that one thing, or nothing at all
+    const [color, kind, p, w] = parse(it, `If there is an? ${COLOR} ${KIND} on the shelf, put it ${WHERE}\\.`);
+    assert.match(it.say, new RegExp(`there is ${/^[aeiou]/.test(color) ? 'an' : 'a'} ${color} `), `${it.id}: a / an`);
+    const hits = all(it, { kind, color });
+    assert.ok(hits.length <= 1, `${it.id}: ${hits.length} things fit`);
+    // both words have to be checked: the same kind in another colour and another kind in that colour are always there
+    assert.ok(all(it, { kind }).some((o) => o.color !== color), `${it.id}: the word "${color}" is not needed`);
+    assert.ok(all(it, { color }).some((o) => o.kind !== kind), `${it.id}: the word "${kind}" is not needed`);
+    return hits.length ? free(to(hits[0].id, place(it, p, w))) : free();
   },
   'if-where': (it) => {
     const [cond, ks, p1, w1, p2, w2] = parse(it, `If ${IF_THERE}, put all the ${KINDS} ${WHERE}\\. If not, put them ${WHERE}\\.`);

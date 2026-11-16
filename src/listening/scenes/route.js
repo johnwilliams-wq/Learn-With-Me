@@ -39,6 +39,16 @@ function legsOf(start, path) {
   return legs;
 }
 
+/** A step straight back takes back the step before it: he drove a square too far and corrected himself. */
+function untangle(start, path) {
+  const out = [];
+  for (const p of path) {
+    if (out.length && same(p, out.length > 1 ? out[out.length - 2] : start)) out.pop();
+    else out.push(p);
+  }
+  return out;
+}
+
 function checkExact(path, expect, scene) {
   const want = expect.path;
   const total = want.length;
@@ -89,7 +99,8 @@ export function check(answer, item) {
   const path = Array.isArray(answer) ? answer : [];
   const exact = Array.isArray(item.expect.path);
   if (!path.length) return { correct: false, error: 'no-response', at: 0, prefix: 0, total: exact ? item.expect.path.length : 0 };
-  return exact ? checkExact(path, item.expect, item.scene) : checkPlaces(path, item.expect, item.scene);
+  // (only for counted routes: when he drives to places, a visit followed by a step back is still a visit)
+  return exact ? checkExact(untangle(item.scene.start, path), item.expect, item.scene) : checkPlaces(path, item.expect, item.scene);
 }
 
 /**

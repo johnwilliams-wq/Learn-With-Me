@@ -25,6 +25,7 @@ export const THING_KINDS = OBJECT_KINDS.filter((k) => k !== 'chest');
 const num = (id) => Number(id.slice(1));
 const soundsAlike = (things, places) => {
   for (let i = 0; i < things.length; i++) for (let j = i + 1; j < things.length; j++) if (clashes(things[i].kind, things[j].kind)) return true;
+  if (places.some((p) => p.kind === 'bag') && places.some((p) => p.kind === 'basket')) return true;
   return places.some((p) => things.some((t) => (PLACE_CLASH[p.kind] || []).includes(t.kind)));
 };
 

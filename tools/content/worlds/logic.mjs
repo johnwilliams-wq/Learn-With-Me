@@ -1,10 +1,11 @@
 // World "logic" - LOGIC LAB: understanding, not memory (activity type "tap"). Nothing is hidden;
 // the work is in the words.
 //
-// The ladder, one new difficulty per level:
-//   1 counting places in a row      2 which one, by its neighbours     3 groups (wear, animals, fly...)
-//   4 two conditions at once        5 count, compare, decide           6 unless / only if / exactly
-//   7 two orders, pick the true one and keep its sequence              boss = mix of 5-7
+// The ladder, one new difficulty per level (the ORDER of the `levels` array at the end of this
+// file is the ladder; the ids are older than the order, so Groups is "logic3" but comes first):
+//   groups (wear, animals, fly...)  counting places in a row           which one, by its neighbours
+//   two conditions at once          count, compare, decide             unless / only if / exactly
+//   two orders, pick the true one and keep its sequence                boss = mix of the last three
 //
 // Drafts are finished by tools/content/lib.mjs (see the top of tools/content/levels.mjs).
 // Every pattern name `v` has its own rule in tests/unit/oracles/tap-logic.mjs.
@@ -61,7 +62,7 @@ function arrange(rng, parts, ok) {
   return retry('no arrangement fits');
 }
 
-// ----------------------------------------------------------------------------- level 1: places
+// ----------------------------------------------------------------------------- places (logic1, the second level)
 
 function placeItem(rng, i) {
   // the side alternates for the plain counts, and switches every four items for the filtered ones
@@ -100,7 +101,7 @@ function placeItem(rng, i) {
   return { say: `Tap the ${ORDINALS[k]} ${word} from the ${side}.`, ...row(objects), expect: [[t]], ...single, s: ['ordinal', 'side', 'detail'], v: byColour ? 'nth-colour' : 'nth-kind' };
 }
 
-// ----------------------------------------------------------------------------- level 2: neighbours
+// ----------------------------------------------------------------------------- neighbours (logic2, the third level)
 
 function neighbourItem(rng, i) {
   switch (i % 4) {
@@ -149,11 +150,12 @@ function neighbourItem(rng, i) {
   }
 }
 
-// ----------------------------------------------------------------------------- level 3: groups
+// ----------------------------------------------------------------------------- groups (logic3, the FIRST level)
 
 // Every group is kept unarguable by what is allowed beside it: `others` lists the only things
 // that may appear as wrong choices (so no dragon among "the animals", no ghost among "the
 // people", no flag among "things that can fly", nothing that jingles among the music makers).
+// A group whose MEMBERS are arguable stays out altogether (is a map something you "read"?).
 const GROUPS = {
   wear: { say: 'Tap everything you can wear.', members: ['hat', 'boot', 'ring', 'crown'],
     others: ['drum', 'map', 'chest', 'egg', 'mushroom', 'potion', 'sword', 'rocket', 'torch', 'owl', 'fox', 'robot', 'dragon', 'ghost'] },
@@ -165,10 +167,8 @@ const GROUPS = {
     others: ['map', 'hat', 'boot', 'mushroom', 'egg', 'flag', 'potion', 'star', 'crown', 'torch', 'gem', 'book'] },
   people: { say: 'Tap all the people.', members: ['wizard', 'knight'],
     others: ['cat', 'owl', 'fox', 'dragon', 'boot', 'crown', 'key', 'bell', 'map', 'drum', 'flag', 'chest'], near: ['cat', 'owl', 'fox', 'dragon'] },
-  read: { say: 'Tap everything you can read.', members: ['book', 'map'],
-    others: ['gem', 'key', 'sword', 'drum', 'bell', 'egg', 'mushroom', 'hat', 'ring', 'star', 'torch', 'cat', 'owl', 'fox'] },
 };
-const GROUP_ORDER = ['wear', 'animals', 'fly', 'music', 'people', 'read'];
+const GROUP_ORDER = ['wear', 'animals', 'fly', 'music', 'people'];
 
 /** Some members of a group (sometimes one of them twice, in two colours) plus things that do not belong. */
 function groupScene(rng, group) {
@@ -215,7 +215,7 @@ function twoClueItem(rng, i) {
       const q = split(1, rng.range(1, 2), 2, rng.range(2, 3));
       return { say: `Tap the things that are neither ${q.C} nor ${S}.`, objects: all(q), expect: [q.neither], ...pick, s: ['logic', 'not', 'all'], v: 'neither-nor' };
     }
-    case 2: { // a group from the level before, and a colour
+    case 2: { // a group from the Groups level, and a colour ("every", not a plural: often only one thing fits)
       const group = Math.floor(i / 5) % 2 ? 'wear' : 'animals';
       const g = GROUPS[group];
       const [C, D] = hues(rng, 2);
@@ -224,16 +224,16 @@ function twoClueItem(rng, i) {
       const n = rng.range(1, 2);
       const targets = members.slice(0, n).map((k) => obj(k, C));
       const objects = [...targets, ...members.slice(n).map((k) => obj(k, D)), obj(wrong[0], C), obj(wrong[1], C), obj(wrong[2], D), obj(wrong[3], rng.pick([C, D]))];
-      const what = group === 'wear' ? 'things you can wear' : 'animals';
-      return { say: `Tap the ${what} that are ${C}.`, objects, expect: [targets], ...pick, s: ['category', 'logic', 'all'], v: `group-colour-${group}` };
+      const what = group === 'wear' ? 'everything you can wear' : 'every animal';
+      return { say: `Tap ${what} that is ${C}.`, objects, expect: [targets], ...pick, s: ['category', 'logic', 'all'], v: `group-colour-${group}` };
     }
     case 3: {
       const q = split(rng.range(1, 2), rng.range(0, 1), rng.range(2, 3), 2);
       return { say: `Tap everything that is ${S} but not ${q.C}.`, objects: all(q), expect: [q.sizeOnly], ...pick, s: ['logic', 'not', 'all'], v: 'size-not-colour' };
     }
-    default: {
+    default: { // one thing is both: "or both" says out loud that it counts too
       const q = split(1, rng.range(1, 2), rng.range(1, 2), rng.range(2, 3));
-      return { say: `Tap everything that is ${q.C} or ${S}.`, objects: all(q), expect: [[...q.both, ...q.colourOnly, ...q.sizeOnly]], ...pick, s: ['logic', 'all', 'detail'], v: 'either-or' };
+      return { say: `Tap everything that is ${q.C}, or ${S}, or both.`, objects: all(q), expect: [[...q.both, ...q.colourOnly, ...q.sizeOnly]], ...pick, s: ['logic', 'all', 'detail'], v: 'either-or' };
     }
   }
 }
@@ -388,16 +388,16 @@ export default {
   id: 'logic', name: 'Logic Lab', blurb: 'Think it through: count, compare, unless, only if.', color: '#2aa9d8', speed: 0.92,
   levels: [
     {
+      id: 'logic3', title: 'Groups', n: 15, maxSame: 3, gen: groupItem, // five sentences, three scenes each
+      tip: 'Welcome to the Logic Lab! First, think about groups. Things you can wear, like a hat or a ring. Animals, like a cat. Things that can fly. Tap every one that fits. Then press the green check mark.',
+    },
+    {
       id: 'logic1', title: 'Count the Places', n: 18, maxSame: 3, gen: placeItem,
-      tip: 'Welcome to the Logic Lab! Everything is in one row. Count along the row to find the right one. Listen for which side to start from: the left, or the right.',
+      tip: 'Now everything is in one row. Listen for the side to start counting from: the left, or the right. If I say the second red one, count only the red ones.',
     },
     {
       id: 'logic2', title: 'Neighbors', n: 18, gen: neighbourItem,
-      tip: 'Now some things look the same. Listen for what is beside each one. Next to. Between. To the left of. Only one of them fits.',
-    },
-    {
-      id: 'logic3', title: 'Groups', n: 18, maxSame: 3, gen: groupItem,
-      tip: 'Now think about groups. Things you can wear, like a hat or a ring. Animals, like a cat. Things that can fly. Tap every one that fits. Then press the green check mark.',
+      tip: 'One row again, but now some things look the same. Listen for what is beside each one. Next to. Between. To the left of. Only one of them fits.',
     },
     {
       id: 'logic4', title: 'Two Clues at Once', n: 18, gen: twoClueItem,
@@ -409,7 +409,7 @@ export default {
     },
     {
       id: 'logic6', title: 'Unless and Only If', n: 18, allowNone: true, quota: { go: 4, nogo: 2 }, gen: unlessItem,
-      tip: 'Tricky words: unless, and only if. Tap the star, unless there is a dragon. So if you see a dragon, do not tap anything. Press the hand instead.',
+      tip: 'Tricky words: unless, and only if. Tap the star, unless there is a dragon. So if you see a dragon, do not tap anything. Press the hand instead. Only if means: do it just when that is true.',
     },
     {
       id: 'logic7', title: 'Two Orders', n: 18, gen: twoOrdersItem,
