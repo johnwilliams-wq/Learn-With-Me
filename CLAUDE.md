@@ -40,8 +40,8 @@ src/listening/              checker (is the answer right), progress (stars/unloc
                             board (tappable grid), bank (data loading), cards, insights (parent stats)
 src/rewards/logic.js        rules for daily rewards, lifetime tiers and chores (pure functions)
 src/core/pin.js, photos.js  parent PIN (salted hash), chore photos (IndexedDB, shrunk JPEGs)
-src/screens/                title, map, mission, results, collection, rewards, chores,
-                            parent (tabs: Progress / Rewards / Chores / Settings), admin (PIN pad + the two tabs)
+src/screens/                title, map, mission, results, collection, rewards, chores, expectations,
+                            parent (tabs: Progress / Rewards / Chores / Expectations / Settings), admin (PIN pad + those tabs)
 assets/data/                GENERATED: listening/levels.json, listening/<level>.json, voice.json, audio.json
 assets/audio/               GENERATED voice clips (mp3): listening/ = instructions, ui/ = the guide's lines
 tools/content/              levels.mjs (the curriculum + item generators), voice.mjs (guide lines), build.mjs
@@ -106,7 +106,11 @@ knowingly. In Claude Code cloud sessions use the `learn-with-me` environment (it
 
 ## Rewards and chores (all on the device)
 
-- State lives in `store` under `rewards` (`daily`, `tiers`, `earned`), `chores` (`list`, `log`) and `admin` (PIN hash).
+- State lives in `store` under `rewards` (`daily`, `tiers`, `earned`), `chores` (`list`, `log`), `expectations`
+  (`list`, per-day ticks, `confirm`) and `admin` (PIN hash).
+- **Expectations** are a daily checklist set by the parent, with no points or rewards. Until every one of today's
+  is done (`rewardsLocked`), his Rewards screen shows only a lock and the way to the list; rewards he wins are
+  still recorded and wait. With `confirm` on, his tick is only `pending` until a grown-up presses OK.
 - **Points are XP.** Missions add XP; an approved chore adds its points to the same total. Lifetime tiers
   are thresholds on that total; daily rewards count missions finished today.
 - A mission counts toward daily rewards only if the level was below 3 stars before it was played

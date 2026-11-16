@@ -189,6 +189,18 @@
    "text": "Nice work! A grown-up will check it soon.",
    "file": "5893eac01a71.mp3"
   },
+  "expect-done": {
+   "text": "All done! Your rewards are unlocked.",
+   "file": "455bff3312da.mp3"
+  },
+  "rewards-locked": {
+   "text": "First, finish your expectations. Then your rewards will open.",
+   "file": "00c5a16a91c7.mp3"
+  },
+  "reward-locked": {
+   "text": "You earned a reward! Finish your expectations to unlock it.",
+   "file": "e7781db9c5d7.mp3"
+  },
   "hello-back-1": {
    "text": "Welcome back, hero!",
    "file": "b2f07f348035.mp3"

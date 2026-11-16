@@ -402,3 +402,18 @@ svg { display: block; width: 100%; height: 100%; }
 .card-reveal .card-art { width: 84px; height: 84px; }
 
 .admin-form .field:first-of-type { flex: 2 1 240px; }
+
+/* ---------- expectations ---------- */
+.tick-btn {
+  appearance: none; cursor: pointer; flex: none; width: 68px; height: 68px; border-radius: 50%; padding: 16px;
+  background: rgba(255, 255, 255, 0.08); border: 4px solid rgba(255, 255, 255, 0.35); color: transparent;
+  transition: transform 0.08s, background 0.15s, border-color 0.15s;
+}
+.tick-btn:active { transform: scale(0.94); }
+.tick-btn.on { background: var(--good); border-color: var(--good); color: #05301e; }
+.expect-row.state-done { opacity: 1; }
+.expect-row.state-pending .tick-btn.on { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
+.all-done { justify-items: center; text-align: center; }
+.lock-panel { justify-items: center; text-align: center; gap: 14px; padding: 28px 22px; margin-top: 4vh; }
+.lock-big { width: 84px; height: 84px; color: var(--gold); }
+.note-panel { border-color: var(--gold); color: var(--ink); font-weight: 700; }

@@ -10,6 +10,9 @@ export const LINES = {
   'hello-first': 'Hi! I am Blip, your guide. Let’s train your super listening. Tap the glowing level to start.',
   'reward-won': 'You earned a reward! Go and show a grown-up.',
   'chore-sent': 'Nice work! A grown-up will check it soon.',
+  'expect-done': 'All done! Your rewards are unlocked.',
+  'rewards-locked': 'First, finish your expectations. Then your rewards will open.',
+  'reward-locked': 'You earned a reward! Finish your expectations to unlock it.',
 };
 
 /** Pools: one line is chosen at random each time, never the same one twice in a row. */

@@ -4878,6 +4878,12 @@
   "speed": 0.95
  },
  {
+  "file": "assets/audio/ui/00c5a16a91c7.mp3",
+  "text": "First, finish your expectations. Then your rewards will open.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
   "file": "assets/audio/ui/02226d98a658.mp3",
   "text": "That is how a captain listens.",
   "voice": "af_heart",
@@ -5018,6 +5024,12 @@
  {
   "file": "assets/audio/ui/442d65b202db.mp3",
   "text": "Two things to do now. Tap them in the order I say. Then press the green check mark. Made a slip? The arrow takes it back.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/455bff3312da.mp3",
+  "text": "All done! Your rewards are unlocked.",
   "voice": "af_heart",
   "speed": 0.97
  },
@@ -5306,6 +5318,12 @@
  {
   "file": "assets/audio/ui/e50cfd84952f.mp3",
   "text": "Hi! I am Blip, your guide. Let’s train your super listening. Tap the glowing level to start.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/e7781db9c5d7.mp3",
+  "text": "You earned a reward! Finish your expectations to unlock it.",
   "voice": "af_heart",
   "speed": 0.97
  },

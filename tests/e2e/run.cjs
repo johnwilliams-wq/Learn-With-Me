@@ -821,6 +821,85 @@ scenario('18 rewards and chores: set up by a grown-up, earned by him, checked an
 });
 
 // ---------------------------------------------------------------------------------------------
+scenario('19 expectations: set by a grown-up, ticked by him, rewards locked until they are done', async (t) => {
+  const { page } = await t.open({ state: { flags: { welcomed: true } } });
+  await toMap(page);
+  t.check((await page.locator('[data-open="expectations"]').count()) === 0, 'no Expectations button before a grown-up adds any');
+
+  await H.openParent(page);
+  await H.openTab(page, 'rewards');
+  await page.fill('[data-form="daily"] input[type="text"]', 'Game time');
+  await page.fill('[data-form="daily"] input[type="number"]', '1');
+  await page.click('[data-form="daily"] button[type="submit"]');
+  await H.openTab(page, 'expectations');
+  for (const title of ['Brush your teeth', 'Pack your bag']) {
+    await page.fill('[data-form="expect"] input[type="text"]', title);
+    await page.click('[data-form="expect"] button[type="submit"]');
+  }
+  let s = await getState(page);
+  t.must(s.expectations.list.length === 2, `expectations were not saved: ${JSON.stringify(s.expectations)}`);
+  const [e1, e2] = s.expectations.list.map((e) => e.id);
+  await page.click('.sub-head .icon-btn');
+  await page.waitForSelector('.screen.map');
+  t.check(((await page.textContent('[data-open="expectations"] .dot')) || '') === '2', 'the Expectations button should show 2 left to do');
+
+  // he wins a reward, but it is locked
+  await openLevel(page, 'w1l1');
+  await playMission(page);
+  t.check(/Finish your expectations/.test((await page.textContent('.won-box')) || ''), 'the results screen should say the reward is locked until the expectations are done');
+  await page.click('[data-act="map"]');
+  await page.waitForSelector('.screen.map');
+  await page.click('[data-open="rewards"]');
+  await page.waitForSelector('.screen.rewards');
+  t.check(await page.locator('.lock-panel').isVisible() && (await page.locator('.reward-row').count()) === 0, 'Rewards should be locked and show nothing while expectations are open');
+
+  // he ticks them off
+  await page.click('.lock-panel [data-open="expectations"]');
+  await page.waitForSelector('.screen.expectations');
+  await page.click(`[data-expect="${e1}"] [data-act="tick"]`);
+  s = await getState(page);
+  t.check(Object.values(s.expectations.days)[0][e1] === 'done', 'his tick should be stored for today');
+  t.check((await page.locator('.all-done').count()) === 0, 'one of two is not "all done"');
+  await page.click(`[data-expect="${e2}"] [data-act="tick"]`);
+  await page.waitForSelector('.all-done');
+  await page.click('.all-done [data-open="rewards"]');
+  await page.waitForSelector('.screen.rewards');
+  t.check((await page.locator('.lock-panel').count()) === 0 && (await page.locator('.reward-row').count()) >= 1, 'Rewards should open once every expectation is done');
+
+  // taking a tick back locks them again
+  await page.click('.sub-head .icon-btn');
+  await page.click('[data-open="expectations"]');
+  await page.click(`[data-expect="${e2}"] [data-act="tick"]`);
+  await page.click('.sub-head .icon-btn');
+  await page.click('[data-open="rewards"]');
+  t.check(await page.locator('.lock-panel').isVisible(), 'un-ticking should lock Rewards again');
+
+  // "needs my OK": his tick only asks; the grown-up confirms
+  await page.click('.sub-head .icon-btn');
+  await H.openParent(page);
+  await H.openTab(page, 'rewards');
+  t.check((await page.locator('[data-note="locked"]').count()) === 1, 'the grown-up should be told the rewards are locked today');
+  await H.openTab(page, 'expectations');
+  await page.click('label.setting:has-text("needs my OK") input');
+  await page.click('.sub-head .icon-btn');
+  await page.click('[data-open="expectations"]');
+  await page.click(`[data-expect="${e2}"] [data-act="tick"]`);
+  s = await getState(page);
+  t.check(Object.values(s.expectations.days)[0][e2] === 'pending', 'with "needs my OK" his tick should only be waiting');
+  await page.click('.sub-head .icon-btn');
+  t.check(((await page.textContent('[data-open="parent"] .dot')) || '') === '2', 'the parent button should flag the tick to confirm (plus the reward to hand out)');
+  await H.openParent(page);
+  await H.openTab(page, 'expectations');
+  await page.click(`[data-expect="${e2}"] [data-act="ok"]`);
+  s = await getState(page);
+  t.check(Object.values(s.expectations.days)[0][e2] === 'done', 'the grown-up\'s OK should mark it done');
+  await page.click('.sub-head .icon-btn');
+  await page.click('[data-open="rewards"]');
+  await page.waitForSelector('.screen.rewards');
+  t.check((await page.locator('.lock-panel').count()) === 0, 'Rewards should be open after the grown-up confirms');
+});
+
+// ---------------------------------------------------------------------------------------------
 async function main() {
   const filters = process.argv.slice(2).map((a) => a.toLowerCase());
   const wanted = scenarios.filter((s) => !filters.length || filters.some((f) => (/^\d+$/.test(f) ? s.name.startsWith(f.padStart(2, '0')) : s.name.toLowerCase().includes(f))));

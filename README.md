@@ -36,6 +36,8 @@ choose a PIN; after that it always asks for the PIN. Inside:
   ("1000 points = trampoline park"). When he wins one it waits under "To hand out" until you mark it given.
 - **Chores** - add chores with points. He taps Done and takes a photo; you approve it or send it back.
   Approved chores add to the same points total as missions. Photos never leave the iPad.
+- **Expectations** - a daily list of things he is simply expected to do (no points, no rewards). He
+  ticks them off each day; until they are all done his rewards stay locked. You can require your own OK.
 - **Settings** - slower voice, daily limit, backup, erase, change PIN.
 
 Everything stays on the device. There are no accounts, ads or tracking. Because there is no server,

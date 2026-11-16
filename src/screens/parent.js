@@ -10,7 +10,7 @@ import { overview, observations, skillStats, errorStats } from '../listening/ins
 import { rankFor } from '../listening/progress.js';
 import { badges } from '../rewards/logic.js';
 import { iconSVG } from '../art/sprites.js';
-import { pinGate, changePinButton, rewardsTab, choresTab } from './admin.js';
+import { pinGate, changePinButton, rewardsTab, choresTab, expectationsTab } from './admin.js';
 
 const TIPS = [
   'Get his eyes first. Say his name, wait until he looks at you, then give the instruction.',
@@ -40,11 +40,11 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
   function show(which) {
     tab = which;
     const b = badges(store.get());
-    mount(tabs, [['progress', 'Progress', 0], ['rewards', 'Rewards', b.rewardsOwed], ['chores', 'Chores', b.toCheck], ['settings', 'Settings', 0]].map(([id, label, n]) =>
+    mount(tabs, [['progress', 'Progress', 0], ['rewards', 'Rewards', b.rewardsOwed], ['chores', 'Chores', b.toCheck], ['expectations', 'Expectations', b.toConfirm], ['settings', 'Settings', 0]].map(([id, label, n]) =>
       h('button', { class: `tab${id === tab ? ' on' : ''}`, type: 'button', dataset: { tab: id }, onclick: () => show(id) }, label, n ? h('span', { class: 'dot' }, String(n)) : null)));
     tabs.hidden = false;
     const refresh = () => show(tab);
-    mount(body, tab === 'rewards' ? rewardsTab(ctx, refresh) : tab === 'chores' ? choresTab(ctx, refresh) : tab === 'settings' ? settingsTab(refresh) : progressTab());
+    mount(body, tab === 'rewards' ? rewardsTab(ctx, refresh) : tab === 'chores' ? choresTab(ctx, refresh) : tab === 'expectations' ? expectationsTab(ctx, refresh) : tab === 'settings' ? settingsTab(refresh) : progressTab());
     body.scrollTop = 0;
   }
 
@@ -126,7 +126,7 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
             if (b.dataset.sure) { store.resetProgress(); ctx.applySettings(); refresh(); }
             else { b.dataset.sure = '1'; b.textContent = 'Tap again to erase his progress'; }
           } }, 'Erase his progress')),
-        h('p', { class: 'fine' }, 'Erasing clears his levels, points, cards and history. Your rewards, chores, settings and PIN are kept.'),
+        h('p', { class: 'fine' }, 'Erasing clears his levels, points, cards and history. Your rewards, chores, expectations, settings and PIN are kept.'),
         backup, backupMsg),
       section('About this game',
         h('p', { class: 'fine' }, 'Each turn follows one routine: he chooses when to listen, waits while the voice talks, then does what was said. Levels add one difficulty at a time: more details, more steps, tricky words (not, except, before, after, if), listening from memory, and stories. A level opens when the one before it earns two stars, or after a few honest tries, so he is never stuck.'),

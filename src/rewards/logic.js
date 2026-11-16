@@ -5,6 +5,8 @@
 //                     plus points from chores a grown-up has approved.
 //   Chores          - set by a grown-up; he marks one done (with a photo); it waits until a
 //                     grown-up approves it or sends it back. Points arrive on approval.
+//   Expectations    - things he is simply expected to do every day (no points, no rewards).
+//                     Until today's list is all done, his rewards stay locked.
 // Everything a grown-up owes him goes into state.rewards.earned until marked as given.
 
 import { todayKey } from '../core/dom.js';
@@ -108,15 +110,57 @@ export function decideChore(state, entryId, approve, note = '', now = new Date()
   return { photo, won };
 }
 
-/** Counts shown as badges: chores he can do now, rewards waiting, and things a grown-up should look at. */
+/**
+ * Today's expectations and where each one stands: 'open', 'pending' (he ticked it and a
+ * grown-up still has to agree - only when `confirm` is switched on) or 'done'.
+ */
+export function expectationsToday(state, now = new Date()) {
+  const ticks = state.expectations.days[todayKey(now)] || {};
+  const items = state.expectations.list.map((e) => ({ ...e, state: ticks[e.id] || 'open' }));
+  const done = items.filter((i) => i.state === 'done').length;
+  return { items, total: items.length, done, waiting: items.filter((i) => i.state === 'pending').length, allDone: done === items.length };
+}
+
+/** His rewards are locked until every one of today's expectations is done. */
+export const rewardsLocked = (state, now = new Date()) => !expectationsToday(state, now).allDone;
+
+function dayTicks(state, now) {
+  const days = state.expectations.days;
+  const key = todayKey(now);
+  days[key] ||= {};
+  for (const old of Object.keys(days).sort().slice(0, -14)) delete days[old]; // two weeks of history is plenty
+  return days[key];
+}
+
+/** He taps an expectation: tick it, or take the tick back. Returns its new state. */
+export function tickExpectation(state, id, now = new Date()) {
+  const ticks = dayTicks(state, now);
+  if (ticks[id] === 'done' && state.expectations.confirm) return 'done'; // a grown-up agreed: it stays
+  if (ticks[id]) delete ticks[id];
+  else ticks[id] = state.expectations.confirm ? 'pending' : 'done';
+  return ticks[id] || 'open';
+}
+
+/** A grown-up sets one of today's expectations to done or not done. */
+export function setExpectation(state, id, done, now = new Date()) {
+  const ticks = dayTicks(state, now);
+  if (done) ticks[id] = 'done';
+  else delete ticks[id];
+}
+
+/** Counts shown as badges: what he can do now, what is waiting, and what a grown-up should look at. */
 export function badges(state, now = new Date()) {
   const statuses = state.chores.list.map((c) => choreStatus(c, state.chores.log, now).state);
+  const ex = expectationsToday(state, now);
   return {
     choresOpen: statuses.filter((s) => s === 'open' || s === 'rejected').length,
     rewardsOwed: owed(state).length,
     toCheck: state.chores.log.filter((e) => e.status === 'pending').length,
+    expectLeft: ex.total - ex.done - ex.waiting,
+    toConfirm: ex.waiting,
   };
 }
 
 export const REWARD_ICONS = ['🎁', '🎮', '🍦', '🍕', '🎬', '📺', '⚽', '🚲', '🧸', '🍪', '🍿', '🎨', '📚', '💵', '⭐', '🏆', '🎟️', '🛹', '🏊', '🎳'];
+export const EXPECT_ICONS = ['✅', '🦷', '🛏️', '🎒', '📚', '🧼', '🚿', '👕', '🥦', '🤝', '👂', '🧹', '🧦', '🍽️', '🕗', '📵', '🙏', '😊', '🐕', '🌙'];
 export const CHORE_ICONS = ['✅', '🛏️', '🍽️', '🗑️', '🧹', '🧺', '🐕', '🐈', '🦷', '🚿', '📚', '🎒', '🌱', '🧦', '🧽', '👕', '🚪', '🍎', '🧸', '🚗'];

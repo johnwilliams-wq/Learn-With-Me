@@ -471,6 +471,8 @@ const ICONS = {
     `<rect x="16" y="53" width="26" height="37" rx="4" fill="${CC}"/><rect x="58" y="53" width="26" height="37" rx="4" fill="${CC}"/>` +
     `<rect x="46" y="32" width="8" height="58" rx="2" fill="${CC}"/>` +
     `<circle cx="37" cy="19" r="9" fill="none" stroke="${CC}" stroke-width="7"/><circle cx="63" cy="19" r="9" fill="none" stroke="${CC}" stroke-width="7"/>`,
+  // expectations: a round badge with a tick
+  expect: () => `<circle cx="50" cy="50" r="38" fill="none" stroke="${CC}" stroke-width="9"/>` + IS('M31 51 45 65 70 36', 11),
   // a camera: body with a ring-shaped lens
   camera: () =>
     IF('M12 34Q12 26 20 26H32L38 16H62L68 26H80Q88 26 88 34V76Q88 84 80 84H20Q12 84 12 76ZM50 38a17 17 0 1 0 0.01 0ZM50 47a8 8 0 1 0 0.01 0Z', 0, 'evenodd'),

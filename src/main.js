@@ -14,6 +14,7 @@ import { collectionScreen } from './screens/collection.js';
 import { parentScreen } from './screens/parent.js';
 import { rewardsScreen } from './screens/rewards.js';
 import { choresScreen } from './screens/chores.js';
+import { expectationsScreen } from './screens/expectations.js';
 
 export const VERSION = '1.0.0';
 
@@ -33,6 +34,7 @@ const screens = {
   parent: parentScreen,
   rewards: rewardsScreen,
   chores: choresScreen,
+  expectations: expectationsScreen,
 };
 
 const ctx = {

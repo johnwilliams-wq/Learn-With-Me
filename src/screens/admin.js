@@ -2,7 +2,7 @@
 
 import { h, mount } from '../core/dom.js';
 import { hasPin, setPin, checkPin, validPin } from '../core/pin.js';
-import { uid, owed, decideChore, REWARD_ICONS, CHORE_ICONS } from '../rewards/logic.js';
+import { uid, owed, decideChore, expectationsToday, setExpectation, REWARD_ICONS, CHORE_ICONS, EXPECT_ICONS } from '../rewards/logic.js';
 import { loadPhoto, deletePhoto } from '../core/photos.js';
 
 // ------------------------------------------------------------------ PIN lock
@@ -138,7 +138,11 @@ export function rewardsTab(ctx, refresh) {
     refresh();
   };
 
+  const ex = expectationsToday(s);
   return [
+    ex.total && !ex.allDone
+      ? h('section', { class: 'panel note-panel', dataset: { note: 'locked' } }, h('p', {}, `Today's expectations are not all done yet (${ex.done} of ${ex.total}), so his rewards are locked on his side.`))
+      : null,
     section(`To hand out (${waiting.length})`,
       waiting.length
         ? h('div', { class: 'admin-list' }, waiting.map((e) => h('div', { class: 'admin-row', dataset: { earned: e.id } },
@@ -235,5 +239,44 @@ export function choresTab(ctx, refresh) {
       recent.length
         ? h('ul', { class: 'obs' }, recent.map((e) => h('li', {}, `${e.icon} ${e.title} - ${e.status === 'approved' ? `approved, +${e.points} points` : `sent back${e.note ? `: ${e.note}` : ''}`} (${when(e.decided || e.t)})`)))
         : h('p', { class: 'fine' }, 'Nothing yet.')),
+  ];
+}
+
+// ------------------------------------------------------------------ Expectations tab
+
+export function expectationsTab(ctx, refresh) {
+  const { store } = ctx;
+  const s = store.get();
+  const ex = expectationsToday(s);
+  const eIcon = iconPicker(EXPECT_ICONS);
+  const eTitle = text('e.g. Brush your teeth');
+  const confirm = h('input', { type: 'checkbox' });
+  confirm.checked = !!s.expectations.confirm;
+  confirm.addEventListener('change', () => { store.update((st) => { st.expectations.confirm = confirm.checked; }); refresh(); });
+  const set = (id, done) => () => { store.update((st) => setExpectation(st, id, done)); refresh(); };
+  const stateName = { open: 'not done yet', pending: 'he says it is done', done: 'done' };
+
+  return [
+    section(`Today (${ex.done} of ${ex.total} done)`,
+      h('p', { class: 'fine' }, 'Expectations earn nothing. But each day his rewards stay locked until every one of them is done.'),
+      ex.total
+        ? h('div', { class: 'admin-list' }, ex.items.map((e) => h('div', { class: 'admin-row', dataset: { expect: e.id } },
+            h('span', { class: 'emoji' }, e.icon),
+            h('span', { class: 'grow' }, h('b', {}, e.title), h('small', {}, stateName[e.state])),
+            e.state === 'done'
+              ? h('button', { class: 'btn btn-chip', type: 'button', dataset: { act: 'undo' }, onclick: set(e.id, false) }, 'Not done')
+              : h('button', { class: 'btn btn-chip btn-primary', type: 'button', dataset: { act: 'ok' }, onclick: set(e.id, true) }, e.state === 'pending' ? 'OK' : 'Mark done'),
+            del(e.title, () => { store.update((st) => { st.expectations.list = st.expectations.list.filter((x) => x.id !== e.id); }); refresh(); }))))
+        : h('p', { class: 'fine' }, 'No expectations yet. With none, his rewards are never locked.'),
+      h('form', { class: 'admin-form', dataset: { form: 'expect' }, onsubmit: (ev) => {
+        ev.preventDefault();
+        const title = eTitle.value.trim();
+        if (!title) return;
+        store.update((st) => { st.expectations.list.push({ id: uid(), icon: eIcon.value, title }); });
+        refresh();
+      } },
+        eIcon, field('Expectation', eTitle), h('button', { class: 'btn btn-primary', type: 'submit' }, 'Add')),
+      h('label', { class: 'setting' }, confirm, h('span', {}, h('b', {}, 'He needs my OK for each one'),
+        h('small', {}, 'Off: his own tick counts. On: his tick waits here until you press OK.')))),
   ];
 }

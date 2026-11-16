@@ -3,7 +3,7 @@
 
 import { h, wait, todayKey } from '../core/dom.js';
 import { rankFor, isUnlocked } from '../listening/progress.js';
-import { countedToday } from '../rewards/logic.js';
+import { countedToday, rewardsLocked } from '../rewards/logic.js';
 import { spriteSVG, chestOpenSVG, iconSVG, guideSVG } from '../art/sprites.js';
 
 export function resultsScreen(ctx, { levelId, sum, card, prevStars, nextWasOpen = false, won = [] }) {
@@ -24,6 +24,7 @@ export function resultsScreen(ctx, { levelId, sum, card, prevStars, nextWasOpen 
   const overLimit = today >= (s.settings.dailyMissions || 3);
   const locked = overLimit && s.settings.hardStop;
   const enough = locked || (overLimit && !chasing);
+  const rewardsShut = rewardsLocked(s);
   let alive = true;
 
   const headline = sum.stars === 3 ? 'Perfect listening!' : sum.stars === 2 ? 'Great listening!' : 'Mission complete!';
@@ -71,7 +72,7 @@ export function resultsScreen(ctx, { levelId, sum, card, prevStars, nextWasOpen 
         justOpened ? h('span', { class: 'tag gold' }, 'New level unlocked!') : null,
         !won.length && chasing && !locked ? h('span', { class: 'tag', dataset: { chasing: chasing.id } }, `${chasing.icon || '🎁'} ${chasing.missions - counted} more today`) : null),
       won.length ? h('div', { class: 'won-box', dataset: { won: String(won.length) } },
-        h('b', {}, 'You won a reward! Show a grown-up'),
+        h('b', {}, rewardsShut ? 'You won a reward! Finish your expectations to unlock it' : 'You won a reward! Show a grown-up'),
         won.map((w) => h('div', { class: 'won-item' }, h('span', { class: 'emoji' }, w.icon || '🎁'), h('span', {}, w.title)))) : null,
       chestArea,
       enough ? h('p', { class: 'enough' }, locked
@@ -92,7 +93,7 @@ export function resultsScreen(ctx, { levelId, sum, card, prevStars, nextWasOpen 
       if (!alive) return;
       if (rankedUp || justOpened || won.length) sfx.fanfare();
       await voice.sayPool(enough ? 'enough' : `result${sum.stars}`);
-      if (alive && won.length) voice.say('reward-won');
+      if (alive && won.length) voice.say(rewardsShut ? 'reward-locked' : 'reward-won');
     },
     destroy() { alive = false; },
   };

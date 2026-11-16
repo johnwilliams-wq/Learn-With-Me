@@ -37,6 +37,11 @@ export function defaultState() {
       log: [], // { id, chore, title, points, t, day, week, status, photo, note }
       requirePhoto: true,
     },
+    expectations: {
+      list: [], // { id, title, icon } - daily, no reward; rewards stay locked until all are done
+      days: {}, // 'YYYY-MM-DD' -> { expectationId: 'done' | 'pending' }
+      confirm: false, // true = his tick waits for a grown-up's OK
+    },
     admin: { hash: '', salt: '', tries: 0, lockUntil: 0 }, // parent PIN (salted hash only)
   };
 }
@@ -84,11 +89,13 @@ export function createStore(backend) {
     for (const k of ['trials', 'missions', 'cards']) if (!Array.isArray(out[k])) out[k] = [];
     if (typeof out.xp !== 'number' || !isFinite(out.xp)) out.xp = 0;
     // Sections added after the first release: fill in whatever an older save is missing.
-    for (const k of ['rewards', 'chores', 'admin']) {
+    for (const k of ['rewards', 'chores', 'expectations', 'admin']) {
       out[k] = { ...base[k], ...(s[k] && typeof s[k] === 'object' ? s[k] : {}) };
     }
     for (const k of ['daily', 'tiers', 'earned']) if (!Array.isArray(out.rewards[k])) out.rewards[k] = [];
     for (const k of ['list', 'log']) if (!Array.isArray(out.chores[k])) out.chores[k] = [];
+    if (!Array.isArray(out.expectations.list)) out.expectations.list = [];
+    if (!out.expectations.days || typeof out.expectations.days !== 'object') out.expectations.days = {};
     out.v = 1;
     return out;
   }
@@ -135,6 +142,7 @@ export function createStore(backend) {
       fresh.admin = state.admin;
       fresh.rewards = { ...fresh.rewards, daily: state.rewards.daily, tiers: state.rewards.tiers, countPerfected: state.rewards.countPerfected };
       fresh.chores = { ...fresh.chores, list: state.chores.list, requirePhoto: state.chores.requirePhoto };
+      fresh.expectations = { ...fresh.expectations, list: state.expectations.list, confirm: state.expectations.confirm };
       fresh.flags = { welcomed: state.flags.welcomed, installHintClosed: state.flags.installHintClosed };
       state = fresh;
       save();

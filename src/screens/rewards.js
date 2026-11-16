@@ -2,12 +2,29 @@
 // grown-up still owes him. The rewards themselves are set by a grown-up in the parent area.
 
 import { h, todayKey } from '../core/dom.js';
-import { countedToday, owed } from '../rewards/logic.js';
+import { countedToday, owed, expectationsToday } from '../rewards/logic.js';
 import { iconSVG, guideSVG } from '../art/sprites.js';
 
 export function rewardsScreen(ctx) {
-  const { store, audio } = ctx;
+  const { store, audio, voice } = ctx;
   const s = store.get();
+  const ex = expectationsToday(s);
+  if (!ex.allDone) {
+    // Expectations come first: until today's list is done, the rewards are not shown at all.
+    const el = h('div', { class: 'screen rewards locked' },
+      h('header', { class: 'sub-head' },
+        h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Back', html: iconSVG('back'), onclick: () => ctx.go('map') }),
+        h('h1', {}, 'Rewards'),
+        h('div', {})),
+      h('main', { class: 'list-body' },
+        h('section', { class: 'panel lock-panel' },
+          h('div', { class: 'lock-big', html: iconSVG('lock') }),
+          h('h2', {}, 'Finish your expectations first'),
+          h('div', { class: 'pips' }, ex.items.map((e) => h('span', { class: `pip${e.state === 'done' ? ' gold' : e.state === 'pending' ? ' silver' : ''}` }))),
+          h('button', { class: 'btn btn-primary btn-big', type: 'button', dataset: { open: 'expectations' }, onclick: () => ctx.go('expectations') },
+            h('span', { class: 'btn-icon', html: iconSVG('expect') }), h('span', {}, 'Expectations')))));
+    return { el, shown: () => voice.say('rewards-locked'), destroy: () => audio.stop() };
+  }
   const R = s.rewards;
   const today = todayKey();
   const counted = countedToday(s);

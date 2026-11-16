@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createStore, defaultState } from '../../src/core/store.js';
 import { todayKey } from '../../src/core/dom.js';
-import { collectRewards, missionCounts, countedToday, owed, choreStatus, submitChore, decideChore, badges, weekKey } from '../../src/rewards/logic.js';
+import { collectRewards, missionCounts, countedToday, owed, choreStatus, submitChore, decideChore, badges, weekKey, expectationsToday, tickExpectation, setExpectation, rewardsLocked } from '../../src/rewards/logic.js';
 import { hasPin, setPin, checkPin, validPin } from '../../src/core/pin.js';
 
 const memory = () => {
@@ -130,6 +130,7 @@ test('old saves without the new sections are filled in', () => {
   assert.deepEqual(s.rewards.daily, []);
   assert.deepEqual(s.chores.list, []);
   assert.equal(s.admin.hash, '');
+  assert.deepEqual(s.expectations, { list: [], days: {}, confirm: false });
 });
 
 test('parent PIN: set once, checked by hash, locks after five wrong tries', async () => {
@@ -146,4 +147,49 @@ test('parent PIN: set once, checked by hash, locks after five wrong tries', asyn
   assert.equal(await checkPin(store, '000000', 2000), 'locked');
   assert.equal(await checkPin(store, '246810', 3000), 'locked', 'even the right PIN waits out the lock');
   assert.equal(await checkPin(store, '246810', 2000 + 31000), 'ok');
+});
+
+test('expectations: ticked each day; rewards stay locked until all of them are done', () => {
+  const s = defaultState();
+  assert.equal(rewardsLocked(s, MON), false, 'with no expectations nothing is ever locked');
+  s.expectations.list.push({ id: 'e1', title: 'Brush teeth', icon: 'x' }, { id: 'e2', title: 'Homework', icon: 'x' });
+  assert.equal(rewardsLocked(s, MON), true);
+  assert.equal(tickExpectation(s, 'e1', MON), 'done');
+  assert.equal(rewardsLocked(s, MON), true, 'one of two is not enough');
+  assert.equal(badges(s, MON).expectLeft, 1);
+  assert.equal(tickExpectation(s, 'e2', MON), 'done');
+  assert.equal(rewardsLocked(s, MON), false);
+  assert.equal(tickExpectation(s, 'e2', MON), 'open', 'he can take a tick back');
+  assert.equal(rewardsLocked(s, MON), true);
+  tickExpectation(s, 'e2', MON);
+  assert.equal(expectationsToday(s, MON).done, 2);
+  assert.equal(rewardsLocked(s, TUE), true, 'a new day starts unticked');
+  assert.equal(expectationsToday(s, TUE).done, 0);
+
+  // "needs my OK": his tick only asks; a grown-up decides
+  s.expectations.confirm = true;
+  assert.equal(tickExpectation(s, 'e1', TUE), 'pending');
+  assert.equal(badges(s, TUE).toConfirm, 1);
+  assert.equal(rewardsLocked(s, TUE), true, 'a tick that is waiting does not unlock anything');
+  setExpectation(s, 'e1', true, TUE);
+  setExpectation(s, 'e2', true, TUE);
+  assert.equal(rewardsLocked(s, TUE), false);
+  assert.equal(tickExpectation(s, 'e1', TUE), 'done', 'he cannot undo what a grown-up confirmed');
+  setExpectation(s, 'e1', false, TUE);
+  assert.equal(rewardsLocked(s, TUE), true);
+
+  // history is trimmed to two weeks
+  for (let d = 1; d <= 28; d++) tickExpectation(s, 'e2', at(2026, 12, d));
+  assert.ok(Object.keys(s.expectations.days).length <= 15);
+});
+
+test('erasing his progress keeps the expectations a grown-up set up', () => {
+  const store = createStore(memory());
+  store.update((s) => { s.expectations.list.push({ id: 'e1', title: 'Brush teeth', icon: 'x' }); s.expectations.confirm = true; s.xp = 50; tickExpectation(s, 'e1'); });
+  store.resetProgress();
+  const s = store.get();
+  assert.equal(s.xp, 0);
+  assert.equal(s.expectations.list.length, 1);
+  assert.equal(s.expectations.confirm, true);
+  assert.deepEqual(s.expectations.days, {});
 });
