@@ -402,12 +402,6 @@
   "speed": 0.92
  },
  {
-  "file": "assets/audio/listening/18e2f06a2400.mp3",
-  "text": "Tap the drum, then the rocket.",
-  "voice": "af_heart",
-  "speed": 0.9
- },
- {
   "file": "assets/audio/listening/18eb0fa68d37.mp3",
   "text": "Tap the boot before you tap the torch.",
   "voice": "af_heart",
@@ -484,12 +478,6 @@
   "text": "If there is a book, tap the crown. If not, tap the bell.",
   "voice": "af_heart",
   "speed": 0.95
- },
- {
-  "file": "assets/audio/listening/1b9187f4abec.mp3",
-  "text": "Tap the mushroom, then the heart.",
-  "voice": "af_heart",
-  "speed": 0.9
  },
  {
   "file": "assets/audio/listening/1ba744baa6b7.mp3",
@@ -628,12 +616,6 @@
   "text": "Tap the big yellow hat.",
   "voice": "af_heart",
   "speed": 0.88
- },
- {
-  "file": "assets/audio/listening/24877de37202.mp3",
-  "text": "On the shelf there was a key, a book, and a ring. A cat knocked the book onto the floor. What fell on the floor?",
-  "voice": "af_heart",
-  "speed": 0.95
  },
  {
   "file": "assets/audio/listening/2542683d4cd1.mp3",
@@ -870,12 +852,6 @@
   "speed": 0.92
  },
  {
-  "file": "assets/audio/listening/33066745cbd3.mp3",
-  "text": "Tap the egg, then the drum.",
-  "voice": "af_heart",
-  "speed": 0.9
- },
- {
   "file": "assets/audio/listening/332ab4882f8f.mp3",
   "text": "Tap the coin after you tap the heart.",
   "voice": "af_heart",
@@ -1026,6 +1002,12 @@
   "speed": 0.95
  },
  {
+  "file": "assets/audio/listening/3a3bb27c0b6a.mp3",
+  "text": "There was a key, a book, and a ring on the shelf. A cat knocked the book onto the floor. What fell on the floor?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
   "file": "assets/audio/listening/3a434d98dbda.mp3",
   "text": "Tap the yellow coin.",
   "voice": "af_heart",
@@ -1114,18 +1096,6 @@
   "text": "Tap the key, then the mushroom, then the drum.",
   "voice": "af_heart",
   "speed": 0.92
- },
- {
-  "file": "assets/audio/listening/3d8eb0c54ce2.mp3",
-  "text": "Tap the flag, then the boot.",
-  "voice": "af_heart",
-  "speed": 0.9
- },
- {
-  "file": "assets/audio/listening/3da8f1a611c0.mp3",
-  "text": "Tap the heart, then the key.",
-  "voice": "af_heart",
-  "speed": 0.9
  },
  {
   "file": "assets/audio/listening/3ddddc358bc4.mp3",
@@ -1428,6 +1398,12 @@
   "speed": 0.95
  },
  {
+  "file": "assets/audio/listening/4c7730e6f4cd.mp3",
+  "text": "Tap the flag, and then the ring.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
   "file": "assets/audio/listening/4cc1767bd267.mp3",
   "text": "Tap the coin, but only if it is yellow.",
   "voice": "af_heart",
@@ -1444,12 +1420,6 @@
   "text": "Tap the purple torch, then the green key.",
   "voice": "af_heart",
   "speed": 0.9
- },
- {
-  "file": "assets/audio/listening/4dd1b3f92eb5.mp3",
-  "text": "On the shelf there was a book, a rocket, and a ring. A cat knocked the ring onto the floor. What fell on the floor?",
-  "voice": "af_heart",
-  "speed": 0.95
  },
  {
   "file": "assets/audio/listening/4e37c6049409.mp3",
@@ -1566,6 +1536,12 @@
   "speed": 0.92
  },
  {
+  "file": "assets/audio/listening/559eae61e1ef.mp3",
+  "text": "Tap the heart, and then the key.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
   "file": "assets/audio/listening/55a52a3dfcd5.mp3",
   "text": "After you tap the key, tap the egg.",
   "voice": "af_heart",
@@ -1650,6 +1626,12 @@
   "speed": 0.9
  },
  {
+  "file": "assets/audio/listening/59ac72e7ac46.mp3",
+  "text": "Tap the hat, and then the gem.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
   "file": "assets/audio/listening/5a981f7494d6.mp3",
   "text": "Tap the key, then the flag, then the mushroom.",
   "voice": "af_heart",
@@ -1716,6 +1698,12 @@
   "speed": 0.92
  },
  {
+  "file": "assets/audio/listening/60b914436acd.mp3",
+  "text": "Tap the torch, and then the hat.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
   "file": "assets/audio/listening/60f2cf4a5ed8.mp3",
   "text": "If there is a gem, tap the torch. If not, tap the hat.",
   "voice": "af_heart",
@@ -1758,6 +1746,12 @@
   "speed": 0.95
  },
  {
+  "file": "assets/audio/listening/62d45c2ba725.mp3",
+  "text": "Tap the mushroom, and then the heart.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
   "file": "assets/audio/listening/62f9fe266cdd.mp3",
   "text": "Tap the green crown, then the orange egg.",
   "voice": "af_heart",
@@ -1798,6 +1792,12 @@
   "text": "Tap the rocket that is not blue.",
   "voice": "af_heart",
   "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/642e7d63b7a0.mp3",
+  "text": "There was a potion, a flag, and a torch on the shelf. A cat knocked the potion onto the floor. What fell on the floor?",
+  "voice": "af_heart",
+  "speed": 0.95
  },
  {
   "file": "assets/audio/listening/6486e96ba758.mp3",
@@ -1914,12 +1914,6 @@
   "speed": 0.92
  },
  {
-  "file": "assets/audio/listening/6837f117ee80.mp3",
-  "text": "Tap the chest, then the egg.",
-  "voice": "af_heart",
-  "speed": 0.9
- },
- {
   "file": "assets/audio/listening/688e7e0fde55.mp3",
   "text": "Tap the key, then tap the flag.",
   "voice": "af_heart",
@@ -2010,6 +2004,12 @@
   "speed": 0.92
  },
  {
+  "file": "assets/audio/listening/6db12fd8e05d.mp3",
+  "text": "Tap the flag, and then the boot.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
   "file": "assets/audio/listening/6dbcc72a804f.mp3",
   "text": "Tap all the bells.",
   "voice": "af_heart",
@@ -2080,6 +2080,12 @@
   "text": "Tap all the red drums.",
   "voice": "af_heart",
   "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/714159a67758.mp3",
+  "text": "There was a heart, a crown, and a star on the shelf. A cat knocked the crown onto the floor. What fell on the floor?",
+  "voice": "af_heart",
+  "speed": 0.95
  },
  {
   "file": "assets/audio/listening/7259a8e5db8c.mp3",
@@ -2256,12 +2262,6 @@
   "speed": 0.95
  },
  {
-  "file": "assets/audio/listening/7c4ec1005e22.mp3",
-  "text": "On the shelf there was a heart, a crown, and a star. A cat knocked the crown onto the floor. What fell on the floor?",
-  "voice": "af_heart",
-  "speed": 0.95
- },
- {
   "file": "assets/audio/listening/7cac0d710880.mp3",
   "text": "Before you tap the ring, tap the chest.",
   "voice": "af_heart",
@@ -2430,6 +2430,12 @@
   "speed": 0.9
  },
  {
+  "file": "assets/audio/listening/8704006fb8c8.mp3",
+  "text": "Tap the boot, and then the shield.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
   "file": "assets/audio/listening/87394e27f1b8.mp3",
   "text": "Tap all the bells except the green one.",
   "voice": "af_heart",
@@ -2578,12 +2584,6 @@
   "text": "Tap the heart that is not blue.",
   "voice": "af_heart",
   "speed": 0.92
- },
- {
-  "file": "assets/audio/listening/8fc479dda91e.mp3",
-  "text": "Tap the boot, then the shield.",
-  "voice": "af_heart",
-  "speed": 0.9
  },
  {
   "file": "assets/audio/listening/8fd3e563a6a3.mp3",
@@ -2800,12 +2800,6 @@
   "text": "The castle is very quiet today. Now, tap the blue coin.",
   "voice": "af_heart",
   "speed": 0.88
- },
- {
-  "file": "assets/audio/listening/99491c0491c8.mp3",
-  "text": "Tap the hat, then the gem.",
-  "voice": "af_heart",
-  "speed": 0.9
  },
  {
   "file": "assets/audio/listening/998913d2af3d.mp3",
@@ -3066,6 +3060,12 @@
   "speed": 0.92
  },
  {
+  "file": "assets/audio/listening/a7d7aeaee465.mp3",
+  "text": "Tap the chest, and then the egg.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
   "file": "assets/audio/listening/a80cb7dc7073.mp3",
   "text": "The knight is going to practice fighting. What should he swing?",
   "voice": "af_heart",
@@ -3120,12 +3120,6 @@
   "speed": 0.92
  },
  {
-  "file": "assets/audio/listening/a94ab944fd25.mp3",
-  "text": "On the shelf there was a potion, a flag, and a torch. A cat knocked the potion onto the floor. What fell on the floor?",
-  "voice": "af_heart",
-  "speed": 0.95
- },
- {
   "file": "assets/audio/listening/a9d438d808ea.mp3",
   "text": "Tap the egg. Then tap the drum.",
   "voice": "af_heart",
@@ -3148,12 +3142,6 @@
   "text": "Tap the crown on the right.",
   "voice": "af_heart",
   "speed": 0.92
- },
- {
-  "file": "assets/audio/listening/aa52d4a15d37.mp3",
-  "text": "Tap the potion, then the chest.",
-  "voice": "af_heart",
-  "speed": 0.9
  },
  {
   "file": "assets/audio/listening/aa7de96749da.mp3",
@@ -3184,12 +3172,6 @@
   "text": "Tap the big blue mushroom.",
   "voice": "af_heart",
   "speed": 0.88
- },
- {
-  "file": "assets/audio/listening/ab5eadeb6936.mp3",
-  "text": "On the shelf there was a book, a torch, and a shield. A cat knocked the torch onto the floor. What fell on the floor?",
-  "voice": "af_heart",
-  "speed": 0.95
  },
  {
   "file": "assets/audio/listening/ab9a6c96b84a.mp3",
@@ -3534,6 +3516,12 @@
   "speed": 0.95
  },
  {
+  "file": "assets/audio/listening/b9b960198cb6.mp3",
+  "text": "Tap the heart, and then the potion.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
   "file": "assets/audio/listening/ba28fe13b3f6.mp3",
   "text": "Tap the yellow bell.",
   "voice": "af_heart",
@@ -3612,12 +3600,6 @@
   "speed": 0.92
  },
  {
-  "file": "assets/audio/listening/bd7886551694.mp3",
-  "text": "Tap the flag, then the ring.",
-  "voice": "af_heart",
-  "speed": 0.9
- },
- {
   "file": "assets/audio/listening/be98937bc8e9.mp3",
   "text": "Tap the drum. After that, tap the crown.",
   "voice": "af_heart",
@@ -3638,12 +3620,6 @@
  {
   "file": "assets/audio/listening/bf45887cbe88.mp3",
   "text": "Tap the purple flag.",
-  "voice": "af_heart",
-  "speed": 0.95
- },
- {
-  "file": "assets/audio/listening/bf6856d4850e.mp3",
-  "text": "On the shelf there was a potion, a shield, and an egg. A cat knocked the egg onto the floor. What fell on the floor?",
   "voice": "af_heart",
   "speed": 0.95
  },
@@ -3804,6 +3780,12 @@
   "speed": 0.9
  },
  {
+  "file": "assets/audio/listening/c457471e8140.mp3",
+  "text": "Tap the potion, and then the chest.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
   "file": "assets/audio/listening/c537c0fad7f2.mp3",
   "text": "Tap the green key, then the blue mushroom.",
   "voice": "af_heart",
@@ -3832,6 +3814,12 @@
   "text": "If you see a dragon, tap the coin.",
   "voice": "af_heart",
   "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/c6f2a75af6f6.mp3",
+  "text": "Tap the egg, and then the drum.",
+  "voice": "af_heart",
+  "speed": 0.9
  },
  {
   "file": "assets/audio/listening/c7dc26365a63.mp3",
@@ -3954,6 +3942,12 @@
   "speed": 0.92
  },
  {
+  "file": "assets/audio/listening/cf2718cde814.mp3",
+  "text": "There was a book, a torch, and a shield on the shelf. A cat knocked the torch onto the floor. What fell on the floor?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
   "file": "assets/audio/listening/cfa319489139.mp3",
   "text": "Tap the small egg.",
   "voice": "af_heart",
@@ -4008,6 +4002,12 @@
   "speed": 0.95
  },
  {
+  "file": "assets/audio/listening/d31e758d3abe.mp3",
+  "text": "Tap the drum, and then the rocket.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
   "file": "assets/audio/listening/d333cf9647f1.mp3",
   "text": "Hoot is looking up at the night sky. What does she see twinkling?",
   "voice": "af_heart",
@@ -4054,12 +4054,6 @@
   "text": "Everybody is waiting for you. Now, tap the orange bell.",
   "voice": "af_heart",
   "speed": 0.88
- },
- {
-  "file": "assets/audio/listening/d57832346e54.mp3",
-  "text": "Tap the torch, then the hat.",
-  "voice": "af_heart",
-  "speed": 0.9
  },
  {
   "file": "assets/audio/listening/d58897194f03.mp3",
@@ -4120,6 +4114,12 @@
   "text": "Tap the red flag.",
   "voice": "af_heart",
   "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/da75ef887a57.mp3",
+  "text": "There was a potion, a shield, and an egg on the shelf. A cat knocked the egg onto the floor. What fell on the floor?",
+  "voice": "af_heart",
+  "speed": 0.95
  },
  {
   "file": "assets/audio/listening/da7b6f086b12.mp3",
@@ -4246,6 +4246,12 @@
   "text": "Tap the one to the left of the flag.",
   "voice": "af_heart",
   "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/e1abc28369e6.mp3",
+  "text": "There was a book, a rocket, and a ring on the shelf. A cat knocked the ring onto the floor. What fell on the floor?",
+  "voice": "af_heart",
+  "speed": 0.95
  },
  {
   "file": "assets/audio/listening/e1e7e07630fd.mp3",
@@ -4654,12 +4660,6 @@
   "text": "Tap the egg. After that, tap the heart.",
   "voice": "af_heart",
   "speed": 0.92
- },
- {
-  "file": "assets/audio/listening/f2e52313c8c5.mp3",
-  "text": "Tap the heart, then the potion.",
-  "voice": "af_heart",
-  "speed": 0.9
  },
  {
   "file": "assets/audio/listening/f306324892bf.mp3",
@@ -5274,12 +5274,6 @@
   "speed": 0.97
  },
  {
-  "file": "assets/audio/ui/d07ae4a05120.mp3",
-  "text": "You won a reward! Go and show a grown-up.",
-  "voice": "af_heart",
-  "speed": 0.97
- },
- {
   "file": "assets/audio/ui/d3d4423b7cea.mp3",
   "text": "Great listening! Two stars!",
   "voice": "af_heart",
@@ -5312,6 +5306,12 @@
  {
   "file": "assets/audio/ui/e50cfd84952f.mp3",
   "text": "Hi! I am Blip, your guide. Let’s train your super listening. Tap the glowing level to start.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/e83679a0dae0.mp3",
+  "text": "You earned a reward! Go and show a grown-up.",
   "voice": "af_heart",
   "speed": 0.97
  },

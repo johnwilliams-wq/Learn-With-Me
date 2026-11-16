@@ -33,7 +33,7 @@ SAME = [
     {"colors", "colours"}, {"ok", "okay"}, {"oh", "o"}, {"hi", "high", "hey"}, {"its", "it's"},
     {"lets", "let's"}, {"captains", "captain's"}, {"heros", "hero's", "heroes"}, {"camp", "camps"},
     {"campfire", "camp"}, {"bell", "belle"}, {"gem", "jem", "gym", "jam"}, {"boot", "boots"},
-    {"wait", "weight"}, {"except", "accept"}, {"listened", "listen"},
+    {"wait", "weight"}, {"except", "accept"}, {"listened", "listen"}, {"ate", "eight"}, {"tap", "tapped"},
 ]
 CANON = {}
 for group in SAME:
@@ -112,6 +112,13 @@ def main():
                 failed.append({**c, "heard": heard, "seconds": round(dur, 2)})
             if n % 50 == 0 or n == len(todo):
                 print(f"  {n}/{len(todo)}  {len(failed)} to double-check  ({time.time() - start:.0f}s)", flush=True)
+
+    # Sentences a person has looked at and accepted, with the reason (tools/tts/accepted.json).
+    accepted_path = ROOT / "tools" / "tts" / "accepted.json"
+    accepted = json.loads(accepted_path.read_text()) if accepted_path.exists() else {}
+    for c in [c for c in failed if c["text"] in accepted]:
+        done.add(c["file"])
+    failed = [c for c in failed if c["text"] not in accepted]
 
     still = []
     if failed:

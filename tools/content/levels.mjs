@@ -206,7 +206,7 @@ const w2 = {
         if (i % 2 === 0) {
           const objects = things(rng, 5);
           const [a, b] = objects;
-          return { say: `Tap the ${a.kind}, then the ${b.kind}.`, objects, expect: [[a], [b]], auto: false, hide: true, s: ['hidden', 'steps2'], v: 'hidden-two' };
+          return { say: `Tap the ${a.kind}, and then the ${b.kind}.`, objects, expect: [[a], [b]], auto: false, hide: true, s: ['hidden', 'steps2'], v: 'hidden-two' };
         }
         const { a, b, objects } = twoColourScene(rng);
         return { say: `Tap the ${a.color} ${a.kind}, then the ${b.color} ${b.kind}.`, objects, expect: [[a], [b]], auto: false, hide: true, s: ['hidden', 'steps2', 'detail'], v: 'hidden-two-colour' };
@@ -665,7 +665,7 @@ const w7 = {
             const objects = things(rng, 4);
             const [x, y, z] = objects;
             const t = rng.pick([x, y, z]);
-            return single(`On the shelf there was ${an(x.kind)} ${x.kind}, ${an(y.kind)} ${y.kind}, and ${an(z.kind)} ${z.kind}. A cat knocked the ${t.kind} onto the floor. What fell on the floor?`, objects, t, ['story'], 'shelf');
+            return single(`There was ${an(x.kind)} ${x.kind}, ${an(y.kind)} ${y.kind}, and ${an(z.kind)} ${z.kind} on the shelf. A cat knocked the ${t.kind} onto the floor. What fell on the floor?`, objects, t, ['story'], 'shelf');
           }
           case 2: {
             const ch = rng.pick(CAST);

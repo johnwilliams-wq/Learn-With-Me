@@ -8,7 +8,7 @@ export const UI_SPEED = 0.97;
 /** Single lines, played by id. (Level tips are added automatically as `tip-<levelId>`.) */
 export const LINES = {
   'hello-first': 'Hi! I am Blip, your guide. Let’s train your super listening. Tap the glowing level to start.',
-  'reward-won': 'You won a reward! Go and show a grown-up.',
+  'reward-won': 'You earned a reward! Go and show a grown-up.',
   'chore-sent': 'Nice work! A grown-up will check it soon.',
 };
 
