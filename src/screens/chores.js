@@ -47,6 +47,7 @@ export function choresScreen(ctx) {
         h('span', { class: 'emoji' }, c.icon || '✅'),
         h('div', { class: 'reward-main' },
           h('div', { class: 'reward-title' }, c.title),
+          c.note ? h('div', { class: 'reward-note' }, c.note) : null,
           h('div', { class: 'chore-sub' },
             h('span', { class: 'tag xp' }, `+${c.points} XP`),
             c.reward ? h('span', { class: 'tag gold' }, c.reward) : null,
@@ -55,7 +56,7 @@ export function choresScreen(ctx) {
         st.state === 'approved' ? h('span', { class: 'stamp given' }, 'Done ✓') : null,
         open ? h('button', { class: 'btn btn-done', type: 'button', dataset: { act: 'done' }, onclick: () => start(c) },
           h('span', { class: 'btn-icon', html: iconSVG(s.chores.requirePhoto === false ? 'check' : 'camera') }), h('span', { class: 'btn-label' }, 'Done!')) : null,
-        say(`${c.title}. ${c.points} points.`));
+        say(`${c.title}. ${c.note ? `${c.note}. ` : ''}${c.points} points.`));
     })));
   }
 

@@ -1,9 +1,11 @@
-// Grown-ups' tools: the PIN lock, and the Rewards and Chores tabs of the parent area.
+// Grown-ups' tools: the PIN lock, and the Rewards, Chores and Expectations tabs of the parent area.
+// Everything in those lists can be added, changed (Edit) and removed; each thing has a name, an
+// optional description, and - for the steps of the reward ladder - an optional picture.
 
 import { h, mount } from '../core/dom.js';
 import { hasPin, setPin, checkPin, validPin } from '../core/pin.js';
-import { uid, owed, decideChore, expectationsToday, setExpectation, REWARD_ICONS, CHORE_ICONS, EXPECT_ICONS } from '../rewards/logic.js';
-import { loadPhoto, deletePhoto } from '../core/photos.js';
+import { owed, decideChore, expectationsToday, setExpectation, addItem, editItem, removeItem, tidy, TITLE_MAX, NOTE_MAX, REWARD_ICONS, CHORE_ICONS, EXPECT_ICONS } from '../rewards/logic.js';
+import { loadPhoto, savePhoto, deletePhoto, shrinkImage, showPhoto } from '../core/photos.js';
 
 // ------------------------------------------------------------------ PIN lock
 
@@ -96,16 +98,159 @@ export function changePinButton(ctx, body, back) {
 
 // ------------------------------------------------------------------ small form helpers
 
-const field = (label, control) => h('label', { class: 'field' }, h('span', {}, label), control);
-const text = (placeholder, max = 60) => h('input', { type: 'text', maxlength: max, placeholder, autocomplete: 'off' });
+const field = (label, control, cls = '') => h('label', { class: `field${cls ? ` ${cls}` : ''}` }, h('span', {}, label), control);
+function text(placeholder, max = TITLE_MAX, value = '') {
+  const input = h('input', { type: 'text', maxlength: max, placeholder, autocomplete: 'off' });
+  input.value = value;
+  return input;
+}
 const number = (value, min = 1, max = 100000) => h('input', { type: 'number', inputmode: 'numeric', min, max, value });
-function iconPicker(icons) {
-  const sel = h('select', { class: 'icon-select', 'aria-label': 'Picture' }, icons.map((i) => h('option', { value: i }, i)));
+function noteBox(value = '') {
+  const box = h('textarea', { rows: 2, maxlength: NOTE_MAX, placeholder: 'optional - a few more words. He sees them, and the speaker button reads them to him.' });
+  box.value = value;
+  return box;
+}
+function iconPicker(icons, value) {
+  const all = value && !icons.includes(value) ? [value, ...icons] : icons;
+  const sel = h('select', { class: 'icon-select', 'aria-label': 'Picture' }, all.map((i) => h('option', { value: i }, i)));
+  if (value) sel.value = value;
+  return sel;
+}
+function choice(options, value) {
+  const sel = h('select', {}, Object.entries(options).map(([v, label]) => h('option', { value: v }, label)));
+  if (value) sel.value = value;
   return sel;
 }
 const when = (t) => new Date(t).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
 const section = (title, ...kids) => h('section', { class: 'panel' }, h('h2', {}, title), ...kids);
-const del = (label, fn) => h('button', { class: 'btn btn-chip btn-danger', type: 'button', 'aria-label': `Delete ${label}`, onclick: fn }, 'Delete');
+
+// ------------------------------------------------------------------ one list of things, with Add / Edit / Delete
+
+const REPEAT = { daily: 'Every day', weekly: 'Once a week', once: 'One time only' };
+/** What the form asks for each kind of thing, besides its picture, name and description. */
+const KINDS = {
+  daily: { icons: REWARD_ICONS, label: 'Reward', example: 'e.g. 15 minutes of game time',
+    fields: (it) => ({ missions: ['Missions in a day', number(it?.missions ?? 3, 1, 20)] }) },
+  tier: { icons: REWARD_ICONS, label: 'Reward', example: 'e.g. Trip to the trampoline park', picture: true,
+    fields: (it) => ({ points: ['Total points needed', number(it?.points ?? 1000, 10, 1000000)] }) },
+  chore: { icons: CHORE_ICONS, label: 'Chore', example: 'e.g. Make your bed',
+    fields: (it) => ({ points: ['Points', number(it?.points ?? 20, 0, 10000)], repeat: ['How often', choice(REPEAT, it?.repeat)], reward: ['Extra reward', text('optional, e.g. $1', 40, it?.reward || '')] }) },
+  expect: { icons: EXPECT_ICONS, label: 'Expectation', example: 'e.g. Brush your teeth', fields: () => ({}) },
+};
+
+let editing = null; // 'kind:id' of the row that is open for changes (one at a time)
+let showing = []; // pictures on screen: each entry frees one of them again
+const freePictures = () => { for (const free of showing.splice(0)) free(); };
+
+/**
+ * The form for one reward, chore or expectation: the same for a new one (item = null) and for
+ * changing one. A picture is only stored when the form is saved, so nothing is left behind by
+ * a form that is abandoned.
+ */
+function itemForm(ctx, kind, item, redraw) {
+  const { store } = ctx;
+  const K = KINDS[kind];
+  const icon = iconPicker(K.icons, item?.icon);
+  const title = text(K.example, TITLE_MAX, item?.title || '');
+  const note = noteBox(item?.note || '');
+  const more = K.fields(item);
+  const msg = h('p', { class: 'form-msg', role: 'status' });
+
+  // The picture (steps of the reward ladder): undefined = leave as it is, null = none, a Blob = a new one.
+  let picture;
+  let preview = null;
+  const show = h('span', { class: 'pic-preview' });
+  const drawPicture = () => {
+    if (preview) URL.revokeObjectURL(preview);
+    preview = null;
+    show.className = 'pic-preview';
+    show.replaceChildren();
+    if (picture) {
+      preview = URL.createObjectURL(picture);
+      show.append(h('img', { src: preview, alt: 'The picture you chose' }));
+      show.classList.add('has-photo');
+    } else if (picture === undefined && item?.photo) {
+      showing.push(showPhoto(show, item.photo, 'The picture of this reward'));
+    }
+    removeBtn.hidden = !(picture || (picture === undefined && item?.photo));
+  };
+  const file = h('input', { type: 'file', accept: 'image/*', class: 'visually-hidden', tabindex: '-1', 'aria-hidden': 'true' });
+  file.addEventListener('change', async () => {
+    const chosen = file.files && file.files[0];
+    file.value = '';
+    if (!chosen) return;
+    try {
+      picture = await shrinkImage(chosen, 900, 0.82);
+      msg.textContent = '';
+    } catch {
+      msg.textContent = 'That picture could not be read. Try another one.';
+    }
+    drawPicture();
+  });
+  const removeBtn = h('button', { class: 'btn btn-chip', type: 'button', dataset: { act: 'no-picture' }, onclick: () => { picture = null; drawPicture(); } }, 'Remove picture');
+  const pictureRow = K.picture
+    ? h('div', { class: 'field wide pic-field' }, h('span', {}, 'Picture of the reward (optional) - he sees it on his ladder'),
+        h('div', { class: 'pic-row' }, show,
+          h('button', { class: 'btn btn-chip', type: 'button', dataset: { act: 'picture' }, onclick: () => file.click() }, 'Choose a picture'), removeBtn, file))
+    : null;
+  if (K.picture) drawPicture();
+
+  const form = h('form', { class: `admin-form${item ? ' is-edit' : ''}`, dataset: item ? { edit: kind } : { form: kind } },
+    icon, field(K.label, title),
+    Object.values(more).map(([label, control]) => field(label, control)),
+    field('Description', note, 'wide'),
+    pictureRow,
+    h('div', { class: 'form-buttons' },
+      h('button', { class: 'btn btn-primary', type: 'submit' }, item ? 'Save' : 'Add'),
+      item ? h('button', { class: 'btn', type: 'button', dataset: { act: 'cancel' }, onclick: () => { editing = null; redraw(); } }, 'Cancel') : null),
+    msg);
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if (!tidy(title.value)) {
+      msg.textContent = 'It needs a name.';
+      return void title.focus();
+    }
+    const raw = { icon: icon.value, title: title.value, note: note.value };
+    for (const [key, [, control]] of Object.entries(more)) raw[key] = control.value;
+    if (picture !== undefined) {
+      raw.photo = null;
+      if (picture) {
+        try {
+          raw.photo = await savePhoto(picture);
+        } catch {
+          msg.textContent = 'The picture could not be saved on this device. Saved without it.';
+        }
+      }
+    }
+    let done = null;
+    store.update((st) => { done = item ? editItem(st, kind, item.id, raw) : addItem(st, kind, raw); });
+    if (!done) deletePhoto(raw.photo); // nothing was saved (the item is gone): do not leave the new picture behind
+    else if (done.oldPhoto) deletePhoto(done.oldPhoto);
+    if (preview) URL.revokeObjectURL(preview);
+    editing = null;
+    redraw();
+  });
+  return form;
+}
+
+/** One row of a list: picture, name, a line about it, its description, then Edit and Delete. */
+function itemRow(ctx, kind, item, about, redraw, { before = [], dataset = {} } = {}) {
+  const { store } = ctx;
+  if (editing === `${kind}:${item.id}`) return h('div', { class: 'admin-row is-open', dataset }, itemForm(ctx, kind, item, redraw));
+  const pic = h('span', { class: 'emoji' }, item.icon);
+  if (item.photo) showing.push(showPhoto(pic, item.photo, ''));
+  return h('div', { class: 'admin-row', dataset },
+    pic,
+    h('span', { class: 'grow' }, h('b', {}, item.title), h('small', {}, about), item.note ? h('small', { class: 'row-note' }, item.note) : null),
+    before,
+    h('button', { class: 'btn btn-chip', type: 'button', dataset: { act: 'edit' }, 'aria-label': `Edit ${item.title}`, onclick: () => { editing = `${kind}:${item.id}`; redraw(); } }, 'Edit'),
+    h('button', { class: 'btn btn-chip btn-danger', type: 'button', dataset: { act: 'delete' }, 'aria-label': `Delete ${item.title}`, onclick: () => {
+      let photo = null;
+      store.update((st) => { photo = removeItem(st, kind, item.id); });
+      deletePhoto(photo);
+      redraw();
+    } }, 'Delete'));
+}
 
 // ------------------------------------------------------------------ Rewards tab
 
@@ -114,29 +259,12 @@ export function rewardsTab(ctx, refresh) {
   const s = store.get();
   const R = s.rewards;
   const waiting = owed(s);
-  const sourceName = { daily: 'daily reward', tier: 'lifetime reward', chore: 'chore reward' };
+  const sourceName = { daily: 'daily reward', tier: 'ladder reward', chore: 'chore reward' };
+  freePictures();
 
-  const dIcon = iconPicker(REWARD_ICONS);
-  const dTitle = text('e.g. 15 minutes of game time');
-  const dNeed = number(3, 1, 20);
-  const tIcon = iconPicker(REWARD_ICONS);
-  const tTitle = text('e.g. Trip to the trampoline park');
-  const tNeed = number(1000, 10, 1000000);
   const repeat = h('input', { type: 'checkbox' });
   repeat.checked = !!R.countPerfected;
   repeat.addEventListener('change', () => store.update((st) => { st.rewards.countPerfected = repeat.checked; }));
-
-  const add = (list, make) => (e) => {
-    e.preventDefault();
-    const item = make();
-    if (!item.title) return;
-    store.update((st) => { st.rewards[list].push(item); });
-    refresh();
-  };
-  const remove = (list, id) => () => {
-    store.update((st) => { st.rewards[list] = st.rewards[list].filter((r) => r.id !== id); });
-    refresh();
-  };
 
   const ex = expectationsToday(s);
   return [
@@ -155,18 +283,16 @@ export function rewardsTab(ctx, refresh) {
         : h('p', { class: 'fine' }, 'Nothing waiting. When he wins a reward it appears here until you mark it as given.')),
     section('Daily rewards',
       h('p', { class: 'fine' }, 'He wins one of these each day he finishes that many missions. A mission is 6 instructions, about 3 to 5 minutes.'),
-      h('div', { class: 'admin-list' }, R.daily.slice().sort((a, b) => a.missions - b.missions).map((r) => h('div', { class: 'admin-row' },
-        h('span', { class: 'emoji' }, r.icon), h('span', { class: 'grow' }, h('b', {}, r.title), h('small', {}, `${r.missions} ${r.missions === 1 ? 'mission' : 'missions'} in a day`)), del(r.title, remove('daily', r.id))))),
-      h('form', { class: 'admin-form', dataset: { form: 'daily' }, onsubmit: add('daily', () => ({ id: uid(), icon: dIcon.value, title: dTitle.value.trim(), missions: Math.max(1, Math.min(20, Number(dNeed.value) || 1)) })) },
-        dIcon, field('Reward', dTitle), field('Missions in a day', dNeed), h('button', { class: 'btn btn-primary', type: 'submit' }, 'Add')),
+      h('div', { class: 'admin-list' }, R.daily.slice().sort((a, b) => a.missions - b.missions).map((r) =>
+        itemRow(ctx, 'daily', r, `${r.missions} ${r.missions === 1 ? 'mission' : 'missions'} in a day`, refresh))),
+      itemForm(ctx, 'daily', null, refresh),
       h('label', { class: 'setting' }, repeat, h('span', {}, h('b', {}, 'Count easy and repeated missions too'),
         h('small', {}, 'Off: only levels below 3 stars count - so replaying something he has already mastered does not earn rewards.')))),
-    section('Lifetime rewards',
-      h('p', { class: 'fine' }, `Won once, when his total points reach the number you set. He has ${s.xp} points now. A mission earns roughly 40 to 95 points; a chore earns what you give it.`),
-      h('div', { class: 'admin-list' }, R.tiers.slice().sort((a, b) => a.points - b.points).map((t) => h('div', { class: 'admin-row' },
-        h('span', { class: 'emoji' }, t.icon), h('span', { class: 'grow' }, h('b', {}, t.title), h('small', {}, `at ${t.points} points${s.xp >= t.points ? ' (reached)' : ''}`)), del(t.title, remove('tiers', t.id))))),
-      h('form', { class: 'admin-form', dataset: { form: 'tier' }, onsubmit: add('tiers', () => ({ id: uid(), icon: tIcon.value, title: tTitle.value.trim(), points: Math.max(10, Number(tNeed.value) || 10) })) },
-        tIcon, field('Reward', tTitle), field('Total points needed', tNeed), h('button', { class: 'btn btn-primary', type: 'submit' }, 'Add'))),
+    section('Reward ladder',
+      h('p', { class: 'fine' }, `Each step is won once, when his total points reach its number. He sees the whole ladder - what he has, and what is still ahead - with your pictures. He has ${s.xp} points now. A mission earns roughly 40 to 95 points; a chore earns what you give it.`),
+      h('div', { class: 'admin-list' }, R.tiers.slice().sort((a, b) => a.points - b.points).map((t) =>
+        itemRow(ctx, 'tier', t, `at ${t.points} points${s.xp >= t.points ? ' (reached)' : ''}`, refresh))),
+      itemForm(ctx, 'tier', null, refresh)),
   ];
 }
 
@@ -179,6 +305,7 @@ export function choresTab(ctx, refresh) {
   const pending = C.log.filter((e) => e.status === 'pending');
   const recent = C.log.filter((e) => e.status !== 'pending').slice(-12).reverse();
   const urls = [];
+  freePictures();
 
   const decide = (entry, approve, note) => {
     let photo = null;
@@ -188,11 +315,6 @@ export function choresTab(ctx, refresh) {
     refresh();
   };
 
-  const cIcon = iconPicker(CHORE_ICONS);
-  const cTitle = text('e.g. Make your bed');
-  const cPoints = number(20, 0, 10000);
-  const cRepeat = h('select', {}, h('option', { value: 'daily' }, 'Every day'), h('option', { value: 'weekly' }, 'Once a week'), h('option', { value: 'once' }, 'One time only'));
-  const cReward = text('optional, e.g. $1', 40);
   const needPhoto = h('input', { type: 'checkbox' });
   needPhoto.checked = C.requirePhoto !== false;
   needPhoto.addEventListener('change', () => store.update((st) => { st.chores.requirePhoto = needPhoto.checked; }));
@@ -223,17 +345,9 @@ export function choresTab(ctx, refresh) {
           }))
         : h('p', { class: 'fine' }, 'Nothing to check. When he marks a chore as done it appears here with his photo.')),
     section('Chores',
-      h('div', { class: 'admin-list' }, C.list.map((c) => h('div', { class: 'admin-row' },
-        h('span', { class: 'emoji' }, c.icon), h('span', { class: 'grow' }, h('b', {}, c.title), h('small', {}, `${c.points} points, ${repeatName[c.repeat]}${c.reward ? `, plus: ${c.reward}` : ''}`)),
-        del(c.title, () => { store.update((st) => { st.chores.list = st.chores.list.filter((x) => x.id !== c.id); }); refresh(); })))),
-      h('form', { class: 'admin-form', dataset: { form: 'chore' }, onsubmit: (ev) => {
-        ev.preventDefault();
-        const title = cTitle.value.trim();
-        if (!title) return;
-        store.update((st) => { st.chores.list.push({ id: uid(), icon: cIcon.value, title, points: Math.max(0, Number(cPoints.value) || 0), repeat: cRepeat.value, reward: cReward.value.trim() }); });
-        refresh();
-      } },
-        cIcon, field('Chore', cTitle), field('Points', cPoints), field('How often', cRepeat), field('Extra reward', cReward), h('button', { class: 'btn btn-primary', type: 'submit' }, 'Add')),
+      h('div', { class: 'admin-list' }, C.list.map((c) =>
+        itemRow(ctx, 'chore', c, `${c.points} points, ${repeatName[c.repeat]}${c.reward ? `, plus: ${c.reward}` : ''}`, refresh))),
+      itemForm(ctx, 'chore', null, refresh),
       h('label', { class: 'setting' }, needPhoto, h('span', {}, h('b', {}, 'Ask for a photo'), h('small', {}, 'Photos stay on this iPad and are deleted once you approve or send the chore back.')))),
     section('Recently checked',
       recent.length
@@ -248,8 +362,7 @@ export function expectationsTab(ctx, refresh) {
   const { store } = ctx;
   const s = store.get();
   const ex = expectationsToday(s);
-  const eIcon = iconPicker(EXPECT_ICONS);
-  const eTitle = text('e.g. Brush your teeth');
+  freePictures();
   const confirm = h('input', { type: 'checkbox' });
   confirm.checked = !!s.expectations.confirm;
   confirm.addEventListener('change', () => { store.update((st) => { st.expectations.confirm = confirm.checked; }); refresh(); });
@@ -260,22 +373,14 @@ export function expectationsTab(ctx, refresh) {
     section(`Today (${ex.done} of ${ex.total} done)`,
       h('p', { class: 'fine' }, 'Expectations earn nothing. But each day his rewards stay locked until every one of them is done.'),
       ex.total
-        ? h('div', { class: 'admin-list' }, ex.items.map((e) => h('div', { class: 'admin-row', dataset: { expect: e.id } },
-            h('span', { class: 'emoji' }, e.icon),
-            h('span', { class: 'grow' }, h('b', {}, e.title), h('small', {}, stateName[e.state])),
-            e.state === 'done'
+        ? h('div', { class: 'admin-list' }, ex.items.map((e) => itemRow(ctx, 'expect', e, stateName[e.state], refresh, {
+            dataset: { expect: e.id },
+            before: e.state === 'done'
               ? h('button', { class: 'btn btn-chip', type: 'button', dataset: { act: 'undo' }, onclick: set(e.id, false) }, 'Not done')
               : h('button', { class: 'btn btn-chip btn-primary', type: 'button', dataset: { act: 'ok' }, onclick: set(e.id, true) }, e.state === 'pending' ? 'OK' : 'Mark done'),
-            del(e.title, () => { store.update((st) => { st.expectations.list = st.expectations.list.filter((x) => x.id !== e.id); }); refresh(); }))))
+          })))
         : h('p', { class: 'fine' }, 'No expectations yet. With none, his rewards are never locked.'),
-      h('form', { class: 'admin-form', dataset: { form: 'expect' }, onsubmit: (ev) => {
-        ev.preventDefault();
-        const title = eTitle.value.trim();
-        if (!title) return;
-        store.update((st) => { st.expectations.list.push({ id: uid(), icon: eIcon.value, title }); });
-        refresh();
-      } },
-        eIcon, field('Expectation', eTitle), h('button', { class: 'btn btn-primary', type: 'submit' }, 'Add')),
+      itemForm(ctx, 'expect', null, refresh),
       h('label', { class: 'setting' }, confirm, h('span', {}, h('b', {}, 'He needs my OK for each one'),
         h('small', {}, 'Off: his own tick counts. On: his tick waits here until you press OK.')))),
   ];

@@ -1054,6 +1054,151 @@ scenario('21 small things: Undo puts down what he holds, the "leave?" box holds 
 });
 
 // ---------------------------------------------------------------------------------------------
+scenario('22 a grown-up edits rewards, chores and expectations (name, description, picture); he sees the reward ladder and can look ahead', async (t) => {
+  const { page } = await t.open({ state: { flags: { welcomed: true }, xp: 463 } });
+  await toMap(page);
+  await H.openParent(page);
+  const png = fs.readFileSync(path.join(H.ROOT, 'assets', 'icons', 'icon-192.png'));
+  const rowOf = (title) => page.locator(`.admin-row:not([data-earned]):has(b:text-is("${title}"))`);
+
+  // --- the reward ladder: three steps, one with a description, one with a picture
+  await H.openTab(page, 'rewards');
+  const addTier = async (title, points, note) => {
+    await page.fill('[data-form="tier"] input[type="text"]', title);
+    await page.fill('[data-form="tier"] input[type="number"]', String(points));
+    if (note) await page.fill('[data-form="tier"] textarea', note);
+    await page.click('[data-form="tier"] button[type="submit"]');
+    await rowOf(title).waitFor();
+  };
+  await addTier('Coins', 2000);
+  await addTier('New skin pack', 400, 'Any pack you like');
+  await page.fill('[data-form="tier"] input[type="text"]', 'New mount');
+  await page.fill('[data-form="tier"] input[type="number"]', '800');
+  const [chooser] = await Promise.all([page.waitForEvent('filechooser', { timeout: 5000 }), page.click('[data-form="tier"] [data-act="picture"]')]);
+  await chooser.setFiles({ name: 'mount.png', mimeType: 'image/png', buffer: png });
+  await page.waitForSelector('[data-form="tier"] .pic-preview.has-photo img');
+  await page.click('[data-form="tier"] button[type="submit"]');
+  await rowOf('New mount').waitFor();
+  let s = await getState(page);
+  const order = () => page.locator('section.panel:has(h2:text-is("Reward ladder")) .admin-row b').allTextContents();
+  t.check((await order()).join() === 'New skin pack,New mount,Coins', `the steps should be listed in order of points (got ${await order()})`);
+  t.check(s.rewards.tiers.find((x) => x.title === 'New skin pack').note === 'Any pack you like', 'the description should be saved');
+  const mount = s.rewards.tiers.find((x) => x.title === 'New mount');
+  t.check(typeof mount.photo === 'string' && mount.photo.length > 4, 'the picture should be saved with the step');
+  await rowOf('New mount').locator('.emoji.has-photo img').waitFor();
+  t.check(s.rewards.earned.filter((e) => e.src === 'tier').map((e) => e.title).join() === 'New skin pack', 'a step he has already reached (400 of his 463 points) should be his at once, and only that one');
+  t.check((await page.locator('[data-earned]').count()) === 1, 'it should wait under "To hand out"');
+
+  // --- change one: new name, description, points; the owed reward follows the new name
+  await rowOf('New skin pack').locator('[data-act="edit"]').click();
+  t.check((await page.inputValue('[data-edit="tier"] input[type="text"]')) === 'New skin pack' && (await page.inputValue('[data-edit="tier"] textarea')) === 'Any pack you like',
+    'the edit form should start with what was typed before');
+  await page.fill('[data-edit="tier"] input[type="text"]', 'Skin pack of your choice');
+  await page.fill('[data-edit="tier"] textarea', 'From the Hive shop');
+  await page.click('[data-edit="tier"] button[type="submit"]');
+  await rowOf('Skin pack of your choice').waitFor();
+  s = await getState(page);
+  t.check(s.rewards.tiers.length === 3 && s.rewards.tiers.some((x) => x.title === 'Skin pack of your choice' && x.note === 'From the Hive shop' && x.points === 400), 'the change should be saved in place (still three steps)');
+  t.check(s.rewards.earned[0].title === 'Skin pack of your choice', 'the reward he is owed should carry the new name');
+  // Cancel leaves it alone
+  await rowOf('Coins').locator('[data-act="edit"]').click();
+  await page.fill('[data-edit="tier"] input[type="text"]', 'Something else');
+  await page.click('[data-edit="tier"] [data-act="cancel"]');
+  t.check((await rowOf('Coins').count()) === 1 && (await page.locator('[data-edit]').count()) === 0, 'Cancel should leave the step as it was');
+  // a daily reward with a description, then edited
+  await page.fill('[data-form="daily"] input[type="text"]', 'Game time');
+  await page.fill('[data-form="daily"] textarea', 'Fifteen minutes');
+  await page.click('[data-form="daily"] button[type="submit"]');
+  await rowOf('Game time').locator('[data-act="edit"]').click();
+  await page.fill('[data-edit="daily"] input[type="number"]', '2');
+  await page.click('[data-edit="daily"] button[type="submit"]');
+  await page.waitForFunction(() => globalThis.__lwm.store.get().rewards.daily[0]?.missions === 2);
+
+  // --- a chore and an expectation: added with a description, then edited
+  await H.openTab(page, 'chores');
+  await page.fill('[data-form="chore"] input[type="text"] >> nth=0', 'Make your bed');
+  await page.fill('[data-form="chore"] textarea', 'Pillow on top');
+  await page.click('[data-form="chore"] button[type="submit"]');
+  await rowOf('Make your bed').locator('[data-act="edit"]').click();
+  await page.fill('[data-edit="chore"] input[type="text"] >> nth=0', 'Make your bed nicely');
+  await page.fill('[data-edit="chore"] input[type="number"]', '35');
+  await page.click('[data-edit="chore"] button[type="submit"]');
+  await rowOf('Make your bed nicely').waitFor();
+  await H.openTab(page, 'expectations');
+  await page.fill('[data-form="expect"] input[type="text"]', 'Brush your teeth');
+  await page.click('[data-form="expect"] button[type="submit"]');
+  await rowOf('Brush your teeth').locator('[data-act="edit"]').click();
+  await page.fill('[data-edit="expect"] textarea', 'Two minutes, morning and night');
+  await page.click('[data-edit="expect"] button[type="submit"]');
+  await page.waitForFunction(() => globalThis.__lwm.store.get().expectations.list[0]?.note === 'Two minutes, morning and night');
+  s = await getState(page);
+  t.check(s.chores.list.length === 1 && s.chores.list[0].title === 'Make your bed nicely' && s.chores.list[0].points === 35 && s.chores.list[0].note === 'Pillow on top', `the chore should be changed in place (${JSON.stringify(s.chores.list)})`);
+  await page.screenshot({ path: path.join(OUT, 'edit-parent-expectations.png') });
+
+  // --- his side: descriptions are shown; the expectation has to be done before the rewards open
+  await page.click('.sub-head .icon-btn');
+  await page.click('[data-open="chores"]');
+  t.check(((await page.textContent('.chore-row .reward-note')) || '').trim() === 'Pillow on top', 'he should see the chore\'s description');
+  await page.click('.sub-head .icon-btn');
+  await page.click('[data-open="expectations"]');
+  t.check(((await page.textContent('.expect-row .reward-note')) || '').trim() === 'Two minutes, morning and night', 'he should see the expectation\'s description');
+  await page.click('.expect-row [data-act="tick"]');
+  await page.click('.sub-head .icon-btn');
+
+  // --- the ladder
+  await page.click('[data-open="rewards"]');
+  await page.waitForSelector('.ladder .rung');
+  await page.waitForSelector('.rung .rung-pic.has-photo img');
+  const lad = await page.evaluate(() => ({
+    rungs: [...document.querySelectorAll('.ladder .rung')].map((r) => ({ title: r.querySelector('.reward-title').textContent, state: [...r.classList].find((c) => c.startsWith('is-')).slice(3),
+      shows: (r.querySelector('.stamp') || r.querySelector('.reward-need')).textContent.trim(), photo: !!r.querySelector('.rung-pic img'), w: r.getBoundingClientRect().width, h: r.getBoundingClientRect().height })),
+    points: [...document.querySelectorAll('.ladder-slot:not(.is-start) .ladder-points')].map((n) => n.textContent),
+    at: getComputedStyle(document.querySelector('.ladder-track')).getPropertyValue('--at').trim(),
+    nextInView: (() => { const r = document.querySelector('.rung.is-next').getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth; })(),
+    owed: [...document.querySelectorAll('.glow-panel [data-earned] .reward-title')].map((n) => n.textContent),
+  }));
+  t.check(lad.rungs.map((r) => `${r.title}:${r.state}`).join() === 'Skin pack of your choice:won,New mount:next,Coins:ahead', `the ladder should show what he has, what is next and what is ahead (${JSON.stringify(lad.rungs.map((r) => [r.title, r.state]))})`);
+  t.check(lad.points.join() === '400,800,2000' && lad.rungs[0].shows === 'WON!' && lad.rungs[1].shows === '463 / 800 XP' && lad.rungs[2].shows === '463 / 2000 XP', `each step should show its points and where he stands (${JSON.stringify(lad)})`);
+  t.check(lad.rungs[1].photo && !lad.rungs[0].photo, 'the step with a picture should show the picture, the others their emoji');
+  t.check(Math.abs(Number(lad.at) - (1 + 63 / 400)) < 0.01, `his marker should stand between the first and the second step (at ${lad.at})`);
+  t.check(lad.nextInView, 'the step he is working towards should be in view when the screen opens');
+  t.check(lad.rungs.every((r) => r.w >= 60 && r.h >= 60), 'every step must be big enough to tap');
+  t.check(lad.owed.join() === 'Skin pack of your choice', 'what he has won should be under "You won! Show a grown-up"');
+  await page.screenshot({ path: path.join(OUT, 'ladder-landscape.png') });
+  // look ahead: tap a step that is still far away
+  await page.click('.rung.is-ahead');
+  await page.waitForSelector('.rung-detail');
+  const detail = (await page.textContent('.rung-detail')).replace(/\s+/g, ' ');
+  t.check(/Coins/.test(detail) && /463 \/ 2000 XP/.test(detail) && /1537 XP to go/.test(detail), `looking ahead should show the reward, where he stands and how far it is (${detail})`);
+  await page.screenshot({ path: path.join(OUT, 'ladder-look-ahead.png') });
+  await page.click('.rung-detail [data-act="close"]');
+  t.check((await page.locator('.rung-detail').count()) === 0, 'OK should close it');
+  await page.click('.rung.is-next');
+  await page.waitForSelector('.rung-detail .rung-pic.big img');
+  await page.screenshot({ path: path.join(OUT, 'ladder-next-detail.png') });
+  await page.click('.rung-detail [data-act="close"]');
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await page.waitForTimeout(200);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+  t.check(overflow <= 0, `the page must not scroll sideways in portrait (${overflow}px over)`);
+  await page.screenshot({ path: path.join(OUT, 'ladder-portrait.png') });
+  await page.setViewportSize({ width: 1180, height: 820 });
+
+  // --- removing a step takes its picture with it
+  await page.click('.sub-head .icon-btn');
+  await H.openParent(page);
+  await H.openTab(page, 'rewards');
+  await rowOf('New mount').locator('[data-act="delete"]').click();
+  await page.waitForFunction(() => globalThis.__lwm.store.get().rewards.tiers.length === 2);
+  const left = await page.evaluate((id) => new Promise((resolve) => {
+    const req = indexedDB.open('lwm-photos', 1);
+    req.onsuccess = () => { const g = req.result.transaction('photos').objectStore('photos').get(id); g.onsuccess = () => resolve(!!g.result); g.onerror = () => resolve(null); };
+    req.onerror = () => resolve(null);
+  }), mount.photo);
+  t.check(left === false, 'deleting a step should delete its picture from the device');
+});
+
+// ---------------------------------------------------------------------------------------------
 async function main() {
   const filters = process.argv.slice(2).map((a) => a.toLowerCase());
   const wanted = scenarios.filter((s) => !filters.length || filters.some((f) => (/^\d+$/.test(f) ? s.name.startsWith(f.padStart(2, '0')) : s.name.toLowerCase().includes(f))));

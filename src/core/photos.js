@@ -1,5 +1,7 @@
-// Chore photos. They are kept on this device only (IndexedDB), shrunk to a sensible size,
-// and deleted as soon as a grown-up has approved the chore or sent it back.
+// Pictures, kept on this device only (IndexedDB) and shrunk to a sensible size.
+//   chore photos      deleted as soon as a grown-up has approved the chore or sent it back
+//   reward pictures   chosen by a grown-up for a step of the reward ladder; kept until the
+//                     reward is removed or gets another picture
 
 const DB = 'lwm-photos';
 const STORE = 'photos';
@@ -73,4 +75,29 @@ export function shrinkImage(file, max = 1280, quality = 0.8) {
     };
     img.src = url;
   });
+}
+
+/**
+ * Show a stored picture inside `el` (it replaces what is there). When the picture is missing
+ * (another device, a restored backup) `el` is left as it is, so the emoji underneath stays.
+ * Returns a function that frees the picture again; call it when the screen goes away.
+ */
+export function showPhoto(el, id, alt = '') {
+  let url = null;
+  let gone = false;
+  if (id) {
+    loadPhoto(id).then((blob) => {
+      if (!blob || gone) return;
+      url = URL.createObjectURL(blob);
+      const img = document.createElement('img');
+      img.alt = alt;
+      img.src = url;
+      el.replaceChildren(img);
+      el.classList.add('has-photo');
+    });
+  }
+  return () => {
+    gone = true;
+    if (url) URL.revokeObjectURL(url);
+  };
 }

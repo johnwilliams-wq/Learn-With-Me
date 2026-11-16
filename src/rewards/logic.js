@@ -8,6 +8,10 @@
 //   Expectations    - things he is simply expected to do every day (no points, no rewards).
 //                     Until today's list is all done, his rewards stay locked.
 // Everything a grown-up owes him goes into state.rewards.earned until marked as given.
+//
+// The lifetime tiers are shown to him as a LADDER (see ladder()): every points reward in order,
+// where he stands, and what is still ahead. What a grown-up types (rewards, chores, expectations)
+// goes through addItem / editItem / removeItem, so every list is tidied and limited the same way.
 
 import { todayKey } from '../core/dom.js';
 
@@ -147,6 +151,112 @@ export function setExpectation(state, id, done, now = new Date()) {
   const ticks = dayTicks(state, now);
   if (done) ticks[id] = 'done';
   else delete ticks[id];
+}
+
+// ------------------------------------------------------------------ what a grown-up types
+
+/** One line of typed text: no line breaks, no runs of spaces, at most `max` characters. */
+export const tidy = (text, max = 60) => String(text ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
+export const TITLE_MAX = 60;
+export const NOTE_MAX = 200;
+const whole = (value, min, max, fallback) => {
+  const n = Math.round(Number(value));
+  return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
+};
+const LISTS = {
+  daily: (state) => state.rewards.daily, // { id, title, icon, note, missions }
+  tier: (state) => state.rewards.tiers, // { id, title, icon, note, points, photo }   photo = id of a stored picture, or null
+  chore: (state) => state.chores.list, // { id, title, icon, note, points, repeat, reward }
+  expect: (state) => state.expectations.list, // { id, title, icon, note }
+};
+
+/** The fields a grown-up may set for each kind of thing, tidied and kept within limits. */
+export function cleanItem(kind, raw = {}) {
+  const out = { title: tidy(raw.title, TITLE_MAX), icon: String(raw.icon || '').slice(0, 8), note: tidy(raw.note, NOTE_MAX) };
+  if (kind === 'daily') out.missions = whole(raw.missions, 1, 20, 1);
+  if (kind === 'tier') {
+    out.points = whole(raw.points, 10, 1000000, 10);
+    out.photo = raw.photo ? String(raw.photo) : null;
+  }
+  if (kind === 'chore') {
+    out.points = whole(raw.points, 0, 10000, 0);
+    out.repeat = ['daily', 'weekly', 'once'].includes(raw.repeat) ? raw.repeat : 'daily';
+    out.reward = tidy(raw.reward, 40);
+  }
+  return out;
+}
+
+/** A grown-up adds a reward, a chore or an expectation. Returns the new item (null without a title). */
+export function addItem(state, kind, raw, now = new Date()) {
+  const item = { id: uid(), ...cleanItem(kind, raw) };
+  if (!item.title) return null;
+  LISTS[kind](state).push(item);
+  if (kind === 'daily' || kind === 'tier') collectRewards(state, now); // one he has already reached is his straight away
+  return item;
+}
+
+/**
+ * A grown-up changes one. Only the fields that are given change. Returns { item, oldPhoto }:
+ * oldPhoto is the id of a picture that is no longer used (the caller deletes it). Null when
+ * there is no such item or the title would be empty.
+ */
+export function editItem(state, kind, id, changes, now = new Date()) {
+  const item = LISTS[kind](state).find((x) => x.id === id);
+  if (!item) return null;
+  const next = cleanItem(kind, { ...item, ...changes });
+  if (!next.title) return null;
+  const oldPhoto = item.photo && item.photo !== next.photo ? item.photo : null;
+  Object.assign(item, next);
+  if (kind === 'daily' || kind === 'tier') {
+    // A reward he has won and is still owed follows the new wording (a spelling fix must reach it too);
+    // one that has been handed over stays as it was.
+    for (const e of state.rewards.earned) if (e.src === kind && e.ref === id && !e.given) Object.assign(e, { title: item.title, icon: item.icon });
+    collectRewards(state, now);
+  }
+  return { item, oldPhoto };
+}
+
+/** A grown-up removes one. Returns the id of its picture, if it had one (the caller deletes it). */
+export function removeItem(state, kind, id) {
+  const list = LISTS[kind](state);
+  const at = list.findIndex((x) => x.id === id);
+  if (at < 0) return null;
+  return list.splice(at, 1)[0].photo || null;
+}
+
+// ------------------------------------------------------------------ the reward ladder
+
+/**
+ * The reward ladder: every points reward in order, and where he stands.
+ *   steps   [{ ...tier, state, left }]  state: 'given' (handed over) | 'won' (reached, a grown-up owes it)
+ *                                              | 'next' (the one he is working towards) | 'ahead'
+ *                                       left: points still to go (0 once reached)
+ *   at      his place, counted in steps: 0 = the start, 1 = on the first reward, 1.5 = half-way from
+ *           the first to the second. Never past the last step.
+ *   next    the step he is working towards (null when he has them all)
+ */
+export function ladder(state) {
+  const xp = Math.max(0, Number(state.xp) || 0);
+  const tiers = state.rewards.tiers.filter((t) => t.points > 0).slice().sort((a, b) => a.points - b.points);
+  let aiming = false;
+  const steps = tiers.map((t) => {
+    const e = state.rewards.earned.find((x) => x.src === 'tier' && x.ref === t.id);
+    const reached = !!e || xp >= t.points;
+    const st = e?.given ? 'given' : reached ? 'won' : aiming ? 'ahead' : 'next';
+    if (st === 'next') aiming = true;
+    return { ...t, state: st, left: reached ? 0 : t.points - xp };
+  });
+  let at = 0;
+  for (let i = 0; i < steps.length; i++) {
+    const from = i ? steps[i - 1].points : 0;
+    if (xp >= steps[i].points) {
+      at = i + 1;
+      continue;
+    }
+    at = i + (steps[i].points > from ? Math.max(0, (xp - from) / (steps[i].points - from)) : 0);
+    break;
+  }
+  return { xp, steps, at, next: steps.find((x) => x.state === 'next') || null };
 }
 
 /** Counts shown as badges: what he can do now, what is waiting, and what a grown-up should look at. */

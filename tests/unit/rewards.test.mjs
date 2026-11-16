@@ -4,7 +4,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createStore, defaultState } from '../../src/core/store.js';
 import { todayKey } from '../../src/core/dom.js';
-import { collectRewards, missionCounts, countedToday, owed, choreStatus, submitChore, decideChore, badges, weekKey, expectationsToday, tickExpectation, setExpectation, rewardsLocked } from '../../src/rewards/logic.js';
+import { collectRewards, missionCounts, countedToday, owed, choreStatus, submitChore, decideChore, badges, weekKey, expectationsToday, tickExpectation, setExpectation, rewardsLocked,
+  addItem, editItem, removeItem, cleanItem, ladder, NOTE_MAX, TITLE_MAX } from '../../src/rewards/logic.js';
 import { hasPin, setPin, checkPin, validPin } from '../../src/core/pin.js';
 
 const memory = () => {
@@ -212,4 +213,103 @@ test('a save that cannot be read is kept under another name, never thrown away',
   createStore(fine).update((s) => { s.xp = 7; });
   createStore(fine);
   assert.equal(fine.getItem('lwm.state.v1.bad'), null);
+});
+
+test('what a grown-up types is tidied and kept within limits', () => {
+  assert.deepEqual(cleanItem('daily', { title: '  Game \n  time  ', icon: '🎮', note: ' fifteen   minutes ', missions: '99' }), { title: 'Game time', icon: '🎮', note: 'fifteen minutes', missions: 20 });
+  assert.deepEqual(cleanItem('tier', { title: 'Bike', points: '3' }), { title: 'Bike', icon: '', note: '', points: 10, photo: null });
+  assert.deepEqual(cleanItem('tier', { title: 'Bike', points: 'abc', photo: 'p1' }), { title: 'Bike', icon: '', note: '', points: 10, photo: 'p1' });
+  assert.deepEqual(cleanItem('chore', { title: 'Bed', points: -5, repeat: 'hourly', reward: ' $1 ' }), { title: 'Bed', icon: '', note: '', points: 0, repeat: 'daily', reward: '$1' });
+  assert.deepEqual(cleanItem('expect', { title: 'Teeth' }), { title: 'Teeth', icon: '', note: '' });
+  assert.equal(cleanItem('expect', { title: 'x'.repeat(500), note: 'y'.repeat(500) }).title.length, TITLE_MAX);
+  assert.equal(cleanItem('expect', { title: 'x', note: 'y'.repeat(500) }).note.length, NOTE_MAX);
+});
+
+test('adding, changing and removing rewards, chores and expectations', () => {
+  const s = defaultState();
+  assert.equal(addItem(s, 'chore', { title: '   ' }), null, 'nothing without a name');
+  const bed = addItem(s, 'chore', { title: 'Make your bed', icon: '🛏️', points: 20, repeat: 'daily', note: 'Pillow on top' });
+  const teeth = addItem(s, 'expect', { title: 'Brush your teeth', icon: '🦷' });
+  const game = addItem(s, 'daily', { title: 'Game tme', icon: '🎮', missions: 2 }, MON);
+  assert.deepEqual(s.chores.list, [{ id: bed.id, title: 'Make your bed', icon: '🛏️', note: 'Pillow on top', points: 20, repeat: 'daily', reward: '' }]);
+  assert.equal(s.expectations.list[0].note, '');
+
+  // only what is given changes; the id and the place in the list stay
+  const res = editItem(s, 'chore', bed.id, { points: 35 });
+  assert.equal(res.item, s.chores.list[0]);
+  assert.deepEqual(s.chores.list[0], { id: bed.id, title: 'Make your bed', icon: '🛏️', note: 'Pillow on top', points: 35, repeat: 'daily', reward: '' });
+  editItem(s, 'expect', teeth.id, { note: 'Two minutes' });
+  assert.deepEqual(s.expectations.list, [{ id: teeth.id, title: 'Brush your teeth', icon: '🦷', note: 'Two minutes' }]);
+  assert.equal(editItem(s, 'chore', bed.id, { title: '  ' }), null, 'a name cannot be emptied');
+  assert.equal(s.chores.list[0].title, 'Make your bed');
+  assert.equal(editItem(s, 'chore', 'nope', { title: 'x' }), null);
+
+  // a reward he has won and is still owed follows a spelling fix; one already handed over keeps its wording
+  play(s, 2, MON);
+  collectRewards(s, MON);
+  assert.equal(owed(s)[0].title, 'Game tme');
+  editItem(s, 'daily', game.id, { title: 'Game time', icon: '📺' }, MON);
+  assert.deepEqual([owed(s)[0].title, owed(s)[0].icon], ['Game time', '📺']);
+  s.rewards.earned[0].given = true;
+  editItem(s, 'daily', game.id, { title: 'Screen time' }, MON);
+  assert.equal(s.rewards.earned[0].title, 'Game time');
+
+  // an old save has no descriptions: editing fills the field in, nothing else changes
+  s.rewards.daily.push({ id: 'old', title: 'Sticker', icon: '⭐', missions: 3 });
+  assert.deepEqual(editItem(s, 'daily', 'old', { title: 'Stickers' }, MON).item, { id: 'old', title: 'Stickers', icon: '⭐', missions: 3, note: '' });
+
+  assert.equal(removeItem(s, 'chore', bed.id), null);
+  assert.equal(s.chores.list.length, 0);
+  assert.equal(removeItem(s, 'chore', bed.id), null, 'removing twice is harmless');
+});
+
+test('reward pictures: replacing or removing one names the old picture so it can be deleted', () => {
+  const s = defaultState();
+  const t = addItem(s, 'tier', { title: 'Skin pack', points: 400, photo: 'p1' });
+  assert.equal(editItem(s, 'tier', t.id, { title: 'New skin pack' }).oldPhoto, null, 'a change that does not mention the picture keeps it');
+  assert.equal(s.rewards.tiers[0].photo, 'p1');
+  assert.equal(editItem(s, 'tier', t.id, { photo: 'p2' }).oldPhoto, 'p1');
+  assert.equal(editItem(s, 'tier', t.id, { photo: null }).oldPhoto, 'p2');
+  assert.equal(s.rewards.tiers[0].photo, null);
+  editItem(s, 'tier', t.id, { photo: 'p3' });
+  assert.equal(removeItem(s, 'tier', t.id), 'p3');
+});
+
+test('the reward ladder: every points reward in order, where he stands, and what is ahead', () => {
+  const s = defaultState();
+  assert.deepEqual(ladder(s), { xp: 0, steps: [], at: 0, next: null });
+  addItem(s, 'tier', { title: 'Coins', points: 2000 }, MON);
+  addItem(s, 'tier', { title: 'Skin pack', points: 400 }, MON);
+  addItem(s, 'tier', { title: 'Mount', points: 800 }, MON);
+  const view = () => { const L = ladder(s); return [L.steps.map((x) => `${x.title}:${x.state}:${x.left}`).join(' '), Number(L.at.toFixed(3)), L.next?.title || null]; };
+  assert.deepEqual(view(), ['Skin pack:next:400 Mount:ahead:800 Coins:ahead:2000', 0, 'Skin pack']);
+  s.xp = 200;
+  assert.deepEqual(view(), ['Skin pack:next:200 Mount:ahead:600 Coins:ahead:1800', 0.5, 'Skin pack']);
+  s.xp = 463;
+  collectRewards(s, MON);
+  assert.deepEqual(view(), ['Skin pack:won:0 Mount:next:337 Coins:ahead:1537', Number((1 + 63 / 400).toFixed(3)), 'Mount']);
+  owed(s)[0].given = true;
+  assert.equal(ladder(s).steps[0].state, 'given');
+  s.xp = 800;
+  assert.deepEqual(view().slice(1), [2, 'Coins'], 'exactly on a step counts as on it');
+  s.xp = 5000;
+  collectRewards(s, MON);
+  assert.deepEqual(view(), ['Skin pack:given:0 Mount:won:0 Coins:won:0', 3, null], 'never past the last step');
+
+  // a step that is added below his points is his at once; lowering one below his points too
+  const s2 = defaultState();
+  s2.xp = 500;
+  addItem(s2, 'tier', { title: 'Sticker', points: 100 }, MON);
+  assert.deepEqual(owed(s2).map((e) => e.title), ['Sticker']);
+  const far = addItem(s2, 'tier', { title: 'Bike', points: 9000 }, MON);
+  assert.equal(owed(s2).length, 1);
+  editItem(s2, 'tier', far.id, { points: 450 }, MON);
+  assert.deepEqual(owed(s2).map((e) => e.title), ['Sticker', 'Bike']);
+  // raising it again does not take the reward back (rewards are never taken away)
+  editItem(s2, 'tier', far.id, { points: 9000 }, MON);
+  assert.equal(ladder(s2).steps.find((x) => x.title === 'Bike').state, 'won');
+  // a step he had won stays won even when the step is removed from the ladder
+  removeItem(s2, 'tier', far.id);
+  assert.deepEqual(owed(s2).map((e) => e.title), ['Sticker', 'Bike']);
+  assert.deepEqual(ladder(s2).steps.map((x) => x.title), ['Sticker']);
 });

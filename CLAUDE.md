@@ -128,6 +128,17 @@ in `tools/tts/accepted.json`, with the reason. In Claude Code cloud sessions use
   still recorded and wait. With `confirm` on, his tick is only `pending` until a grown-up presses OK.
 - **Points are XP.** Missions add XP; an approved chore adds its points to the same total. Lifetime tiers
   are thresholds on that total; daily rewards count missions finished today.
+- **The reward ladder** is how he sees the lifetime tiers (`ladder(state)` in `src/rewards/logic.js`,
+  drawn by `src/screens/rewards.js`): every tier in order of points, his marker, what he has, what is
+  next and what is ahead; tapping a step shows it large and reads it aloud. A tier he has already
+  reached when it is added or changed is won at once; raising it later never takes it back.
+- **Everything a grown-up types goes through `addItem` / `editItem` / `removeItem`** (same file): daily
+  rewards, tiers, chores and expectations each have `title`, `icon` and an optional `note` (the
+  description, shown to him and read by the speaker button); a tier may have a `photo` (the id of a
+  picture in IndexedDB, `src/core/photos.js`). Both fields are optional in saved data - older saves
+  do not have them. The parent area (`src/screens/admin.js`) uses one form for adding and for Edit.
+  A reward picture is deleted when its tier is removed or gets another picture; it is not part of a
+  backup, so screens must fall back to the emoji when a picture is missing (`showPhoto`).
 - A mission counts toward daily rewards only if the level was below 3 stars before it was played
   (`missionCounts`), unless the parent turns that off - otherwise replaying level 1 would farm rewards.
 - Everything a grown-up owes him sits in `rewards.earned` until marked "Given" in the Rewards tab.

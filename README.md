@@ -44,12 +44,17 @@ choose a PIN; after that it always asks for the PIN. Inside:
 
 - **Progress** - what he has practised, which kinds of instruction go well, what tends to go wrong,
   and ideas for practising the same skills away from the screen.
-- **Rewards** - set daily rewards ("3 missions today = 15 minutes of game time") and lifetime rewards
-  ("1000 points = trampoline park"). When he wins one it waits under "To hand out" until you mark it given.
+- **Rewards** - set daily rewards ("3 missions today = 15 minutes of game time") and a **reward ladder**:
+  rewards at the points you choose (400, 800, 2000...), each with a name, an optional description and
+  an optional picture. He sees the whole ladder - where he stands, what is next and what is still
+  ahead - and can tap any step to look at it and hear it. When he wins one it waits under "To hand out"
+  until you mark it given.
 - **Chores** - add chores with points. He taps Done and takes a photo; you approve it or send it back.
   Approved chores add to the same points total as missions. Photos never leave the iPad.
 - **Expectations** - a daily list of things he is simply expected to do (no points, no rewards). He
   ticks them off each day; until they are all done his rewards stay locked. You can require your own OK.
+- Everything in those three lists can be changed later with **Edit**, and can carry a short description
+  that he sees and that the speaker button reads to him.
 - **Settings** - slower voice, daily limit, backup, erase, change PIN.
 
 Everything stays on the device. There are no accounts, ads or tracking. Because there is no server,
