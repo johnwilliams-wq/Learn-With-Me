@@ -57,7 +57,7 @@ scenario('02 perfect mission on level 1: stars, chest, unlock, survives reload',
   t.check((await page.locator('[data-act="next"]').count()) === 1, 'results should offer a Next-level button');
   await page.click('.chest', { force: true });
   await page.waitForSelector('.card-reveal .card', { state: 'visible', timeout: 5000 });
-  t.check(await page.locator('.chest.open').count() === 1, 'the chest should look open');
+  t.check(await page.locator('.chest').count() === 0, 'the opened chest should give way to the card (so the screen does not grow)');
   t.check(((await page.textContent('.card-reveal .card-name')) || '').trim().length > 0, 'the revealed card has no name');
   const onMap = async (label) => {
     const m = await page.evaluate(() => {
