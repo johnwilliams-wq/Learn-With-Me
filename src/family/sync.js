@@ -282,6 +282,7 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
       view = null;
       return managerRound();
     }
+    if (!B().since) box.set((b) => { b.since = clock(); }); // (the folder is only swept by a device that has been "his" for a month)
     const waiting = rows(await api.get('commands', 'select=id,type,payload&applied_at=is.null&order=created_at.asc,id.asc&limit=100'));
     const named = waiting.map((c) => c.payload?.item?.photo).filter((id) => typeof id === 'string' && PHOTO.test(id)); // pictures the waiting commands bring
     const outcome = new Map();
