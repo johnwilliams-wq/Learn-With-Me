@@ -854,6 +854,12 @@ scenario('19 expectations: set by a grown-up, ticked by him, rewards locked unti
   await page.fill('[data-form="daily"] input[type="text"]', 'Game time');
   await page.fill('[data-form="daily"] input[type="number"]', '1');
   await page.click('[data-form="daily"] button[type="submit"]');
+  for (const [title, points] of [['Sticker', 10], ['Trampoline park', 5000]]) { // two rewards in his mine: one he reaches with his first mission, one far ahead
+    await page.fill('[data-form="tier"] input[type="text"]', title);
+    await page.fill('[data-form="tier"] input[type="number"]', String(points));
+    await page.click('[data-form="tier"] button[type="submit"]');
+    await page.waitForFunction((n) => globalThis.__lwm.store.get().rewards.tiers.some((x) => x.title === n), title);
+  }
   await H.openTab(page, 'expectations');
   for (const title of ['Brush your teeth', 'Pack your bag']) {
     await page.fill('[data-form="expect"] input[type="text"]', title);
@@ -874,7 +880,16 @@ scenario('19 expectations: set by a grown-up, ticked by him, rewards locked unti
   await page.waitForSelector('.screen.map');
   await page.click('[data-open="rewards"]');
   await page.waitForSelector('.screen.rewards');
-  t.check(await page.locator('.lock-panel').isVisible() && (await page.locator('.reward-row').count()) === 0, 'Rewards should be locked and show nothing while expectations are open');
+  t.check(await page.locator('.lock-panel').isVisible() && (await page.locator('.reward-row').count()) === 0, 'Rewards should be locked while expectations are open: nothing to collect, no goals for today');
+  // ... but he may always look at his mine: where he is, what he has found, what lies ahead
+  t.check((await page.locator('.mine .rung').count()) === 2, 'his mine should be there to look at while the expectations are open');
+  t.check((await page.locator('.mine .rung.is-won .stamp.waits').count()) === 1 && !/WON/.test((await page.textContent('.mine')) || ''), 'a reward he has reached should show as found with a lock, not as won');
+  t.check((await page.locator('.mine .mine-step.is-won .mine-ore.is-found').count()) === 1, 'its ore should be shown as found');
+  await page.click('.mine .rung.is-next');
+  await page.waitForSelector('.rung-detail');
+  t.check(/Trampoline park/.test(await page.textContent('.rung-detail')), 'tapping the reward he is working towards should show it large');
+  await page.click('.rung-detail [data-act="close"]');
+  t.check((await getState(page)).rewards.earned.every((e) => !e.given), 'looking must not hand anything out');
 
   // he ticks them off
   await page.click('.lock-panel [data-open="expectations"]');
@@ -888,6 +903,7 @@ scenario('19 expectations: set by a grown-up, ticked by him, rewards locked unti
   await page.click('.all-done [data-open="rewards"]');
   await page.waitForSelector('.screen.rewards');
   t.check((await page.locator('.lock-panel').count()) === 0 && (await page.locator('.reward-row').count()) >= 1, 'Rewards should open once every expectation is done');
+  t.check((await page.locator('.mine .rung.is-won .stamp:not(.waits)').count()) === 1 && (await page.locator('.stamp.waits').count()) === 0, 'and the reward he found should now show as won');
 
   // taking a tick back locks them again
   await page.click('.sub-head .icon-btn');
@@ -910,7 +926,7 @@ scenario('19 expectations: set by a grown-up, ticked by him, rewards locked unti
   s = await getState(page);
   t.check(Object.values(s.expectations.days)[0][e2] === 'pending', 'with "needs my OK" his tick should only be waiting');
   await page.click('.sub-head .icon-btn');
-  t.check(((await page.textContent('[data-open="parent"] .dot')) || '') === '2', 'the parent button should flag the tick to confirm (plus the reward to hand out)');
+  t.check(((await page.textContent('[data-open="parent"] .dot')) || '') === '3', 'the parent button should flag the tick to confirm (plus the two rewards to hand out: the daily one and the one from his mine)');
   await H.openParent(page);
   await H.openTab(page, 'expectations');
   await page.click(`[data-expect="${e2}"] [data-act="ok"]`);

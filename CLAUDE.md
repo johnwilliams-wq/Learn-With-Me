@@ -134,8 +134,10 @@ in `tools/tts/accepted.json`, with the reason. In Claude Code cloud sessions use
 - State lives in `store` under `rewards` (`daily`, `tiers`, `earned`), `chores` (`list`, `log`), `expectations`
   (`list`, per-day ticks, `confirm`) and `admin` (PIN hash).
 - **Expectations** are a daily checklist set by the parent, with no points or rewards. Until every one of today's
-  is done (`rewardsLocked`), his Rewards screen shows only a lock and the way to the list; rewards he wins are
-  still recorded and wait. With `confirm` on, his tick is only `pending` until a grown-up presses OK.
+  is done (`rewardsLocked`), his Rewards screen shows a lock and the way to the list, and nothing can be collected:
+  what he wins is still recorded and waits. He can always LOOK at his reward mine there (the owner asked for
+  that; looking ahead is the point of it): a reward he has reached shows as found, with a lock instead of
+  "WON!". With `confirm` on, his tick is only `pending` until a grown-up presses OK.
 - **Points are XP.** Missions add XP; an approved chore adds its points to the same total. Lifetime tiers
   are thresholds on that total; daily rewards count missions finished today.
 - **The reward mine** is how he sees the lifetime tiers (`ladder(state)` in `src/rewards/logic.js`,

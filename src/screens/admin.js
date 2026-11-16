@@ -287,7 +287,7 @@ export function rewardsTab(ctx, refresh) {
   const ex = expectationsToday(s);
   return [
     ex.total && !ex.allDone
-      ? h('section', { class: 'panel note-panel', dataset: { note: 'locked' } }, h('p', {}, `Today's expectations are not all done yet (${ex.done} of ${ex.total}), so his rewards are locked on his side.`))
+      ? h('section', { class: 'panel note-panel', dataset: { note: 'locked' } }, h('p', {}, `Today's expectations are not all done yet (${ex.done} of ${ex.total}), so he cannot collect rewards on his side yet. He can still look at his mine.`))
       : null,
     section(`To hand out (${waiting.length})`,
       waiting.length

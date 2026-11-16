@@ -54,7 +54,8 @@ choose a PIN; after that it always asks for the PIN. Inside:
   Approved chores add to the same points total as missions. Without a family account (below) photos
   never leave the iPad.
 - **Expectations** - a daily list of things he is simply expected to do (no points, no rewards). He
-  ticks them off each day; until they are all done his rewards stay locked. You can require your own OK.
+  ticks them off each day; until they are all done his rewards stay locked (he can still look at his mine
+  and see what is ahead). You can require your own OK.
 - Everything in those three lists can be changed later with **Edit**, and can carry a short description
   that he sees and that the speaker button reads to him.
 - **Settings** - slower voice, daily limit, backup, erase, change PIN, and the family account.
