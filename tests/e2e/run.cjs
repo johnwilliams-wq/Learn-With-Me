@@ -26,18 +26,24 @@ const badges = (page, id) => page.locator(id ? `.obj[data-id="${id}"] .badge` : 
 const disabled = (page, sel) => page.locator(sel).isDisabled();
 
 // ---------------------------------------------------------------------------------------------
-scenario('01 first run: title -> map, only level 1 open', async (t) => {
+scenario('01 first run: title -> map; Training Camp is open, its boss too, the other worlds are shut', async (t) => {
   const { page } = await t.open({ state: null });
   await toMap(page);
   const nodes = await page.evaluate(() => [...document.querySelectorAll('.level-node')].map((n) => ({
-    id: n.dataset.level, locked: n.classList.contains('locked'), next: n.classList.contains('next') })));
-  t.check(nodes.length === 44, `expected 44 level nodes, found ${nodes.length}`);
-  t.check(nodes[0]?.id === 'w1l1' && nodes[0].next && !nodes[0].locked, 'level 1 should be the open, highlighted "next" level');
+    id: n.dataset.level, world: n.closest('.world').dataset.world, starter: !!n.closest('details'),
+    locked: n.classList.contains('locked'), next: n.classList.contains('next'), boss: n.classList.contains('boss') })));
+  const main = nodes.filter((n) => !n.starter);
+  const camp = main.filter((n) => n.world === 'camp');
+  t.check(camp.length >= 4 && camp[0].next && !camp[0].locked, 'the first Training Camp level should be the open, highlighted "next" level');
   t.check(nodes.filter((n) => n.next).length === 1, 'exactly one level should be highlighted as next');
-  const open = nodes.slice(1).filter((n) => !n.locked).map((n) => n.id);
-  t.check(open.length === 0, `levels that should be locked but are open: ${open.join(', ')}`);
-  t.check((await page.getAttribute('.map-foot .btn', 'data-play')) === 'w1l1', 'the big Play button should start level 1');
-  for (const id of ['w1l2', 'w8l3']) {
+  t.check(camp.at(-1).boss && !camp.at(-1).locked, 'the Training Camp boss should be open from the start (the skip-ahead)');
+  const openMiddle = camp.slice(1, -1).filter((n) => !n.locked).map((n) => n.id);
+  t.check(openMiddle.length === 0, `camp levels that should be locked but are open: ${openMiddle.join(', ')}`);
+  const openElsewhere = main.filter((n) => n.world !== 'camp' && !n.locked).map((n) => n.id);
+  t.check(openElsewhere.length === 0, `levels of other worlds that should be shut but are open: ${openElsewhere.join(', ')}`);
+  t.check(nodes.filter((n) => n.starter).length === 44 && nodes.filter((n) => n.starter).every((n) => !n.locked), 'the 44 Starter levels should all be open, inside their drawer');
+  t.check((await page.getAttribute('.map-foot .btn', 'data-play')) === camp[0].id, 'the big Play button should start the first camp level');
+  for (const id of [camp[1].id, ...main.filter((n) => n.world !== 'camp').slice(-1).map((n) => n.id)]) {
     await page.click(`.level-node[data-level="${id}"]`);
     await sleep(500);
     const where = await page.evaluate(() => ({ screen: globalThis.__lwm.debug.screen, mission: !!document.querySelector('.mission') }));
@@ -48,13 +54,13 @@ scenario('01 first run: title -> map, only level 1 open', async (t) => {
 });
 
 // ---------------------------------------------------------------------------------------------
-scenario('02 perfect mission on level 1: stars, chest, unlock, survives reload', async (t) => {
+scenario('02 perfect first mission: stars, chest, the next level opens, survives reload', async (t) => {
   const { page } = await t.open({ state: null });
   await toMap(page);
   await page.click('.map-foot .btn');
   await playMission(page);
   t.check((await page.locator('.big-star.on').count()) === 3, 'results should show 3 stars');
-  t.check((await page.locator('[data-act="next"]').count()) === 1, 'results should offer a Next-level button');
+  t.check((await page.locator('[data-act="next"]').count()) === 1, 'results should offer a Next button');
   await page.click('.chest', { force: true });
   await page.waitForSelector('.card-reveal .card', { state: 'visible', timeout: 5000 });
   t.check(await page.locator('.chest').count() === 0, 'the opened chest should give way to the card (so the screen does not grow)');
@@ -62,12 +68,12 @@ scenario('02 perfect mission on level 1: stars, chest, unlock, survives reload',
   const onMap = async (label) => {
     const m = await page.evaluate(() => {
       const n = (id) => document.querySelector(`.level-node[data-level="${id}"]`);
-      return { l2locked: n('w1l2').classList.contains('locked'), l2next: n('w1l2').classList.contains('next'),
-        l1stars: n('w1l1').querySelectorAll('.node-stars .on').length, l3locked: n('w1l3').classList.contains('locked') };
+      return { l2locked: n('camp2').classList.contains('locked'), l2next: n('camp2').classList.contains('next'),
+        l1stars: n('camp1').querySelectorAll('.node-stars .on').length, l3locked: n('camp3').classList.contains('locked') };
     });
-    t.check(!m.l2locked && m.l2next, `${label}: level 2 should be unlocked and highlighted`);
-    t.check(m.l1stars === 3, `${label}: level 1 should show 3 stars, shows ${m.l1stars}`);
-    t.check(m.l3locked, `${label}: level 3 should still be locked`);
+    t.check(!m.l2locked && m.l2next, `${label}: camp level 2 should be unlocked and highlighted`);
+    t.check(m.l1stars === 3, `${label}: camp level 1 should show 3 stars, shows ${m.l1stars}`);
+    t.check(m.l3locked, `${label}: camp level 3 should still be locked`);
   };
   await page.click('[data-act="map"]');
   await page.waitForSelector('.screen.map');
@@ -77,10 +83,10 @@ scenario('02 perfect mission on level 1: stars, chest, unlock, survives reload',
   await toMap(page);
   await onMap('after a reload');
   const s = await getState(page);
-  t.check(s.levels.w1l1?.stars === 3 && s.levels.w1l1.plays === 1 && s.levels.w1l1.best === 6, `stored level record is wrong: ${JSON.stringify(s.levels.w1l1)}`);
+  t.check(s.levels.camp1?.stars === 3 && s.levels.camp1.plays === 1 && s.levels.camp1.best === 6, `stored level record is wrong: ${JSON.stringify(s.levels.camp1)}`);
   t.check(s.cards.length === 1, `expected 1 stored card, got ${s.cards.length}`);
   t.check(s.xp === 95, `expected 95 XP (6x10 + 15 + 10 patience + 10 perfect), got ${s.xp}`);
-  t.check(s.trials.length === 6 && s.trials.every((x) => x.c1 === 1 && x.e === ''), 'expected 6 clean first-listen trials in the log');
+  t.check(s.trials.length === 6 && s.trials.every((x) => x.c1 === 1 && x.e === ''), 'expected 6 clean first-try trials in the log');
 });
 
 // ---------------------------------------------------------------------------------------------
@@ -445,7 +451,7 @@ scenario('12 parent area: PIN, settings, backup / erase / restore', async (t) =>
 });
 
 // ---------------------------------------------------------------------------------------------
-scenario('13 every level is playable (44 levels, robot plays perfectly)', async (t) => {
+scenario('13 every level is playable (robot plays one mission of each perfectly)', async (t) => {
   const queue = LEVELS.map((l) => l.id);
   let done = 0;
   const worker = async () => {
@@ -477,7 +483,7 @@ scenario('13 every level is playable (44 levels, robot plays perfectly)', async 
     }
   };
   await Promise.all(Array.from({ length: 8 }, worker));
-  t.check(done === 44, `${done} of 44 levels played through to 3 stars`);
+  t.check(done === LEVELS.length, `${done} of ${LEVELS.length} levels played through to 3 stars`);
 });
 
 // ---------------------------------------------------------------------------------------------
@@ -774,7 +780,7 @@ scenario('18 rewards and chores: set up by a grown-up, earned by him, checked an
   t.check(((await page.textContent('[data-open="chores"] .dot')) || '') === '1', 'the Chores button should show 1 chore to do');
 
   // --- he plays one mission: the daily reward (1 mission) is won, the 100-point tier is not yet (95 XP)
-  await openLevel(page, 'w1l1');
+  await openLevel(page, 'camp1');
   await playMission(page);
   t.check(await page.locator('.won-box').isVisible() && /Game time/.test(await page.textContent('.won-box')), 'the results screen should announce the reward he won');
   s = await getState(page);
@@ -829,7 +835,7 @@ scenario('18 rewards and chores: set up by a grown-up, earned by him, checked an
 
   // --- a second mission the same day on the now-perfected level does not count again
   await page.click('.sub-head .icon-btn');
-  await openLevel(page, 'w1l1');
+  await openLevel(page, 'camp1');
   await playMission(page);
   s = await getState(page);
   const today = Object.values(s.days)[0];
@@ -861,7 +867,7 @@ scenario('19 expectations: set by a grown-up, ticked by him, rewards locked unti
   t.check(((await page.textContent('[data-open="expectations"] .dot')) || '') === '2', 'the Expectations button should show 2 left to do');
 
   // he wins a reward, but it is locked
-  await openLevel(page, 'w1l1');
+  await openLevel(page, 'camp1');
   await playMission(page);
   t.check(/Finish your expectations/.test((await page.textContent('.won-box')) || ''), 'the results screen should say the reward is locked until the expectations are done');
   await page.click('[data-act="map"]');

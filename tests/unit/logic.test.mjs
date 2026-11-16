@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { check, demoOrder } from '../../src/listening/checker.js';
-import { starsFor, missionXp, rankFor, isUnlocked, nextLevel, pickItems, summarize, flattenLevels, RANKS } from '../../src/listening/progress.js';
+import { starsFor, missionXp, rankFor, isUnlocked, nextLevel, worldOpen, worldCleared, openCount, pickItems, summarize, flattenLevels, RANKS } from '../../src/listening/progress.js';
 import { createStore, defaultState } from '../../src/core/store.js';
 import { makeRng } from '../../src/core/rng.js';
 import { skillStats, errorStats, overview, observations, SKILLS } from '../../src/listening/insights.js';
@@ -69,27 +69,77 @@ test('stars, xp and ranks', () => {
   assert.equal(rankFor(1e9).next, null);
 });
 
-const levels = flattenLevels([{ id: 'w1', name: 'W', levels: [{ id: 'l1', trials: 6 }, { id: 'l2', trials: 6 }, { id: 'l3', trials: 6 }] }]);
+const WORLDS = [
+  { id: 'camp', name: 'Camp', levels: [{ id: 'c1', trials: 6 }, { id: 'c2', trials: 6 }, { id: 'c3', trials: 6 }, { id: 'cb', trials: 6, boss: true }] },
+  { id: 'za', name: 'Zone A', needs: ['camp'], levels: [{ id: 'a1', trials: 6 }, { id: 'a2', trials: 6 }, { id: 'ab', trials: 6, boss: true }] },
+  { id: 'zb', name: 'Zone B', needs: ['camp'], levels: [{ id: 'b1', trials: 6 }, { id: 'bb', trials: 6, boss: true }] },
+  { id: 'top', name: 'Top', needs: ['za', 'zb'], needsCount: 2, levels: [{ id: 't1', trials: 6 }, { id: 'tb', trials: 6, boss: true }] },
+  { id: 'old', name: 'Starter', starter: true, levels: [{ id: 's1', trials: 6 }, { id: 's2', trials: 6 }] },
+];
+const levels = flattenLevels(WORLDS);
+const open = (s) => levels.filter((l) => isUnlocked(l.id, levels, s)).map((l) => l.id).join(' ');
+const stars = (n, extra = {}) => ({ stars: n, plays: 1, best: n === 3 ? 6 : 5, last: 1, ...extra });
 
-test('unlocking: two stars opens the next level; he can never get stuck', () => {
+test('a new player: the first camp level and the camp boss are open, other worlds are shut, Starter levels are open', () => {
   const s = defaultState();
-  assert.equal(isUnlocked('l1', levels, s), true);
-  assert.equal(isUnlocked('l2', levels, s), false);
-  s.levels.l1 = { stars: 1, plays: 1, best: 4 };
-  assert.equal(isUnlocked('l2', levels, s), false);
-  s.levels.l1 = { stars: 1, plays: 3, best: 4 };
-  assert.equal(isUnlocked('l2', levels, s), true, 'three tries with most right also opens it');
-  s.levels.l1 = { stars: 1, plays: 4, best: 2 };
-  assert.equal(isUnlocked('l2', levels, s), false);
-  s.levels.l1 = { stars: 1, plays: 5, best: 2 };
-  assert.equal(isUnlocked('l2', levels, s), true, 'five finished tries always opens it: he can never be stuck');
-  s.levels.l1 = { stars: 1, plays: 3, best: 4 };
-  assert.equal(nextLevel(levels, s).id, 'l2', 'Play moves on with him once the next level has opened');
-  s.levels.l1 = { stars: 2, plays: 1, best: 5 };
-  assert.equal(isUnlocked('l2', levels, s), true);
-  assert.equal(nextLevel(levels, s).id, 'l2');
-  s.flags.unlockAll = true;
-  assert.equal(isUnlocked('l3', levels, s), true);
+  assert.equal(open(s), 'c1 cb s1 s2');
+  assert.equal(worldOpen('za', levels, s), false);
+  assert.equal(nextLevel(levels, s).id, 'c1');
+  assert.equal(openCount(levels, s), 2, 'Starter levels are not counted as "newly opened"');
+});
+
+test('inside a world: two stars opens the next level, and he can never get stuck', () => {
+  const s = defaultState();
+  s.levels.c1 = { stars: 1, plays: 1, best: 4 };
+  assert.equal(isUnlocked('c2', levels, s), false);
+  s.levels.c1 = { stars: 1, plays: 3, best: 4 };
+  assert.equal(isUnlocked('c2', levels, s), true, 'three tries with most right opens it');
+  assert.equal(nextLevel(levels, s).id, 'c2', 'Play moves on with him');
+  s.levels.c1 = { stars: 1, plays: 4, best: 2 };
+  assert.equal(isUnlocked('c2', levels, s), false);
+  s.levels.c1 = { stars: 1, plays: 5, best: 2 };
+  assert.equal(isUnlocked('c2', levels, s), true, 'five finished tries always opens it');
+  s.levels.c1 = stars(2);
+  assert.equal(open(s), 'c1 c2 cb s1 s2');
+  assert.equal(nextLevel(levels, s).id, 'c2');
+});
+
+test('beating a boss clears its world: everything in it opens and so do the worlds that needed it', () => {
+  const s = defaultState();
+  s.levels.cb = stars(1);
+  assert.equal(worldCleared('camp', levels, s), false, 'one star on the boss is not enough');
+  s.levels.cb = stars(2);
+  assert.equal(worldCleared('camp', levels, s), true);
+  assert.equal(open(s), 'c1 c2 c3 cb a1 ab b1 bb s1 s2');
+  assert.equal(worldOpen('top', levels, s), false);
+  s.levels.ab = stars(2);
+  assert.equal(worldOpen('top', levels, s), false, 'the top world needs two cleared zones');
+  s.levels.bb = stars(3);
+  assert.equal(worldOpen('top', levels, s), true);
+  // a world is also cleared by passing every level in it
+  const t = defaultState();
+  for (const id of ['c1', 'c2', 'c3', 'cb']) t.levels[id] = { stars: 1, plays: 5, best: 2 };
+  assert.equal(worldCleared('camp', levels, t), true);
+});
+
+test('Play rotates between the open worlds he has not cleared, least recently played first', () => {
+  const s = defaultState();
+  s.levels.cb = stars(2, { last: 10 });
+  assert.equal(nextLevel(levels, s).id, 'a1', 'worlds never played come first, in map order');
+  s.levels.a1 = stars(2, { last: 20 });
+  assert.equal(nextLevel(levels, s).id, 'b1', 'then the other zone');
+  s.levels.b1 = stars(2, { last: 30 });
+  assert.equal(nextLevel(levels, s).id, 'a2', 'then back to the first zone, at its next level');
+  s.levels.a2 = stars(2, { last: 40 });
+  assert.equal(nextLevel(levels, s).id, 'bb', 'a world with only its boss left offers the boss');
+  s.levels.bb = stars(2, { last: 50 });
+  s.levels.ab = stars(2, { last: 60 });
+  assert.equal(nextLevel(levels, s).id, 't1');
+  s.levels.tb = stars(3, { last: 70 });
+  assert.equal(nextLevel(levels, s).id, 'tb', 'with everything cleared it offers the last level of the game');
+  const all = defaultState();
+  all.flags.unlockAll = true;
+  assert.equal(levels.every((l) => isUnlocked(l.id, levels, all)), true);
 });
 
 test('pickItems: fresh items first, quotas respected, right count', () => {

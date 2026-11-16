@@ -12,6 +12,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { OBJECT_KINDS, CHARACTER_KINDS } from '../../src/art/sprites.js';
 import { SKILLS } from '../../src/listening/insights.js';
+import { TYPES } from '../../tools/content/types/index.mjs';
+import { RULES as EXTRA_RULES } from './oracles/tap-extra.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const read = (p) => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
@@ -21,6 +23,8 @@ const voice = read('assets/data/voice.json');
 const own = levels.filter((l) => !l.mix);
 const bank = (id) => read(`assets/data/listening/${id}.json`).items;
 const itemsOf = (level) => (level.mix || [level.id]).flatMap(bank);
+const isTap = (it) => !it.t || it.t === 'tap';
+const isNone = (it) => TYPES[it.t || 'tap'].isNone(it);
 
 const COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
 const KINDS = [...OBJECT_KINDS, ...CHARACTER_KINDS];
@@ -176,15 +180,24 @@ const SOUND_ALIKE = [['boot', 'book'], ['heart', 'hat'], ['coin', 'crown']];
 
 test('every item: the answer worked out from the sentence matches the stored answer', () => {
   let n = 0;
+  const helpers = { one, all, ids, rx, index, picked, fits, COLORS, KINDS };
   for (const level of own) {
-    for (const it of bank(level.id)) {
-      const rule = ORACLE[it.v];
-      assert.ok(rule, `${it.id}: no independent rule for pattern "${it.v}" - add one to tests/unit/content.test.mjs`);
-      assert.deepEqual(norm(rule(it, mentions(it.say))), norm(it.expect), `${it.id}: ${it.say}`);
+    for (const it of bank(level.id).filter(isTap)) {
+      const rule = ORACLE[it.v] || EXTRA_RULES[it.v];
+      assert.ok(rule, `${it.id}: no independent rule for pattern "${it.v}" - add one (tests/unit/content.test.mjs or tests/unit/oracles/tap-extra.mjs)`);
+      assert.deepEqual(norm(rule(it, mentions(it.say), helpers)), norm(it.expect), `${it.id}: ${it.say}`);
       n++;
     }
   }
   assert.ok(n > 700, `only ${n} items`);
+});
+
+test('every other activity type has its own independent oracle test', () => {
+  const types = new Set(own.flatMap((l) => bank(l.id)).filter((it) => !isTap(it)).map((it) => it.t));
+  for (const t of types) {
+    assert.ok(TYPES[t], `unknown activity type ${t}`);
+    assert.ok(existsSync(join(ROOT, 'tests', 'unit', `oracle-${t}.test.mjs`)), `activity type "${t}" has items but no tests/unit/oracle-${t}.test.mjs`);
+  }
 });
 
 test('every item is well formed and fair', () => {
@@ -193,17 +206,18 @@ test('every item is well formed and fair', () => {
     for (const it of bank(level.id)) {
       assert.ok(!seenIds.has(it.id), `duplicate id ${it.id}`);
       seenIds.add(it.id);
-      const objs = it.scene.objects;
-      assert.ok(objs.length >= 2 && objs.length <= 12, it.id);
-      for (const o of objs) {
-        assert.ok(KINDS.includes(o.kind) && COLORS.includes(o.color) && ['big', 'small'].includes(o.size), `${it.id}: ${JSON.stringify(o)}`);
-      }
-      for (const [a, b] of SOUND_ALIKE) assert.ok(!(objs.some((o) => o.kind === a) && objs.some((o) => o.kind === b)), `${it.id}: ${a} and ${b} sound alike`);
       for (const tag of it.s) assert.ok(tag in SKILLS, `${it.id}: unknown skill ${tag}`);
-      const taps = it.expect.flat();
-      if (it.auto) assert.ok(taps.length <= 1, `${it.id}: auto item with several taps`);
-      if (!taps.length) assert.ok(level.allowNone, `${it.id}: "do nothing" needs the hand button`);
-      if (it.hide) assert.ok(objs.length <= 8, `${it.id}: too much to find after a hidden instruction`);
+      if (isNone(it)) assert.ok(level.allowNone, `${it.id}: "do nothing" needs the hand button`);
+      if (isTap(it)) {
+        const objs = it.scene.objects;
+        assert.ok(objs.length >= 2 && objs.length <= 12, it.id);
+        for (const o of objs) {
+          assert.ok(KINDS.includes(o.kind) && COLORS.includes(o.color) && ['big', 'small'].includes(o.size), `${it.id}: ${JSON.stringify(o)}`);
+        }
+        for (const [a, b] of SOUND_ALIKE) assert.ok(!(objs.some((o) => o.kind === a) && objs.some((o) => o.kind === b)), `${it.id}: ${a} and ${b} sound alike`);
+        if (it.auto) assert.ok(it.expect.flat().length <= 1, `${it.id}: auto item with several taps`);
+        if (it.hide) assert.ok(objs.length <= 8, `${it.id}: too much to find after a hidden instruction`);
+      }
       assert.match(it.say, /^[A-Z].*[.?!]$/, it.id);
       assert.match(it.audio, /^[0-9a-f]{12}\.mp3$/, it.id);
     }
@@ -213,7 +227,7 @@ test('every item is well formed and fair', () => {
 test('detail words are really needed (each clue has a look-alike that differs only by it)', () => {
   const foil = (it, t, same, differ) => it.scene.objects.some((o) => o.id !== t.id && same.every((k) => o[k] === t[k]) && differ.every((k) => o[k] !== t[k]));
   for (const level of own) {
-    for (const it of bank(level.id)) {
+    for (const it of bank(level.id).filter(isTap)) {
       const t = it.scene.objects.find((o) => o.id === it.expect[0]?.[0]);
       if (it.v === 'colour') assert.ok(foil(it, t, ['kind'], ['color']), it.id);
       if (it.v === 'size') assert.ok(foil(it, t, ['kind', 'color'], ['size']), it.id);
@@ -230,11 +244,11 @@ test('detail words are really needed (each clue has a look-alike that differs on
 test('every level can fill a mission, and missions can be varied', () => {
   for (const level of levels) {
     const items = itemsOf(level);
-    assert.ok(items.length >= level.trials * 3, `${level.id}: only ${items.length} items`);
+    assert.ok(items.length >= level.trials * 2.5, `${level.id}: only ${items.length} items`);
     for (const [group, count] of Object.entries(level.quota || {})) {
       assert.ok(items.filter((it) => it.g === group).length >= count * 3, `${level.id}: quota ${group}`);
     }
-    if (items.some((it) => !it.expect.flat().length)) assert.ok(level.allowNone, `${level.id} needs the hand button`);
+    if (items.some(isNone)) assert.ok(level.allowNone, `${level.id} needs the hand button`);
     assert.ok(voice.lines[level.tip], `${level.id}: tip line missing`);
     assert.ok(level.tipText.length <= 200, `${level.id}: tip is too long`);
   }

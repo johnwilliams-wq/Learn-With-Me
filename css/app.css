@@ -418,3 +418,14 @@ svg { display: block; width: 100%; height: 100%; }
 .lock-panel { justify-items: center; text-align: center; gap: 14px; padding: 28px 22px; margin-top: 4vh; }
 .lock-big { width: 84px; height: 84px; color: var(--gold); }
 .note-panel { border-color: var(--gold); color: var(--ink); font-weight: 700; }
+
+/* ---------- map: worlds that are still shut, bosses, the Starter drawer ---------- */
+.world.shut { opacity: 0.62; }
+.world-lock { width: 24px; height: 24px; color: var(--ink-dim); }
+.level-node.boss { background: rgba(255, 210, 63, 0.14); }
+.level-node.boss .node-num { background: var(--gold); color: var(--gold-ink); }
+.level-node.boss .node-lock { width: 30px; height: 30px; }
+.starter { border: 2px dashed var(--line); border-radius: var(--radius); padding: 12px 16px; display: grid; gap: 14px; }
+.starter summary { cursor: pointer; font-weight: 800; font-size: 20px; padding: 6px 0; list-style-position: inside; }
+.starter summary small { color: var(--ink-dim); font-weight: 600; font-size: 15px; }
+.starter[open] summary { margin-bottom: 10px; }

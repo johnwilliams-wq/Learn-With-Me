@@ -38,16 +38,19 @@ const waitPhase = (page, want, timeout = 20000) =>
   page.waitForFunction((w) => document.querySelector('.mission')?.dataset.phase === w, want, { timeout });
 
 /** Tap what the item asks for (or deliberately something else when wrong = true). */
+/** The robot for an activity type (tests/e2e/robots/<type>.cjs). */
+function robotFor(type) {
+  return require(path.join(__dirname, 'robots', `${type || 'tap'}.cjs`));
+}
+
+/** Answer the turn on screen: correctly, or (wrong = true) with a deliberately wrong answer. */
 async function answer(page, { wrong = false } = {}) {
   const item = await page.evaluate(() => globalThis.__lwm.debug.item);
-  let taps = item.expect.flat();
-  if (wrong) {
-    const all = item.scene.objects.map((o) => o.id);
-    const bad = all.find((id) => !taps.includes(id));
-    taps = taps.length ? [bad] : [all[0]]; // a wrong object, or acting when he should not
-  }
-  for (const id of taps) await page.click(`.obj[data-id="${id}"]`);
-  if (!taps.length) await page.click('.btn-hand');
+  const robot = robotFor(item.t);
+  const nothing = robot.isNone(item);
+  if (wrong) await robot.wrong(page, item); // (for a "do nothing" item, wrong = acting anyway)
+  else if (!nothing) await robot.solve(page, item);
+  if (!wrong && nothing) await page.click('.btn-hand');
   else if (!item.auto && (await phase(page)) === 'respond') await page.click('.btn-done');
   return item;
 }
@@ -123,6 +126,8 @@ const toMap = async (page) => {
   await page.waitForSelector('.screen.map');
 };
 const openLevel = async (page, id) => {
+  // Starter levels live in a drawer on the map: open it if this level is inside.
+  await page.evaluate((lv) => { const d = document.querySelector(`.level-node[data-level="${lv}"]`)?.closest('details'); if (d) d.open = true; }, id);
   await page.click(`.level-node[data-level="${id}"]`);
   await page.waitForSelector('.overlay.intro');
 };
@@ -217,6 +222,7 @@ function seenExcept(levelId, pred) {
 }
 
 module.exports = {
+  robotFor,
   typePin, openParent, openTab,
   ROOT, STATE_KEY, startServer, phase, waitPhase, answer, playMission,
   watchErrors, openPage, toMap, openLevel, begin, listen, curItem, getState, waitTrials, gotoItem,

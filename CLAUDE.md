@@ -42,17 +42,19 @@ src/core/                   dom helpers, store (localStorage), audio (voice clip
 src/art/sprites.js          all art as inline SVG: spriteSVG(kind, color), guideSVG(mood), iconSVG(name)
 src/listening/              checker (is the answer right), progress (stars/unlocks/picking items),
                             board (tappable grid), bank (data loading), cards, insights (parent stats)
-src/rewards/logic.js        rules for daily rewards, lifetime tiers and chores (pure functions)
+src/listening/scenes/       one plug-in per activity type (tap, truth, put, paint, build, route, panel)
+src/rewards/logic.js        rules for daily rewards, lifetime tiers, chores and expectations (pure functions)
 src/core/pin.js, photos.js  parent PIN (salted hash), chore photos (IndexedDB, shrunk JPEGs)
 src/screens/                title, map, mission, results, collection, rewards, chores, expectations,
                             parent (tabs: Progress / Rewards / Chores / Expectations / Settings), admin (PIN pad + those tabs)
 assets/data/                GENERATED: listening/levels.json, listening/<level>.json, voice.json, audio.json
 assets/audio/               GENERATED voice clips (mp3): listening/ = instructions, ui/ = the guide's lines
-tools/content/              levels.mjs (the curriculum + item generators), voice.mjs (guide lines), build.mjs
+tools/content/              worlds/ (one module per world), types/ (content rules per activity type), pipeline.mjs,
+                            levels.mjs (the Starter levels), voice.mjs (guide lines), build.mjs, preview.mjs
 tools/tts/                  setup.sh, synth.py (make clips), verify.py (speech-recognition check), manifest.json
 tools/build-precache.mjs    regenerates the service-worker file list in sw.js
 tests/unit/                 node:test - logic, sprites, shell, and an independent check of every item
-tests/e2e/                  Playwright (Chromium): smoke.cjs plus helpers with a "robot player"
+tests/e2e/                  Playwright (Chromium): run.cjs (scenarios), all-items.cjs (plays every item), robots/ (one per activity type)
 ```
 
 ## Commands
@@ -142,6 +144,137 @@ knowingly. In Claude Code cloud sessions use the `learn-with-me` environment (it
 - All URLs are relative (the site lives in a sub-folder on GitHub Pages). `.nojekyll` must stay.
 - It has only been tested in desktop Chromium at iPad size. Anything touching audio, storage or the
   service worker should be re-checked on the real iPad by the parent.
+
+## Worlds and unlocking
+
+The map is a list of **worlds** (`tools/content/worlds/index.mjs`): Training Camp, then one world per
+kind of activity, then Legend Trials, then the Starter levels (the original gentle ladder, always open,
+in a drawer). Inside an open world the first level and the **boss** (always the last level) are open;
+every other level opens when the one before it is passed. Beating a boss with 2 stars clears its world
+- that is the skip-ahead for a strong listener - and clearing Training Camp opens every activity world.
+The Play button rotates between the open worlds (`nextLevel` in `src/listening/progress.js`).
+
+## Activity types (how the listening game grows)
+
+Every turn is still: tap the ear -> listen -> respond -> feedback. What changes between activity types is
+the **play area** and what an **answer** is. Each type is a plug-in made of the pieces below; the
+mission screen (`src/screens/mission.js`) never needs to know the details. `tap` and `truth` are the
+reference implementations - read them before writing a new one.
+
+| piece | file | what it does |
+|---|---|---|
+| play area | `src/listening/scenes/<type>.js` | `create(item, host)`, `check(answer, item)`, `isNone(item)` |
+| its art (optional) | `src/art/<type>.js` | extra inline SVG, same rules as `sprites.js` (no ids, defs, text) |
+| its styles | `css/scenes/<type>.css` | all selectors prefixed with a class unique to the type |
+| content rules | `tools/content/types/<type>.mjs` | `finish(rng, draft)`, `validate(item, tools)`, `isNone(item)` |
+| a world | `tools/content/worlds/<world>.mjs` | default-exports the world: levels, generators, spoken tips |
+| answer oracle | `tests/unit/oracle-<type>.test.mjs` | works every answer out again from the sentence alone |
+| checker tests | `tests/unit/scene-<type>.test.mjs` | unit tests of `check()` |
+| test robot | `tests/e2e/robots/<type>.cjs` | `solve(page, item)`, `wrong(page, item)`, `isNone(item)` |
+
+The registries (`src/listening/scenes/index.js`, `tools/content/types/index.mjs`,
+`tools/content/worlds/index.mjs`) and `index.html` already name every planned type; a type that is not
+built yet is a placeholder file that you replace.
+
+### The play area: `src/listening/scenes/<type>.js`
+
+```js
+export default {
+  create(item, host) {            // host = { sfx, onChange(), onSubmit(), onEarly(), onIdle() }
+    return {
+      el,                         // root element; it is mounted in .board-wrap
+      fit(container),             // size yourself to the space you have (called on mount and on resize)
+      setMode(mode),              // 'ready' | 'listening' | 'respond' | 'off' - see below
+      setCovered(bool),           // true = hide what must be remembered (levels with item.hide)
+      reset(),                    // forget everything he has done in this turn
+      answer(),                   // his answer so far, as plain JSON, in the shape check() expects
+      size(),                     // how much he has done: 0 = nothing (Done and Undo stay disabled)
+      undo(),                     // take back the last thing he did
+      demo(onStep),               // async: show the RIGHT answer, one step at a time (after two misses)
+      celebrate(), shake(),       // a happy flourish / a gentle "not quite"
+      destroy(),                  // optional: remove listeners, timers
+    };
+  },
+  check(answer, item) { return { correct, error, at, prefix, total }; },   // pure, no DOM
+  isNone(item) { return false; }, // true when the right response is to do nothing (he presses the hand)
+};
+```
+
+- **Modes.** `ready`: frozen; any touch calls `host.onIdle()` (the ear pulses). `listening`: frozen; any
+  touch calls `host.onEarly()` (he jumped in too soon - the mission counts it and reminds him).
+  `respond`: interactive. `off`: frozen and silent (feedback, demo). Only act on input in `respond`.
+- Call `host.onChange()` after every change to the answer, and `host.sfx.tap()` for the little click.
+  Call `host.onSubmit()` only for items with `item.auto` (a one-touch answer). Otherwise he presses the
+  green Done button; Undo calls your `undo()`; "Not this time" (the hand) calls `reset()` then checks.
+- `check()` returns `error` as one of the keys of `ERRORS` in `src/listening/insights.js` (`''` when
+  correct): `incomplete`, `extra`, `order`, `attribute`, `object`, `place`, `count`, `value`, `path`,
+  `choice`, `false-alarm`, `no-response`. `total` is how many separate things had to be done (shown as
+  dots on the supported retry when it is 1-8; use 0 to show none). `at`/`prefix`: index of the first
+  wrong step / how many were right before it (0 if that makes no sense for the type).
+- An empty answer must never be marked correct unless `isNone(item)`.
+- Children's-tablet rules: every touch target at least 60 CSS px; **tap, never drag-only** (tap a thing,
+  then tap where it goes - dragging may be offered as an extra); nothing requires reading (use pictures,
+  colours, digits and icons; words only as decoration); show clearly what he has done so far so he can
+  check it before pressing Done; `prefers-reduced-motion` is already handled globally.
+- Sprites: `spriteSVG(kind, color)` for the 22 objects and 8 characters, `iconSVG(name)`, `PALETTE`
+  (the six play colours plus gray) in `src/art/sprites.js`. Colour words in sentences are exactly the six
+  palette names. New art goes in your own `src/art/<type>.js`.
+
+### Content: `tools/content/types/<type>.mjs` and `tools/content/worlds/<world>.mjs`
+
+A generator returns a **draft** - plain data plus `t: '<type>'`, the spoken sentence `say`, skill tags `s`
+(keys of `SKILLS` in `src/listening/insights.js`), a pattern name `v`, and optionally `hide: true`,
+`auto: true`, `g` (quota group). The type's `finish(rng, draft)` turns it into a finished item
+`{ say, t, scene, expect, s, v, ...flags }` (shuffle positions, assign ids), throwing an Error whose
+message contains `try again` for an unlucky random draw. `validate(item, { fail, checkObjects })` must
+reject anything malformed. The pipeline adds `id` and `audio`.
+
+```js
+export default {
+  id: 'pack', name: 'Move and Pack', blurb: 'One short line for the map.', color: '#18b99a', speed: 0.95,
+  levels: [
+    { id: 'pack1', title: 'Into the Chest', n: 18, tip: 'Spoken explanation, at most 200 characters.',
+      gen(rng, i) { return { t: 'put', say: '...', /* scene parts */ s: ['put'], v: 'put-one' }; } },
+    // ... 6 or 7 levels, each adding ONE difficulty, the last ones genuinely hard ...
+    { id: 'pack-boss', title: 'Pack Boss', boss: true, mix: ['pack5', 'pack6', 'pack7'], tip: '...' },
+  ],
+};
+```
+
+- `gen(rng, i)`: `rng` is seeded (`src/core/rng.js`: `pick`, `shuffle`, `range`, `chance`, `sample`);
+  use `i % k` to rotate sentence patterns so a mission is varied. `tools/content/lib.mjs` has
+  `pickKinds` (never puts sound-alike words in one scene), `pickColors`, `obj`, `find`, `only`, `plural`, `an`.
+- **Every spoken word must matter, and every sentence must have exactly one right answer.** Build scenes
+  with look-alikes so each detail word is needed; never rely on reading; write numbers as words;
+  sentences are synthesized and then checked by a speech recogniser, so avoid invented words, homophone
+  traps, symbols and abbreviations. Keep a sentence under about 35 words.
+- A tip is spoken before the level (until he has passed it), so it must teach the new thing by ear and
+  refer to buttons by what they look like ("the green check mark", "the hand").
+- Levels that include "do nothing" items need `allowNone: true` (the hand button).
+
+### Building and testing one world without touching the game data
+
+Never run `npm run build`, `tools/content/build.mjs` or the `tools/tts` scripts while a world is being
+developed alongside others: they rewrite shared files. Use the preview instead:
+
+```bash
+node tools/content/preview.mjs tools/content/worlds/pack.mjs tests/e2e/out/pack   # build + validate one world
+LWM_ITEMS_DIR=tests/e2e/out/pack node --test tests/unit/oracle-put.test.mjs       # the oracle, on the preview
+node --test tests/unit/scene-put.test.mjs                                         # checker unit tests
+node tests/e2e/all-items.cjs --dir tests/e2e/out/pack                             # robot plays EVERY item in the real screen
+# look at it: serve the repo (python3 -m http.server 8080) and open
+#   index.html?sandbox=tests/e2e/out/pack/pack1.json&fast=1&nosw=1   (fast = no real audio)
+```
+
+The **oracle test** is the safety net against wrong answer keys: for every item of the type it must work
+out the right answer again from `item.say` and `item.scene` only (never from `item.expect` or from code
+shared with the generator) and insist it equals `item.expect`. See `tests/unit/content.test.mjs` (tap)
+and use `itemsOfType()` from `tests/unit/oracles/load.mjs`. New tap sentence patterns add their rule to
+`tests/unit/oracles/tap-extra.mjs`.
+
+The **robot** drives the real page: `solve` performs the right answer, `wrong` a definitely wrong but
+non-empty one; neither presses Done or the hand (the helper does). `window.__lwm.debug.item` is the
+item on screen.
 
 ## Adding a new subject later
 
