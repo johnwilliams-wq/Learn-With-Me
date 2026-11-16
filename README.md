@@ -81,6 +81,10 @@ their photos (kept in a private folder and deleted once you approve the chore or
 play history, the PIN and the settings never leave his device. *Delete the family account* (under
 More) removes everything that is stored online.
 
+Forgot the password? In the database's dashboard delete the user (Authentication, Users) and empty
+its folder (Storage, photos), then create the account again on his device and sign in on yours.
+Nothing on the devices is lost: his device simply reports everything afresh.
+
 The account lives in a small database that belongs to the family (see CLAUDE.md, "The family
 database"). Anyone who uses this code for their own child needs their own.
 
