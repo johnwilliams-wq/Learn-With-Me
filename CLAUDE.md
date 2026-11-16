@@ -34,7 +34,8 @@ These came from the parent's brief; do not trade them away for features.
 8. **The parent area is locked by a PIN the parent chooses on the device.** Only a salted hash is
    stored. Never put a PIN, a hash, or any family detail in this repository.
 9. **Rewards never take anything away.** Daily rewards and lifetime tiers are only ever won; chore
-   points arrive when a grown-up approves. Chore photos stay on the device and are deleted once checked.
+   points arrive when a grown-up approves. Chore photos stay on the device (with a family sign-in:
+   also in the family's private folder, so a grown-up can check them elsewhere) and are deleted once checked.
 
 ## Layout
 
@@ -47,9 +48,15 @@ src/listening/              checker (is the answer right), progress (stars/unloc
                             board (tappable grid), bank (data loading), cards, insights (parent stats)
 src/listening/scenes/       one plug-in per activity type (tap, truth, put, paint, build, route, panel)
 src/rewards/logic.js        rules for daily rewards, lifetime tiers, chores and expectations (pure functions)
-src/core/pin.js, photos.js  parent PIN (salted hash), chore photos (IndexedDB, shrunk JPEGs)
+src/rewards/actions.js      act(): everything a grown-up can do to those lists, as named actions
+src/family/                 the optional family account: config (project address), api (the few calls),
+                            shape (what is shared), sync (the device he plays on <-> a grown-up's device)
+src/core/pin.js, photos.js  parent PIN (salted hash), pictures (IndexedDB, shrunk JPEGs)
 src/screens/                title, map, mission, results, collection, rewards, chores, expectations,
-                            parent (tabs: Progress / Rewards / Chores / Expectations / Settings), admin (PIN pad + those tabs)
+                            parent (tabs: Progress / Rewards / Chores / Expectations / Settings), admin (PIN pad + those tabs),
+                            family (the account panel in Settings)
+supabase/migrations/        the family database: tables, row level security, the private photo folder
+tools/db/                   check.sh: applies the migrations to a throw-away Postgres and checks who can do what
 assets/data/                GENERATED: listening/levels.json, listening/<level>.json, voice.json, audio.json
 assets/audio/               GENERATED voice clips (mp3): listening/ = instructions, ui/ = the guide's lines
 tools/content/              worlds/ (one module per world), types/ (content rules per activity type), pipeline.mjs,
@@ -58,7 +65,8 @@ tools/tts/                  setup.sh, synth.py (make clips), verify.py (speech-r
                             manifest.json, verified.json, report.json, tweaks.json, accepted.json
 tools/build-precache.mjs    regenerates the service-worker file list in sw.js
 tests/unit/                 node:test - logic, sprites, shell, and an independent check of every item
-tests/e2e/                  Playwright (Chromium): run.cjs (scenarios), all-items.cjs (plays every item), robots/ (one per activity type)
+tests/e2e/                  Playwright (Chromium): run.cjs (scenarios), all-items.cjs (plays every item), robots/ (one per activity type),
+                            family-server.cjs (a stand-in for the family database), live-family.mjs (a try-out on the real one)
 ```
 
 ## Commands
@@ -146,6 +154,13 @@ in `tools/tts/accepted.json`, with the reason. In Claude Code cloud sessions use
   do not have them. The parent area (`src/screens/admin.js`) uses one form for adding and for Edit.
   A reward picture is deleted when its tier is removed or gets another picture; it is not part of a
   backup, so screens must fall back to the emoji when a picture is missing (`showPhoto`).
+- **The parent area never touches the save itself.** Every change is a named action carried out by
+  `act(state, type, payload)` (`src/rewards/actions.js`: add / edit / remove / given / chore / expect /
+  option), reached through a "desk" (`ctx.family.desk()`): `state()` to read, `run(type, payload)` to
+  change, `savePhoto(blob)`. On the device he plays on the desk is this device's own save; on a
+  grown-up's own device it is his device from afar (see the family database). A new thing a grown-up
+  can do = a new action there, never a `store.update` in a screen. Actions must stay safe to carry out
+  twice and must treat their payload as untrusted (it can arrive from another device).
 - A mission counts toward daily rewards only if the level was below 3 stars before it was played
   (`missionCounts`), unless the parent turns that off - otherwise replaying level 1 would farm rewards.
 - Everything a grown-up owes him sits in `rewards.earned` until marked "Given" in the Rewards tab.
@@ -153,9 +168,9 @@ in `tools/tts/accepted.json`, with the reason. In Claude Code cloud sessions use
   `pending` -> the parent approves or sends it back in the Chores tab -> photo deleted.
 - Reward and chore names are typed by the parent, so every row has a speaker button that reads it aloud
   with the device voice (`audio.speak`), and icons are emoji picked from a list.
-- **Managing from another device** (the grown-up's phone or computer) needs somewhere to sync: see
-  "The family database" below. **Push notifications are not built**; they would be a further step
-  (a function that sends them) and need the owner's go-ahead.
+- **Managing from another device** (the grown-up's phone or computer) works through the family
+  account: see "The family database" below. **Push notifications are not built**; they would be a
+  further step (a function that sends them) and need the owner's go-ahead.
 
 ## The family database (Supabase) - the owner's decision, November 2026
 
@@ -163,11 +178,10 @@ The owner created a small Supabase project of their own so that a grown-up can m
 and expectations (with pictures) from their own phone or computer, check chore photos there, and see
 his points. His detailed play history stays on the device.
 
-- **State of the work:** the database side exists (`supabase/migrations/`). The app side (sign-in in
-  the parent area, sync, pictures) is the next piece of work; until it lands the app does not talk to
-  the database at all.
+- **State of the work:** both sides are built. Nothing talks to the database until a grown-up signs
+  in (parent area, Settings, "Family account"); a device that is not signed in behaves exactly as before.
 - **Project:** `https://kfgtrroainxuoqfncdgf.supabase.co`. The app uses only the *publishable* key
-  (`sb_publishable_...`, safe to commit; it goes in the client code when the app side is built) plus
+  (`sb_publishable_...`, safe to commit; it is in `src/family/config.js`) plus
   the family's own sign-in. **Never** commit or ask for the database password, a connection string or
   a secret / service_role key. This repository is public.
 - **Model: one family = one account; the device he plays on stays the source of truth.**
@@ -183,8 +197,39 @@ his points. His detailed play history stays on the device.
 - **Changing the database:** add a new file in `supabase/migrations/` (never edit one that has been
   applied). `bash tools/db/check.sh` applies all migrations to a throw-away local Postgres with a
   stand-in for Supabase's roles and storage tables, and checks who can read and write what - run it
-  before every change. The owner linked the repository to the project: migrations are applied by
-  Supabase when they reach `main`.
+  before every change. The owner linked the repository to the project: migrations are meant to be
+  applied by Supabase when they reach `main` (that needs "Deploy to production" switched on in the
+  project's GitHub integration) - afterwards, check that the change really is there
+  (`GET /rest/v1/<table>` stops answering `PGRST205`); pasting the file into the SQL editor also works.
+- **The app side** (`src/family/`, no library - a few `fetch` calls with time limits):
+  `sync.js` runs "rounds". The **player** round (he plays here): reads who the player device is, carries
+  out waiting commands with `act()` (fetching a picture a command brings first), sends new pictures and
+  deletes unused ones, publishes `snapshot(state)` (`shape.js`: the lists, points, what he is owed,
+  pending chores, today's ticks and a few totals - never the PIN, settings or play history), then ticks
+  the commands off - in that order, so a grown-up's device never sees "carried out" without the result.
+  The **manager** round (a grown-up's device): sends its queued commands in order, asks which were
+  carried out, then reads the snapshot; what it shows is the snapshot with its own waiting commands on
+  top (`viewOf`), so a change shows at once. Rounds run after a change (debounced), when the app comes
+  to the front, about once a minute on his device and while a grown-up's parent area is open - never
+  during a mission. Failures are silent for him; the panel in Settings says how the account is doing.
+- What a device remembers about the account (the sign-in, its role, the queue, which commands it has
+  carried out) is its own localStorage record `lwm.family.v1` - **never inside the save**, so a backup
+  never contains a sign-in. Signing out forgets it; his save is never touched by signing in or out.
+- Only one device is the player (`family_state.player_device`). Choosing "He plays on this device"
+  elsewhere asks first; the old one then steps back to a grown-up's device and its own game is untouched.
+- Pictures are named by their id in the family's folder. Ids and everything else read from the
+  database are untrusted: ids are checked against a pattern before they go into an address, and
+  `stateFrom()` rebuilds the lists defensively.
+- **Project settings the owner chooses in the Supabase dashboard** (not in this repository):
+  Authentication, Email: "Confirm email" off (or the confirmation link's Site URL set to the game's
+  address); once the family account exists, "Allow new users to sign up" off, so nobody else can
+  make an account in the project (they could never see the family's rows, but they do not belong there).
+- **Testing it:** `tests/unit/family.test.mjs` runs two devices against `tests/e2e/family-server.cjs`
+  (the same addresses, status codes and error bodies as the real services, answered from memory);
+  scenario 23 of `tests/e2e/run.cjs` clicks through it with two browsers (`?family=http://127.0.0.1:<port>`
+  points the app at the stand-in - honoured only when the app itself runs on this computer).
+  `NODE_USE_ENV_PROXY=1 node tests/e2e/live-family.mjs --yes` tries the real project with a throw-away
+  account that it deletes again; it refuses to run while new accounts need an email confirmation.
 - In Claude Code cloud sessions the `learn-with-me` environment allows the project's address.
 
 ## iPad / web-app constraints (learned the hard way - keep these)

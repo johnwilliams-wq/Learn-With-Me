@@ -63,6 +63,20 @@ export function collectRewards(state, now = new Date()) {
 export const owed = (state) => state.rewards.earned.filter((e) => !e.given);
 
 /**
+ * A grown-up has handed a reward over. `which` names it by its id; when that is not known here
+ * (it was pressed on another device, before that device had heard the id), by what it was won
+ * for: { src, ref, day }. Returns the entry, or null when there is nothing to mark.
+ */
+export function markGiven(state, which = {}) {
+  const earned = state.rewards.earned;
+  const e = earned.find((x) => x.id === which.id)
+    || earned.find((x) => !x.given && x.src === which.src && x.ref === which.ref && (x.src === 'tier' || x.day === which.day));
+  if (!e || e.given) return null;
+  e.given = true;
+  return e;
+}
+
+/**
  * Where a chore stands for him right now:
  *   'open'      he can do it        'pending'  sent, waiting for a grown-up
  *   'approved'  done for this period 'rejected' sent back - he can try again (entry.note says why)
@@ -187,11 +201,19 @@ export function cleanItem(kind, raw = {}) {
   return out;
 }
 
-/** A grown-up adds a reward, a chore or an expectation. Returns the new item (null without a title). */
+/**
+ * A grown-up adds a reward, a chore or an expectation. Returns the new item (null without a title).
+ * When it was typed on another device (the family account), that device has already chosen the
+ * id (raw.id), so both devices mean the same thing by it; the same one arriving twice is added once.
+ */
 export function addItem(state, kind, raw, now = new Date()) {
-  const item = { id: uid(), ...cleanItem(kind, raw) };
+  const list = LISTS[kind](state);
+  const id = typeof raw?.id === 'string' && /^[a-z0-9]{6,24}$/.test(raw.id) ? raw.id : uid();
+  const had = list.find((x) => x.id === id);
+  if (had) return had;
+  const item = { id, ...cleanItem(kind, raw) };
   if (!item.title) return null;
-  LISTS[kind](state).push(item);
+  list.push(item);
   if (kind === 'daily' || kind === 'tier') collectRewards(state, now); // one he has already reached is his straight away
   return item;
 }

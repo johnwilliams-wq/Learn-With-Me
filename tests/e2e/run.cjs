@@ -1215,6 +1215,169 @@ scenario('22 a grown-up edits rewards, chores and expectations (name, descriptio
 });
 
 // ---------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------
+scenario('23 family account: a grown-up signs in on their own device and manages his rewards, chores and expectations from there', async (t) => {
+  const fam = await require('./family-server.cjs').startFamilyServer(); // a stand-in for the family database
+  t.cleanup(() => fam.close());
+  const query = `fast=1&nosw=1&family=${encodeURIComponent(fam.url)}`;
+  const png = fs.readFileSync(path.join(H.ROOT, 'assets', 'icons', 'icon-192.png'));
+  const rowOf = (page, title) => page.locator(`.admin-row:not([data-earned]):has(b:text-is("${title}"))`);
+  const round = (page) => page.evaluate(() => globalThis.__lwm.family.sync());
+  const status = (page) => page.evaluate(() => globalThis.__lwm.family.status());
+  const refused = (line) => /Failed to load resource/.test(line) && /status of 40[01]/.test(line) && line.includes(fam.url); // a wrong password, a sign-in that ran out
+  const folder = () => [...fam.db.objects.keys()].map((k) => k.split('/')[1]);
+
+  // --- the device he plays on: a few things already on it
+  const his = await t.open({ query, state: { flags: { welcomed: true }, xp: 463,
+    rewards: { daily: [{ id: 'daily0001', title: 'Game time', icon: '🎮', note: '', missions: 2 }], tiers: [{ id: 'tier00001', title: 'Trampoline park', icon: '🏆', note: '', points: 800, photo: null }] },
+    chores: { list: [{ id: 'chore0001', title: 'Make your bed', icon: '🛏️', note: '', points: 20, repeat: 'daily', reward: '' }] },
+    expectations: { list: [{ id: 'expect001', title: 'Brush your teeth', icon: '🦷', note: '' }] } } });
+  his.log.tolerate = refused;
+  const ipad = his.page;
+  await toMap(ipad);
+  await H.openParent(ipad);
+  await H.openTab(ipad, 'settings');
+  await ipad.waitForSelector('[data-family="out"]');
+  await sleep(600);
+  t.check(fam.requests.length === 0, `nothing may be sent before a grown-up signs in (sent: ${fam.requests.join(', ')})`);
+
+  // --- creating the account: what is typed is checked first
+  const form = '[data-form="family"]';
+  await ipad.click(`${form} [data-act="create"]`);
+  t.check(/email address/i.test(await ipad.textContent(`${form} .form-msg`)), 'an empty form should ask for the email address');
+  await ipad.fill(`${form} input[type="email"]`, 'family@example.com');
+  await ipad.fill(`${form} input[type="password"]`, 'short');
+  await ipad.click(`${form} [data-act="create"]`);
+  t.check(/at least 8/.test(await ipad.textContent(`${form} .form-msg`)), 'a short password should be refused with a reason');
+  t.check(fam.requests.length === 0, 'and nothing sent yet');
+  await ipad.fill(`${form} input[type="password"]`, 'correct horse battery');
+  await ipad.click(`${form} [data-act="create"]`);
+  await ipad.waitForSelector('[data-family="choose"]');
+  await ipad.click('[data-family="choose"] [data-role="player"]');
+  await ipad.waitForSelector('[data-family="player"] .family-state[data-state="ok"]');
+  t.check(fam.db.family_state.length === 1 && fam.db.family_state[0].data.rewards.tiers[0].title === 'Trampoline park', 'his device should have reported its lists to the family account');
+  t.check(!JSON.stringify(fam.db.family_state[0].data).includes('"hash"') && !('trials' in fam.db.family_state[0].data), 'neither the PIN nor his play history may be sent');
+  const saved = await ipad.evaluate(() => localStorage.getItem('lwm.state.v1'));
+  t.check(!saved.includes('at-') && !saved.includes('refresh_token'), 'the sign-in must not be stored inside his save (it would end up in a backup)');
+
+  // --- a grown-up's own phone, with a game of its own on it
+  const mine = await t.open({ query, viewport: { width: 414, height: 820 }, state: { flags: { welcomed: true }, rewards: { daily: [{ id: 'own000001', title: 'Typed on the phone', icon: '🎁', note: '', missions: 3 }] } } });
+  mine.log.tolerate = refused;
+  const phone = mine.page;
+  await toMap(phone);
+  await H.openParent(phone, '135790');
+  await H.openTab(phone, 'settings');
+  await phone.fill(`${form} input[type="email"]`, 'family@example.com');
+  await phone.fill(`${form} input[type="password"]`, 'not the password');
+  await phone.click(`${form} button[type="submit"]`);
+  await phone.waitForFunction((sel) => /do not go together/.test(document.querySelector(sel)?.textContent || ''), `${form} .form-msg`);
+  t.check((await phone.inputValue(`${form} input[type="email"]`)) === 'family@example.com', 'a wrong password should leave what was typed');
+  await phone.fill(`${form} input[type="password"]`, 'correct horse battery');
+  await phone.click(`${form} button[type="submit"]`);
+  await phone.waitForSelector('[data-family="choose"]');
+  await phone.click('[data-family="choose"] [data-role="manager"]');
+  await phone.waitForSelector('[data-family="manager"] .family-state[data-state="ok"]');
+
+  await H.openTab(phone, 'rewards');
+  await phone.waitForSelector('[data-note="family"]');
+  await rowOf(phone, 'Trampoline park').waitFor();
+  t.check((await rowOf(phone, 'Game time').count()) === 1 && (await rowOf(phone, 'Typed on the phone').count()) === 0, 'the phone should show HIS rewards, not the ones typed into its own game');
+  t.check(/463 points/.test(await phone.textContent('.parent-body')), 'the phone should show his points');
+
+  // a new reward with a picture, typed on the phone
+  await phone.fill('[data-form="tier"] input[type="text"]', 'New mount');
+  await phone.fill('[data-form="tier"] input[type="number"]', '400');
+  const [chooser] = await Promise.all([phone.waitForEvent('filechooser', { timeout: 5000 }), phone.click('[data-form="tier"] [data-act="picture"]')]);
+  await chooser.setFiles({ name: 'mount.png', mimeType: 'image/png', buffer: png });
+  await phone.waitForSelector('[data-form="tier"] .pic-preview.has-photo img');
+  await phone.click('[data-form="tier"] button[type="submit"]');
+  await rowOf(phone, 'New mount').locator('.emoji.has-photo img').waitFor();
+  t.check((await phone.locator('[data-earned]').count()) === 1, 'he has the points for it already: it should wait under "To hand out" at once');
+  // a change, a new chore, and one of today's expectations ticked for him
+  await rowOf(phone, 'Game time').locator('[data-act="edit"]').click();
+  await phone.fill('[data-edit="daily"] input[type="text"]', 'Thirty minutes of game time');
+  await phone.click('[data-edit="daily"] button[type="submit"]');
+  await rowOf(phone, 'Thirty minutes of game time').waitFor();
+  await H.openTab(phone, 'chores');
+  await phone.fill('[data-form="chore"] input[type="text"] >> nth=0', 'Feed the dog');
+  await phone.click('[data-form="chore"] button[type="submit"]');
+  await rowOf(phone, 'Feed the dog').waitFor();
+  await H.openTab(phone, 'expectations');
+  await phone.click('[data-expect="expect001"] [data-act="ok"]');
+  await phone.waitForSelector('[data-expect="expect001"] [data-act="undo"]');
+  t.check((await getState(phone)).rewards.tiers.length === 0 && (await getState(phone)).chores.list.length === 0, 'none of this may land in the phone\'s own game');
+  await round(phone);
+  t.check(fam.db.commands.length === 4 && fam.db.commands.every((c) => !c.applied_at), `four changes should be waiting for his device (${fam.db.commands.length})`);
+
+  // --- his device carries them out the next time it is in touch
+  await ipad.click('[data-family="player"] [data-act="sync"]');
+  await ipad.waitForFunction(() => globalThis.__lwm.store.get().rewards.tiers.length === 2);
+  let s = await getState(ipad);
+  const mount = s.rewards.tiers.find((x) => x.title === 'New mount');
+  t.check(!!mount && mount.points === 400 && typeof mount.photo === 'string', `the new reward should be on his device: ${JSON.stringify(mount)}`);
+  t.check(s.rewards.daily[0].title === 'Thirty minutes of game time' && s.chores.list.some((c) => c.title === 'Feed the dog'), 'so should the change and the new chore');
+  t.check(s.expectations.days[Object.keys(s.expectations.days)[0]]?.expect001 === 'done', 'and the expectation ticked from the phone');
+  t.check(s.rewards.earned.some((e) => e.ref === mount.id && !e.given), 'the reward he had already reached should be his');
+  await sleep(300);
+  t.check(fam.db.commands.every((c) => c.applied_at && c.outcome === 'done'), 'every change should be ticked off as carried out');
+  await H.openTab(ipad, 'rewards');
+  await rowOf(ipad, 'New mount').locator('.emoji.has-photo img').waitFor({ timeout: 5000 }).catch(() => t.check(false, 'the picture chosen on the phone should show on his device'));
+  // what he sees: his mine, with the new reward and its picture
+  await ipad.click('.screen.parent .sub-head .icon-btn');
+  await ipad.waitForSelector('.screen.map');
+  await ipad.click('[data-open="rewards"]');
+  await ipad.waitForSelector('.mine .rung');
+  t.check((await ipad.locator('.mine .rung').count()) === 2, 'his mine should have both rewards');
+  await ipad.locator('.mine .rung:has-text("New mount") .rung-pic.has-photo img').waitFor({ timeout: 5000 }).catch(() => t.check(false, 'he should see the picture in his mine'));
+
+  // --- he does a chore with a photo; the grown-up checks it on the phone
+  await ipad.click('.screen.rewards .sub-head .icon-btn');
+  await ipad.waitForSelector('.screen.map');
+  await ipad.click('[data-open="chores"]');
+  const [camera] = await Promise.all([ipad.waitForEvent('filechooser', { timeout: 5000 }), ipad.click('.chore-row:has-text("Make your bed") [data-act="done"]')]);
+  await camera.setFiles({ name: 'bed.png', mimeType: 'image/png', buffer: png });
+  await ipad.click('.photo-panel [data-act="send"]');
+  await ipad.waitForFunction(() => globalThis.__lwm.store.get().chores.log.length === 1);
+  await round(ipad);
+  t.check(folder().length === 2, `the chore photo should be in the family's folder beside the reward picture (${folder().length} files)`);
+  await H.openTab(phone, 'chores'); // looking at a tab fetches what is new
+  await phone.waitForSelector('.check-card img', { timeout: 8000 }).catch(() => t.check(false, 'the grown-up should see his chore photo on the phone'));
+  t.check(/Chores\s*1/.test(await phone.textContent('.tab[data-tab="chores"]')), 'the Chores tab should show that one is waiting');
+  fam.expireTokens(); // the sign-in runs out now and then: both devices must renew it by themselves
+  await phone.click('.check-card [data-act="approve"]');
+  await round(phone);
+  await round(ipad);
+  s = await getState(ipad);
+  t.check(s.xp === 483 && s.chores.log[0].status === 'approved' && !s.chores.log[0].photo, `approving on the phone should give him the points: xp ${s.xp}, ${JSON.stringify(s.chores.log[0])}`);
+  t.check(folder().length === 1 && folder()[0] === mount.photo, 'the checked chore photo should be gone from the family\'s folder');
+  t.check((await status(phone)).signedIn && (await status(ipad)).signedIn && !(await status(ipad)).error, 'both devices should still be signed in');
+
+  // --- handing out, from the phone; news arrives in the open parent area by itself
+  await H.openTab(phone, 'rewards');
+  await phone.waitForSelector('[data-earned] [data-act="given"]');
+  await phone.click('[data-earned] [data-act="given"]');
+  await round(phone);
+  await round(ipad);
+  t.check((await getState(ipad)).rewards.earned.every((e) => e.given), 'a reward marked as given on the phone should be given on his device');
+  await ipad.evaluate(() => globalThis.__lwm.family.desk().run('add', { kind: 'tier', item: { title: 'Added on his device', points: 5000 } }));
+  await round(ipad);
+  await round(phone);
+  await rowOf(phone, 'Added on his device').waitFor({ timeout: 5000 }).catch(() => t.check(false, 'something added on his device should appear on the phone without touching it'));
+
+  // --- signing out on the phone: its own game again; his device carries on, also after a restart
+  await H.openTab(phone, 'settings');
+  await phone.click('[data-act="sign-out"]');
+  await phone.waitForSelector('[data-family="out"]');
+  await H.openTab(phone, 'rewards');
+  t.check((await rowOf(phone, 'Typed on the phone').count()) === 1 && (await rowOf(phone, 'New mount').count()) === 0 && (await phone.locator('[data-note="family"]').count()) === 0,
+    'signed out, the phone should show its own game again');
+  await ipad.reload();
+  await ipad.waitForSelector('.screen.title .btn-huge');
+  t.check((await status(ipad)).role === 'player', 'his device should still be signed in after the app is opened again');
+  s = await getState(ipad);
+  t.check(s.xp === 483 && s.rewards.tiers.length === 3, 'and nothing of his should have changed by that');
+});
+
 async function main() {
   const filters = process.argv.slice(2).map((a) => a.toLowerCase());
   const wanted = scenarios.filter((s) => !filters.length || filters.some((f) => (/^\d+$/.test(f) ? s.name.startsWith(f.padStart(2, '0')) : s.name.toLowerCase().includes(f))));

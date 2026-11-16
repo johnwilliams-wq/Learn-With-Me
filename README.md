@@ -51,15 +51,38 @@ choose a PIN; after that it always asks for the PIN. Inside:
   and star ore. He can scroll down to look ahead, and tap any reward to see it large and hear it.
   When he wins one it waits under "To hand out" until you mark it given.
 - **Chores** - add chores with points. He taps Done and takes a photo; you approve it or send it back.
-  Approved chores add to the same points total as missions. Photos never leave the iPad.
+  Approved chores add to the same points total as missions. Without a family account (below) photos
+  never leave the iPad.
 - **Expectations** - a daily list of things he is simply expected to do (no points, no rewards). He
   ticks them off each day; until they are all done his rewards stay locked. You can require your own OK.
 - Everything in those three lists can be changed later with **Edit**, and can carry a short description
   that he sees and that the speaker button reads to him.
-- **Settings** - slower voice, daily limit, backup, erase, change PIN.
+- **Settings** - slower voice, daily limit, backup, erase, change PIN, and the family account.
 
-Everything stays on the device. There are no accounts, ads or tracking. Because there is no server,
-the game cannot send push notifications: badges inside the app show what is waiting.
+There are no ads and no tracking, and by default everything stays on the device. The game cannot send
+push notifications: badges inside the app show what is waiting.
+
+### Family account (optional)
+
+With a family account you can manage his rewards, chores and expectations from your own phone or
+computer, check his chore photos there, and see his points. Without it nothing leaves the device.
+
+1. **On the device he plays on**: For parents, Settings, Family account. Type an email address and a
+   password and press *Create the family account*, then choose **He plays on this device**.
+2. **On your own phone or computer**: open the game, For parents (choose a PIN for that device),
+   Settings, Family account. *Sign in* with the same email address and password and choose
+   **It is my own device**. Its Rewards, Chores and Expectations tabs now show HIS lists.
+
+What you add or change on your own device is carried out on his device the next time the game is open
+there with internet (it looks about once a minute); what he earns shows on yours the next time you look.
+His device stays the one source of truth: his progress lives there, and only what you need to manage
+things is shared - the lists you typed, his points, what he is owed, chores waiting for a check, and
+their photos (kept in a private folder and deleted once you approve the chore or send it back). His
+play history, the PIN and the settings never leave his device. *Delete the family account* (under
+More) removes everything that is stored online.
+
+The account lives in a small database that belongs to the family (see CLAUDE.md, "The family
+database"). Anyone who uses this code for their own child needs their own.
 
 This is practice, not a test or a diagnosis.
 
@@ -72,6 +95,7 @@ npm test                  # unit tests
 npm run build             # regenerate level data and the offline file list
 npm run serve             # http://localhost:8080
 node tests/e2e/smoke.cjs  # browser smoke test (needs Playwright + Chromium)
+bash tools/db/check.sh    # the family database's rules, on a throw-away local Postgres
 ```
 
 See [CLAUDE.md](CLAUDE.md) for the architecture, the design rules, and how to add levels and voice clips.

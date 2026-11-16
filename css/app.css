@@ -478,3 +478,17 @@ svg { display: block; width: 100%; height: 100%; }
 .starter summary { cursor: pointer; font-weight: 800; font-size: 20px; padding: 18px 0; list-style-position: inside; }
 .starter summary small { color: var(--ink-dim); font-weight: 600; font-size: 15px; }
 .starter[open] summary { margin-bottom: 0; }
+
+/* the family account (parent area, Settings) and the note above his lists on a grown-up's own device */
+.family-form { border-top: 0; padding-top: 0; }
+.family-form .field { flex: 1 1 240px; }
+.family-form .field input { width: 100%; }
+.family-form .form-buttons { flex-wrap: wrap; }
+.family-roles, .family-foot { justify-content: flex-start; }
+.family-roles .btn { flex: 1; min-width: 220px; }
+.family-state { font-weight: 700; }
+.family-state[data-state]:not([data-state='ok']) { color: var(--gold); }
+.family-more summary { cursor: pointer; padding: 10px 0; color: var(--ink-dim); font-size: 16px; min-height: 44px; }
+.family-more .btn { min-height: 52px; font-size: 17px; }
+.family-note { display: grid; gap: 6px; }
+.family-note p { margin: 0; font-weight: 600; font-size: 16px; line-height: 1.4; }

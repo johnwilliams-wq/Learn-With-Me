@@ -1,7 +1,10 @@
-// Pictures, kept on this device only (IndexedDB) and shrunk to a sensible size.
+// Pictures, kept on this device (IndexedDB) and shrunk to a sensible size.
 //   chore photos      deleted as soon as a grown-up has approved the chore or sent it back
-//   reward pictures   chosen by a grown-up for a step of the reward ladder; kept until the
+//   reward pictures   chosen by a grown-up for a reward in the mine; kept until the
 //                     reward is removed or gets another picture
+// With a family account (src/family/sync.js) the same pictures are also kept in the family's
+// private folder, so a grown-up's own device can show them: a picture that is not on this
+// device is then looked for there (setPhotoSource).
 
 const DB = 'lwm-photos';
 const STORE = 'photos';
@@ -30,19 +33,37 @@ async function run(mode, fn) {
   }
 }
 
-/** Save a picture; returns its id. (Stored as raw bytes, which every Safari version handles.) */
-export async function savePhoto(blob) {
-  const id = `p${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+let elsewhere = null;
+/** Where to look for a picture that is not on this device: (id) => a Blob, or null. */
+export const setPhotoSource = (fn) => { elsewhere = fn; };
+
+/** Save a picture; returns its id. (Stored as raw bytes, which every Safari version handles.) `id`: keep it under this one. */
+export async function savePhoto(blob, id = `p${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`) {
   const data = await blob.arrayBuffer();
   await run('readwrite', (s) => s.put({ type: blob.type || 'image/jpeg', data, t: Date.now() }, id));
   return id;
 }
 
-export async function loadPhoto(id) {
+/** A picture that is on this device (null when it is not). */
+export async function localPhoto(id) {
   if (!id) return null;
   try {
     const rec = await run('readonly', (s) => s.get(id));
     return rec ? new Blob([rec.data], { type: rec.type }) : null;
+  } catch {
+    return null;
+  }
+}
+
+export const hasPhoto = async (id) => !!(await localPhoto(id));
+
+/** A picture, from this device or - with a family account - from the family's folder. */
+export async function loadPhoto(id) {
+  if (!id) return null;
+  const here = await localPhoto(id);
+  if (here || !elsewhere) return here;
+  try {
+    return (await elsewhere(id)) || null;
   } catch {
     return null;
   }

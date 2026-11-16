@@ -15,6 +15,10 @@ import { parentScreen } from './screens/parent.js';
 import { rewardsScreen } from './screens/rewards.js';
 import { choresScreen } from './screens/chores.js';
 import { expectationsScreen } from './screens/expectations.js';
+import { familyConfig } from './family/config.js';
+import { createApi } from './family/api.js';
+import { createFamily, createBox } from './family/sync.js';
+import { savePhoto, localPhoto, hasPhoto, deletePhoto, setPhotoSource } from './core/photos.js';
 
 export const VERSION = '1.0.0';
 
@@ -27,6 +31,18 @@ const store = createStore(sandbox ? memoryBackend() : undefined);
 const audio = createAudio();
 const sfx = createSfx();
 if (params.has('fast')) audio.setFast(true); // automated tests only: skip real playback
+
+// The optional family account (src/family/sync.js). Until a grown-up signs in, in the parent
+// area, it does nothing at all and nothing leaves this device.
+const box = createBox(sandbox ? memoryBackend() : undefined);
+const family = createFamily({
+  store,
+  box,
+  api: createApi({ ...familyConfig(), session: { get: () => box.get().session, set: (s) => box.set((b) => { b.session = s; }) } }),
+  photos: { load: localPhoto, save: savePhoto, has: hasPhoto, delete: deletePhoto },
+  screen: () => ctx.debug.screen,
+});
+setPhotoSource(family.picture);
 
 const screens = {
   title: titleScreen,
@@ -43,6 +59,7 @@ const screens = {
 const ctx = {
   version: VERSION,
   store,
+  family,
   audio,
   sfx,
   voice: null,
@@ -158,4 +175,15 @@ async function warmAudio() {
   } catch { /* best effort */ }
 }
 
-boot().then(() => setTimeout(warmAudio, 5000));
+// --- the family account: keep in step while the app is in front ---------------
+// The device he plays on reports after every change and looks for what grown-ups asked for;
+// a grown-up's own device only looks while its parent area is open.
+const inStep = () => family.status().role === 'player' || ctx.debug.screen === 'parent';
+store.subscribe(() => family.kick('change'));
+document.addEventListener('visibilitychange', () => { if (!document.hidden && inStep()) family.kick('look'); });
+setInterval(() => { if (!document.hidden && inStep()) family.kick('tick'); }, 30000);
+
+boot().then(() => {
+  setTimeout(warmAudio, 5000);
+  if (inStep()) family.kick('look');
+});

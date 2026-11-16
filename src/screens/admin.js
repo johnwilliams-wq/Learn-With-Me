@@ -1,11 +1,16 @@
 // Grown-ups' tools: the PIN lock, and the Rewards, Chores and Expectations tabs of the parent area.
 // Everything in those lists can be added, changed (Edit) and removed; each thing has a name, an
-// optional description, and - for the steps of the reward ladder - an optional picture.
+// optional description, and - for the rewards in the mine - an optional picture.
+//
+// The tabs never touch the save themselves: they read and change the lists through a "desk"
+// (ctx.family.desk(), src/family/sync.js). On the device he plays on that is this device's own
+// save; on a grown-up's own device, signed in to the family account, it is HIS device from afar.
+// The PIN is always this device's own.
 
 import { h, mount } from '../core/dom.js';
 import { hasPin, setPin, checkPin, validPin } from '../core/pin.js';
-import { owed, decideChore, expectationsToday, setExpectation, addItem, editItem, removeItem, tidy, TITLE_MAX, NOTE_MAX, REWARD_ICONS, CHORE_ICONS, EXPECT_ICONS } from '../rewards/logic.js';
-import { loadPhoto, savePhoto, deletePhoto, shrinkImage, showPhoto } from '../core/photos.js';
+import { owed, expectationsToday, tidy, TITLE_MAX, NOTE_MAX, REWARD_ICONS, CHORE_ICONS, EXPECT_ICONS } from '../rewards/logic.js';
+import { loadPhoto, shrinkImage, showPhoto } from '../core/photos.js';
 
 // ------------------------------------------------------------------ PIN lock
 
@@ -101,13 +106,13 @@ export function changePinButton(ctx, body, back) {
 const field = (label, control, cls = '') => h('label', { class: `field${cls ? ` ${cls}` : ''}` }, h('span', {}, label), control);
 function text(placeholder, max = TITLE_MAX, value = '') {
   const input = h('input', { type: 'text', maxlength: max, placeholder, autocomplete: 'off' });
-  input.value = value;
+  input.value = input.dataset.was = value; // "was": so the parent area can tell a box someone is typing in from an untouched one
   return input;
 }
 const number = (value, min = 1, max = 100000) => h('input', { type: 'number', inputmode: 'numeric', min, max, value, required: true });
 function noteBox(value = '') {
   const box = h('textarea', { rows: 2, maxlength: NOTE_MAX, placeholder: 'optional - a few more words. He sees them, and the speaker button reads them to him.' });
-  box.value = value;
+  box.value = box.dataset.was = value;
   return box;
 }
 function iconPicker(icons, value) {
@@ -150,7 +155,7 @@ export const closeForms = () => { editing = null; freePictures(); };
  * a form that is abandoned.
  */
 function itemForm(ctx, kind, item, redraw) {
-  const { store } = ctx;
+  const desk = ctx.family.desk();
   const K = KINDS[kind];
   const icon = iconPicker(K.icons, item?.icon);
   const title = text(K.example, TITLE_MAX, item?.title || '');
@@ -211,7 +216,7 @@ function itemForm(ctx, kind, item, redraw) {
       item ? h('button', { class: 'btn', type: 'button', dataset: { act: 'cancel' }, onclick: () => { editing = null; redraw(); } }, 'Cancel') : null),
     msg);
   // He has won this reward and it has not been handed over: a new name changes what he is owed.
-  if (item && (kind === 'daily' || kind === 'tier') && owed(store.get()).some((e) => e.src === kind && e.ref === item.id)) {
+  if (item && (kind === 'daily' || kind === 'tier') && owed(desk.state()).some((e) => e.src === kind && e.ref === item.id)) {
     msg.textContent = 'He has won this one and it is waiting to be handed out. A new name changes what you owe him - for a new reward, add a new one instead.';
   }
   form.addEventListener('submit', async (ev) => {
@@ -228,19 +233,19 @@ function itemForm(ctx, kind, item, redraw) {
       raw.photo = null;
       if (picture) {
         try {
-          raw.photo = await savePhoto(picture);
+          raw.photo = await desk.savePhoto(picture);
         } catch {
           // nothing is changed (his old picture stays too): the grown-up decides what to do
-          msg.textContent = 'The picture could not be saved on this device. Remove it or try another one.';
+          msg.textContent = desk.remote
+            ? 'The picture could not be sent to the family account. Check the internet connection and try again, or remove the picture.'
+            : 'The picture could not be saved on this device. Remove it or try another one.';
           busy = false;
           return;
         }
       }
     }
-    let done = null;
-    store.update((st) => { done = item ? editItem(st, kind, item.id, raw) : addItem(st, kind, raw); });
-    if (!done) deletePhoto(raw.photo); // nothing was saved (the item is gone): do not leave the new picture behind
-    else if (done.oldPhoto) deletePhoto(done.oldPhoto);
+    // (A picture that ends up unused - the old one, or a new one for a thing that has gone - is deleted by the desk.)
+    desk.run(item ? 'edit' : 'add', item ? { kind, id: item.id, item: raw } : { kind, item: raw });
     if (preview) URL.revokeObjectURL(preview);
     editing = null;
     redraw();
@@ -250,7 +255,7 @@ function itemForm(ctx, kind, item, redraw) {
 
 /** One row of a list: picture, name, a line about it, its description, then Edit and Delete. */
 function itemRow(ctx, kind, item, about, redraw, { before = [], dataset = {} } = {}) {
-  const { store } = ctx;
+  const desk = ctx.family.desk();
   if (editing === `${kind}:${item.id}`) return h('div', { class: 'admin-row is-open', dataset }, itemForm(ctx, kind, item, redraw));
   const pic = h('span', { class: 'emoji' }, item.icon);
   if (item.photo) showing.push(showPhoto(pic, item.photo, ''));
@@ -260,9 +265,7 @@ function itemRow(ctx, kind, item, about, redraw, { before = [], dataset = {} } =
     before,
     h('button', { class: 'btn btn-chip', type: 'button', dataset: { act: 'edit' }, 'aria-label': `Edit ${item.title}`, onclick: () => { editing = `${kind}:${item.id}`; redraw(); } }, 'Edit'),
     h('button', { class: 'btn btn-chip btn-danger', type: 'button', dataset: { act: 'delete' }, 'aria-label': `Delete ${item.title}`, onclick: () => {
-      let photo = null;
-      store.update((st) => { photo = removeItem(st, kind, item.id); });
-      deletePhoto(photo);
+      desk.run('remove', { kind, id: item.id });
       redraw();
     } }, 'Delete'));
 }
@@ -270,8 +273,8 @@ function itemRow(ctx, kind, item, about, redraw, { before = [], dataset = {} } =
 // ------------------------------------------------------------------ Rewards tab
 
 export function rewardsTab(ctx, refresh) {
-  const { store } = ctx;
-  const s = store.get();
+  const desk = ctx.family.desk();
+  const s = desk.state();
   const R = s.rewards;
   const waiting = owed(s);
   const sourceName = { daily: 'daily reward', tier: 'mine reward', chore: 'chore reward' };
@@ -279,7 +282,7 @@ export function rewardsTab(ctx, refresh) {
 
   const repeat = h('input', { type: 'checkbox' });
   repeat.checked = !!R.countPerfected;
-  repeat.addEventListener('change', () => store.update((st) => { st.rewards.countPerfected = repeat.checked; }));
+  repeat.addEventListener('change', () => desk.run('option', { name: 'countPerfected', on: repeat.checked }));
 
   const ex = expectationsToday(s);
   return [
@@ -291,8 +294,8 @@ export function rewardsTab(ctx, refresh) {
         ? h('div', { class: 'admin-list' }, waiting.map((e) => h('div', { class: 'admin-row', dataset: { earned: e.id } },
             h('span', { class: 'emoji' }, e.icon || '🎁'),
             h('span', { class: 'grow' }, h('b', {}, e.title), h('small', {}, `${sourceName[e.src] || 'reward'}, won ${when(e.t)}`)),
-            h('button', { class: 'btn btn-chip btn-primary', type: 'button', onclick: () => {
-              store.update((st) => { const x = st.rewards.earned.find((y) => y.id === e.id); if (x) x.given = true; });
+            h('button', { class: 'btn btn-chip btn-primary', type: 'button', dataset: { act: 'given' }, onclick: () => {
+              desk.run('given', { id: e.id });
               refresh();
             } }, 'Given'))))
         : h('p', { class: 'fine' }, 'Nothing waiting. When he wins a reward it appears here until you mark it as given.')),
@@ -317,8 +320,8 @@ export function rewardsTab(ctx, refresh) {
 // ------------------------------------------------------------------ Chores tab
 
 export function choresTab(ctx, refresh) {
-  const { store } = ctx;
-  const s = store.get();
+  const desk = ctx.family.desk();
+  const s = desk.state();
   const C = s.chores;
   const pending = C.log.filter((e) => e.status === 'pending');
   const recent = C.log.filter((e) => e.status !== 'pending').slice(-12).reverse();
@@ -326,16 +329,17 @@ export function choresTab(ctx, refresh) {
   freePictures();
 
   const decide = (entry, approve, note) => {
-    let photo = null;
-    store.update((st) => { ({ photo } = decideChore(st, entry.id, approve, note)); });
-    deletePhoto(photo);
+    desk.run('chore', { id: entry.id, ok: approve, note }); // his photo is deleted with it
     for (const u of urls) URL.revokeObjectURL(u);
     refresh();
   };
 
   const needPhoto = h('input', { type: 'checkbox' });
   needPhoto.checked = C.requirePhoto !== false;
-  needPhoto.addEventListener('change', () => store.update((st) => { st.chores.requirePhoto = needPhoto.checked; }));
+  needPhoto.addEventListener('change', () => desk.run('option', { name: 'requirePhoto', on: needPhoto.checked }));
+  const photoNote = ctx.family.status().signedIn
+    ? 'With the family account his photos are also kept in your private family folder, so you can check them from your own device. They are deleted once you approve or send the chore back.'
+    : 'Photos stay on this device and are deleted once you approve or send the chore back.';
   const repeatName = { daily: 'every day', weekly: 'once a week', once: 'one time' };
 
   return [
@@ -366,7 +370,7 @@ export function choresTab(ctx, refresh) {
       h('div', { class: 'admin-list' }, C.list.map((c) =>
         itemRow(ctx, 'chore', c, `${c.points} points, ${repeatName[c.repeat]}${c.reward ? `, plus: ${c.reward}` : ''}`, refresh))),
       itemForm(ctx, 'chore', null, refresh),
-      h('label', { class: 'setting' }, needPhoto, h('span', {}, h('b', {}, 'Ask for a photo'), h('small', {}, 'Photos stay on this iPad and are deleted once you approve or send the chore back.')))),
+      h('label', { class: 'setting' }, needPhoto, h('span', {}, h('b', {}, 'Ask for a photo'), h('small', {}, photoNote)))),
     section('Recently checked',
       recent.length
         ? h('ul', { class: 'obs' }, recent.map((e) => h('li', {}, `${e.icon} ${e.title} - ${e.status === 'approved' ? `approved, +${e.points} points` : `sent back${e.note ? `: ${e.note}` : ''}`} (${when(e.decided || e.t)})`)))
@@ -377,14 +381,14 @@ export function choresTab(ctx, refresh) {
 // ------------------------------------------------------------------ Expectations tab
 
 export function expectationsTab(ctx, refresh) {
-  const { store } = ctx;
-  const s = store.get();
+  const desk = ctx.family.desk();
+  const s = desk.state();
   const ex = expectationsToday(s);
   freePictures();
   const confirm = h('input', { type: 'checkbox' });
   confirm.checked = !!s.expectations.confirm;
-  confirm.addEventListener('change', () => { store.update((st) => { st.expectations.confirm = confirm.checked; }); refresh(); });
-  const set = (id, done) => () => { store.update((st) => setExpectation(st, id, done)); refresh(); };
+  confirm.addEventListener('change', () => { desk.run('option', { name: 'confirm', on: confirm.checked }); refresh(); });
+  const set = (id, done) => () => { desk.run('expect', { id, done }); refresh(); };
   const stateName = { open: 'not done yet', pending: 'he says it is done', done: 'done' };
 
   return [
