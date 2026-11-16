@@ -1,0 +1,362 @@
+{
+ "voice": "af_heart",
+ "lines": {
+  "tip-w1l1": {
+   "text": "Welcome to Rookie Camp! Here is how it works. Tap the ear when you are ready to listen. Wait until I finish talking. Then tap what I said.",
+   "file": "fcb46234d064.mp3"
+  },
+  "tip-w1l2": {
+   "text": "Now listen for the color. There is more than one, so the color tells you which.",
+   "file": "d6cb7ec5d67d.mp3"
+  },
+  "tip-w1l3": {
+   "text": "This time, listen for big or small.",
+   "file": "b520cbc7b3b1.mp3"
+  },
+  "tip-w1l4": {
+   "text": "Two clues now: the color, and the thing. You need both.",
+   "file": "ccf10f775500.mp3"
+  },
+  "tip-w1l5": {
+   "text": "Three clues! The size, the color, and the thing. Here is a trick: say it back in your head.",
+   "file": "3844274e2bf0.mp3"
+  },
+  "tip-w1l6": {
+   "text": "Sometimes the important part comes at the very end. Keep listening until I stop talking.",
+   "file": "791d39be86c0.mp3"
+  },
+  "tip-w1l7": {
+   "text": "Camp challenge! A mix of everything you have learned so far.",
+   "file": "6e70ee27f6f2.mp3"
+  },
+  "tip-w2l1": {
+   "text": "Now there are two things to do. Tap them in the order I say, then press Done. If you slip, press Undo.",
+   "file": "a40a7560a126.mp3"
+  },
+  "tip-w2l2": {
+   "text": "Two steps, with colors. Here is a trick: make a picture of each one in your mind.",
+   "file": "e4e1bc291337.mp3"
+  },
+  "tip-w2l3": {
+   "text": "Listen for how many times.",
+   "file": "41f1a8b48957.mp3"
+  },
+  "tip-w2l4": {
+   "text": "This time the cards are hidden while I talk. Listen first, hold it in your head, then look.",
+   "file": "0051fdf15f8e.mp3"
+  },
+  "tip-w2l5": {
+   "text": "Two steps, and the cards are hidden. Say them back in your head while you wait.",
+   "file": "42ef4865bfe0.mp3"
+  },
+  "tip-w2l6": {
+   "text": "Trail boss! Two steps, counting, and hidden cards, all mixed up.",
+   "file": "707a7def2113.mp3"
+  },
+  "tip-w3l1": {
+   "text": "Tricky word alert: NOT. Listen for the one I do not want.",
+   "file": "a0a0c828e882.mp3"
+  },
+  "tip-w3l2": {
+   "text": "When I say ALL, tap every one that fits. Then press Done.",
+   "file": "933790ceb186.mp3"
+  },
+  "tip-w3l3": {
+   "text": "Tricky word: EXCEPT. Except means: leave that one out.",
+   "file": "d4103729b7f5.mp3"
+  },
+  "tip-w3l4": {
+   "text": "Now listen for where things are. Next to. Between. In the middle.",
+   "file": "cc2557ddfc4c.mp3"
+  },
+  "tip-w3l5": {
+   "text": "Left and right. Here is a trick: hold up your hands. Your left hand makes the letter L.",
+   "file": "39c9316ef462.mp3"
+  },
+  "tip-w3l6": {
+   "text": "Woods challenge! Not, all, except, and where. Listen for the tricky word.",
+   "file": "41e19e57d297.mp3"
+  },
+  "tip-w4l1": {
+   "text": "First, then, last. These words tell you the order.",
+   "file": "32f1233ea5b5.mp3"
+  },
+  "tip-w4l2": {
+   "text": "Listen for the word AFTER.",
+   "file": "d185cc7dfe16.mp3"
+  },
+  "tip-w4l3": {
+   "text": "Listen for the word BEFORE.",
+   "file": "2f88f2a505fb.mp3"
+  },
+  "tip-w4l4": {
+   "text": "Careful! Sometimes I say the second thing first. Listen for BEFORE, and think: what happens first?",
+   "file": "95abcb82226c.mp3"
+  },
+  "tip-w4l5": {
+   "text": "Careful again. Listen for AFTER, and think: what happens first?",
+   "file": "0ab5285a3041.mp3"
+  },
+  "tip-w4l6": {
+   "text": "Tower boss! Before and after, all mixed up. Think: what happens first?",
+   "file": "0590d0992cbd.mp3"
+  },
+  "tip-w5l1": {
+   "text": "Captain’s rule: only do it if I say, Captain says. If I do not say Captain says, tap the hand.",
+   "file": "0ed16647b9fa.mp3"
+  },
+  "tip-w5l2": {
+   "text": "Sneaky pirates are giving orders too. Only listen to the captain.",
+   "file": "9eee5449b0e8.mp3"
+  },
+  "tip-w5l3": {
+   "text": "IF is a tricky word. If it is true, do it. If it is not true, tap the hand.",
+   "file": "2ba4d80c6faa.mp3"
+  },
+  "tip-w5l4": {
+   "text": "Now there are two choices. If it is true, do the first thing. If not, do the second.",
+   "file": "0e3ce614d9ce.mp3"
+  },
+  "tip-w5l5": {
+   "text": "Sometimes I change my mind at the end. Wait until I have completely finished.",
+   "file": "9e9c80ec8ee8.mp3"
+  },
+  "tip-w5l6": {
+   "text": "Captain’s test! Wait for every word before you move.",
+   "file": "a5aef63b419f.mp3"
+  },
+  "tip-w6l1": {
+   "text": "Three steps now. Here is a trick: count them on your fingers as you listen.",
+   "file": "d604d82b919d.mp3"
+  },
+  "tip-w6l2": {
+   "text": "Three steps, with colors. Say them back in your head.",
+   "file": "a840cf2ed7e5.mp3"
+  },
+  "tip-w6l3": {
+   "text": "Three steps, and the cards are hidden. You can do it. Picture each one.",
+   "file": "f0d004e4dc5a.mp3"
+  },
+  "tip-w6l4": {
+   "text": "Four steps! Take a breath, listen all the way, and go one at a time.",
+   "file": "bd84dd7986b8.mp3"
+  },
+  "tip-w6l5": {
+   "text": "Mountain boss! Long instructions. Breathe, listen, and go one step at a time.",
+   "file": "c2658c77581c.mp3"
+  },
+  "tip-w7l1": {
+   "text": "Story time! Listen to the story, then answer my question.",
+   "file": "91054483639c.mp3"
+  },
+  "tip-w7l2": {
+   "text": "These stories are a bit longer. Make a movie in your mind as you listen.",
+   "file": "97a1b95c8756.mp3"
+  },
+  "tip-w7l3": {
+   "text": "Listen for what happens first, next, and last.",
+   "file": "642df368e83e.mp3"
+  },
+  "tip-w7l4": {
+   "text": "Be a detective. I will not tell you the answer. Use the clues to work it out.",
+   "file": "cce0e6cd5a14.mp3"
+  },
+  "tip-w7l5": {
+   "text": "Cave boss! Stories and clues. Make a movie in your mind.",
+   "file": "c9e6728d2a26.mp3"
+  },
+  "tip-w8l1": {
+   "text": "Hero’s Trial, part one. Clues, steps, and tricky words.",
+   "file": "37ca7afee34e.mp3"
+  },
+  "tip-w8l2": {
+   "text": "Hero’s Trial, part two. Wait for the real order, and remember every step.",
+   "file": "236b86647885.mp3"
+  },
+  "tip-w8l3": {
+   "text": "The Legend Run. Everything you have learned. You are ready.",
+   "file": "e52928379695.mp3"
+  },
+  "hello-first": {
+   "text": "Hi! I am Blip, your guide. Let’s train your super listening. Tap the glowing level to start.",
+   "file": "66901401c613.mp3"
+  },
+  "hello-back-1": {
+   "text": "Welcome back, hero!",
+   "file": "0b2ba386e44d.mp3"
+  },
+  "hello-back-2": {
+   "text": "Good to see you! Ready to train?",
+   "file": "7395a478df47.mp3"
+  },
+  "hello-back-3": {
+   "text": "Blip here. Let’s go!",
+   "file": "99a18949404d.mp3"
+  },
+  "good-1": {
+   "text": "Yes!",
+   "file": "3e333e69e59e.mp3"
+  },
+  "good-2": {
+   "text": "You got it!",
+   "file": "0a2c1c0b38d6.mp3"
+  },
+  "good-3": {
+   "text": "Great listening!",
+   "file": "8d759d3cb2a3.mp3"
+  },
+  "good-4": {
+   "text": "Nice! You listened to every word.",
+   "file": "3d6d7d3b0472.mp3"
+  },
+  "good-5": {
+   "text": "That’s it!",
+   "file": "ed63769ba358.mp3"
+  },
+  "good-6": {
+   "text": "Boom! Nailed it.",
+   "file": "fca761fef652.mp3"
+  },
+  "good-7": {
+   "text": "Perfect.",
+   "file": "02ff47fcb0cd.mp3"
+  },
+  "good-8": {
+   "text": "You listened all the way to the end. Nice!",
+   "file": "eafeb73ccea6.mp3"
+  },
+  "goodWait-1": {
+   "text": "Great waiting!",
+   "file": "9271559c4ca3.mp3"
+  },
+  "goodWait-2": {
+   "text": "You waited until I finished. Nice!",
+   "file": "678b004de029.mp3"
+  },
+  "goodWait-3": {
+   "text": "That is how a captain listens.",
+   "file": "6bffdcf6a68d.mp3"
+  },
+  "gotIt-1": {
+   "text": "That’s it. You got it!",
+   "file": "2d60706dcc1e.mp3"
+  },
+  "gotIt-2": {
+   "text": "Nice. Listening again worked.",
+   "file": "96273778b706.mp3"
+  },
+  "gotIt-3": {
+   "text": "There you go!",
+   "file": "c2788c1603ff.mp3"
+  },
+  "retry-1": {
+   "text": "Not quite. Listen one more time.",
+   "file": "4aab4355d250.mp3"
+  },
+  "retry-2": {
+   "text": "Almost. Let’s hear it again.",
+   "file": "1bbe8f106129.mp3"
+  },
+  "retry-3": {
+   "text": "Hmm, not yet. Listen again.",
+   "file": "dcec2195a6d5.mp3"
+  },
+  "retry-4": {
+   "text": "So close! One more listen.",
+   "file": "fc7e78a5a6aa.mp3"
+  },
+  "watch-1": {
+   "text": "Watch. Here is how it goes.",
+   "file": "f36b1426ed74.mp3"
+  },
+  "watch-2": {
+   "text": "Let me show you this one.",
+   "file": "cd44110a29c8.mp3"
+  },
+  "watch-3": {
+   "text": "That was a tricky one. Watch me.",
+   "file": "25d68cf62d89.mp3"
+  },
+  "result3-1": {
+   "text": "Perfect listening! Three stars!",
+   "file": "e5a4f278206a.mp3"
+  },
+  "result3-2": {
+   "text": "Wow! Every single one on the first listen!",
+   "file": "1a7a8b0eb3fc.mp3"
+  },
+  "result2-1": {
+   "text": "Great listening! Two stars!",
+   "file": "beb5ec4cdb93.mp3"
+  },
+  "result2-2": {
+   "text": "Awesome job. You earned two stars!",
+   "file": "11b043cdaf15.mp3"
+  },
+  "result1-1": {
+   "text": "Mission complete! Every mission makes your listening stronger.",
+   "file": "58d631548642.mp3"
+  },
+  "result1-2": {
+   "text": "You finished the mission! Want to try for two stars?",
+   "file": "29ae86523822.mp3"
+  },
+  "enough-1": {
+   "text": "Great training today! This is a good place to stop. See you next time!",
+   "file": "658f74501097.mp3"
+  }
+ },
+ "pools": {
+  "hello-back": [
+   "hello-back-1",
+   "hello-back-2",
+   "hello-back-3"
+  ],
+  "good": [
+   "good-1",
+   "good-2",
+   "good-3",
+   "good-4",
+   "good-5",
+   "good-6",
+   "good-7",
+   "good-8"
+  ],
+  "goodWait": [
+   "goodWait-1",
+   "goodWait-2",
+   "goodWait-3"
+  ],
+  "gotIt": [
+   "gotIt-1",
+   "gotIt-2",
+   "gotIt-3"
+  ],
+  "retry": [
+   "retry-1",
+   "retry-2",
+   "retry-3",
+   "retry-4"
+  ],
+  "watch": [
+   "watch-1",
+   "watch-2",
+   "watch-3"
+  ],
+  "result3": [
+   "result3-1",
+   "result3-2"
+  ],
+  "result2": [
+   "result2-1",
+   "result2-2"
+  ],
+  "result1": [
+   "result1-1",
+   "result1-2"
+  ],
+  "enough": [
+   "enough-1"
+  ]
+ }
+}

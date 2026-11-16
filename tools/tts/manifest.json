@@ -1,0 +1,5276 @@
+[
+ {
+  "file": "assets/audio/listening/001ec485f3cd.mp3",
+  "text": "Tap the blue flag.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/008f6a2f2c4b.mp3",
+  "text": "The dragon says, tap the orange shield.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/009c2a91dc92.mp3",
+  "text": "Tap the small map.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/00a3af6bd46d.mp3",
+  "text": "Captain says, tap the key, then the torch.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/00b4f0fdff2d.mp3",
+  "text": "Tap the orange book.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/01347237f492.mp3",
+  "text": "First, tap the hat. Then, tap the drum. Last, tap the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/018930a1ca72.mp3",
+  "text": "Tap the big coin.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/01c7dcc61886.mp3",
+  "text": "Find the yellow boot and tap it.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/01d6c8e72a3f.mp3",
+  "text": "Tap the egg first. Then tap the ring.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/021cdaeee900.mp3",
+  "text": "Tap everything that is blue.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/0230ac4df7a5.mp3",
+  "text": "If you see a fox, tap the boot.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/02976def7b8f.mp3",
+  "text": "Before tapping the gem, tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/02b9ffd843bd.mp3",
+  "text": "Tap the drum next to the key.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/02ed4ef945f9.mp3",
+  "text": "Tap the hat, then the gem.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/0307474b6766.mp3",
+  "text": "Tap the orange mushroom.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/03853713bdd8.mp3",
+  "text": "Tap the red potion, then the red boot.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/03cd79f0acbf.mp3",
+  "text": "Tap everything except the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/044588fdafa1.mp3",
+  "text": "Dash the fox picked up a key. Then she picked up a gem. Last, she picked up an egg. What did Dash pick up last?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/046c489402d6.mp3",
+  "text": "Hoot the owl picked up a book. Then she picked up a shield. Last, she picked up a star. What did Hoot pick up first?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/04a24f18ae73.mp3",
+  "text": "Zip the robot had a blue bell and a purple shield. He gave the bell to a friend. What does Zip have now?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/04f4bc59ef7f.mp3",
+  "text": "Tap the one that is not a boot.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/051abadcac20.mp3",
+  "text": "On the shelf there was a book, a torch, and a shield. A cat knocked the torch onto the floor. What fell on the floor?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/05367dfbd513.mp3",
+  "text": "Tap the coin two times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/05702f0d2ec9.mp3",
+  "text": "Captain says, tap the orange chest.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/05da175ca610.mp3",
+  "text": "Sir Clank the knight found a red map on the beach. What did Sir Clank find?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/05f44c3afb1f.mp3",
+  "text": "Tap the flag, then the book, then the key, then the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/064306a6cce6.mp3",
+  "text": "Before tapping the shield, tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/064dc34e6957.mp3",
+  "text": "Tap the egg, then the drum, then the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/067f9f1f3471.mp3",
+  "text": "Before you tap the sword, tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/06bae41801ee.mp3",
+  "text": "Tap the flag, then the boot.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/071468817a5b.mp3",
+  "text": "If you see an owl, tap the flag. If not, tap the key.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/07cfc2508061.mp3",
+  "text": "Tap the blue drum, then the blue ring.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/089da636dbd3.mp3",
+  "text": "It rained all night long. Now, tap the red bell.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/08b7fed0db51.mp3",
+  "text": "Tap the key after you tap the boot.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/08e264cf865d.mp3",
+  "text": "The knight is going to practice fighting. What should he swing?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/091984bb453a.mp3",
+  "text": "Tap all the bells except the green one.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/097407bedfb3.mp3",
+  "text": "Tap the small coin.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/099b91a2678c.mp3",
+  "text": "Tap the red ring.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/09afd5f158f1.mp3",
+  "text": "If you see a wizard, tap the star.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/09b59e7ddc72.mp3",
+  "text": "Tap the coin. The small one.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/0a580d147a5f.mp3",
+  "text": "Tap the big flag.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/0a95e21acf05.mp3",
+  "text": "First, tap the crown. Next, the torch. Then, the chest. Last, the mushroom.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/0bb964a0a046.mp3",
+  "text": "Find the yellow gem and tap it.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/0c0dcfd7aa8d.mp3",
+  "text": "Tap the ring. The purple one.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/0c1408b7b172.mp3",
+  "text": "Tap the orange drum.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/0c4b9bf94640.mp3",
+  "text": "Tap the shield on the left.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/0c9b2df31431.mp3",
+  "text": "Tap the crown.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/0cd33b0fc6a3.mp3",
+  "text": "First, tap the hat. Then, tap the egg. Last, tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/0ce68f8104da.mp3",
+  "text": "The wizard says, tap the purple mushroom.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/0d35345a4323.mp3",
+  "text": "First, tap the gem. Then, tap the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/0de32d2d9095.mp3",
+  "text": "Find the purple coin and tap it.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/0ded34df18c4.mp3",
+  "text": "Tap all the purple things except the gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/0e4b3f6cf323.mp3",
+  "text": "Tap the egg. Then tap the drum.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/0e61a09a9469.mp3",
+  "text": "Tap the rocket. The big one.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/0ebd1b830b68.mp3",
+  "text": "Pounce the cat went to the market. She bought an orange hat, and then she went home for lunch. What did Pounce buy?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/10d439cbc482.mp3",
+  "text": "Tap the book that is not red.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/10ed0c50f9f6.mp3",
+  "text": "Tap the chest three times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/1187bd60f041.mp3",
+  "text": "Tap the boot first, and the key last.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/120d1de61845.mp3",
+  "text": "Tap the hat, then tap the boot.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/12219de8ea63.mp3",
+  "text": "Tap the green sword, then the purple crown.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/122243e175c8.mp3",
+  "text": "First, tap the rocket. Next, the shield. Then, the egg. Last, the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/1251de5cabfe.mp3",
+  "text": "Tap all the bells.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/1389ba4da2f5.mp3",
+  "text": "Tap the crown before the mushroom.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/14303afd7364.mp3",
+  "text": "Tap the flag, then the coin, then the egg.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/15af979b5734.mp3",
+  "text": "Tap the chest. After that, tap the rocket.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/167c6154913e.mp3",
+  "text": "Captain says, tap the blue sword.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/168bfce5e009.mp3",
+  "text": "If you see a ghost, tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/16fe852c48e0.mp3",
+  "text": "Tap the green star, then the orange shield.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/177940265dac.mp3",
+  "text": "Tap everything except the ring.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/1782f27dc2bb.mp3",
+  "text": "Tap the gem. The purple one.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/17b073c6fa32.mp3",
+  "text": "If you see a dragon, tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/17be77ff4d3d.mp3",
+  "text": "Tap the orange sword.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/1803024871b5.mp3",
+  "text": "Captain says, tap the yellow shield.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/1846e8f76812.mp3",
+  "text": "Tap the star three times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/191d2f41fb95.mp3",
+  "text": "Tap all the yellow things except the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/19948e05b3e0.mp3",
+  "text": "Tap the one to the left of the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/1a1e4f137628.mp3",
+  "text": "Tap the blue flag, then the yellow coin, then the yellow key.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/1a504ef0e4f6.mp3",
+  "text": "Zip the robot picked up a bell. Then he picked up a ring. Last, he picked up a potion. What did Zip pick up last?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/1ab105ec7db2.mp3",
+  "text": "Zip the robot hid the star inside the chest. Where is the star?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/1ad2a58bba58.mp3",
+  "text": "Tap all the yellow things except the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/1b16adf0a7b1.mp3",
+  "text": "Tap the drum that is not yellow.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/1b56d4d8f0f0.mp3",
+  "text": "Tap the map, then the potion, then the coin, then the bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/1b725e4e4fcb.mp3",
+  "text": "Tap the book, then tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/1ce19c8a8227.mp3",
+  "text": "Tap the ring, then tap the egg.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/1ce2098f02e0.mp3",
+  "text": "Hoot the owl found a green shield behind the castle. What did Hoot find?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/1dc3671e217a.mp3",
+  "text": "Tap the big purple crown.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/1e2435eed8f8.mp3",
+  "text": "Tap the mushroom. Oh, and tap the chest too.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/1e284e8986e0.mp3",
+  "text": "Zip the robot is carrying a shield to the castle. What is Zip carrying?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/1ec84f6d1de6.mp3",
+  "text": "First, tap the map. Next, the mushroom. Then, the hat. Last, the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/1fb575426b32.mp3",
+  "text": "Tap the key. No, wait! Tap the shield instead.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/203f16b34dc8.mp3",
+  "text": "Tap the rocket before you tap the sword.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/20479ac2cde7.mp3",
+  "text": "Dash the fox picked up an egg. Then she picked up a drum. Last, she picked up a map. Tap them in the same order.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/20700b2867fd.mp3",
+  "text": "Tap the flag after the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/20d7b4bd0e2a.mp3",
+  "text": "Tap the orange flag.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/21985ac165bc.mp3",
+  "text": "Tap the drum after you tap the rocket.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/22671383a80f.mp3",
+  "text": "Tap the potion that is not orange.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/22ca624c163b.mp3",
+  "text": "Tap the gem, then tap the rocket two times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/22df243f882a.mp3",
+  "text": "The pirate says, tap the orange shield.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/2321c1b13cd1.mp3",
+  "text": "Tap the small bell.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/23c045a35010.mp3",
+  "text": "Tap the star, then the book, then the rocket.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/24099e357633.mp3",
+  "text": "Tap the blue rocket.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/2493cf1b779a.mp3",
+  "text": "Tap the map.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/24c07105310c.mp3",
+  "text": "First, tap the crown. Then, tap the star. Last, tap the boot.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/24cb50ba4e56.mp3",
+  "text": "Tap the blue hat, then the orange map, then the orange gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/251bf0b237f1.mp3",
+  "text": "Tap the potion, then the hat, then the shield, then the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/256ac9febc4d.mp3",
+  "text": "Tap the one to the right of the bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/2593cd666934.mp3",
+  "text": "Before tapping the boot, tap the star.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/25b98d7e4037.mp3",
+  "text": "Find the purple book and tap it.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/25c570315b28.mp3",
+  "text": "Tap the one that is not a chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/263dd1b546d9.mp3",
+  "text": "Tap the red rocket.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/26fd077cca34.mp3",
+  "text": "Zip the robot picked up a coin. Then he picked up an egg. Last, he picked up a potion. What did Zip pick up right after the coin?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/2766f4a64a3f.mp3",
+  "text": "After you tap the map, tap the sword.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/28dfb99b1754.mp3",
+  "text": "Tap the coin, but only if it is orange.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/28efe9aed360.mp3",
+  "text": "Tap the big green rocket.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/28f438691529.mp3",
+  "text": "Tap the sword. The orange one.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/28f4cbb883e3.mp3",
+  "text": "Tap the orange heart.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/290bb721993b.mp3",
+  "text": "Dash the fox found a blue key under the bridge. What did Dash find?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/29ad9fcfc866.mp3",
+  "text": "Tap the key before you tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/29b1bb1cb3c5.mp3",
+  "text": "Tap the star before the coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/2a39ce25b46f.mp3",
+  "text": "First, tap the mushroom. Next, the egg. Then, the boot. Last, the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/2a51173ce38a.mp3",
+  "text": "On the shelf there was a book, a rocket, and a ring. A cat knocked the ring onto the floor. What fell on the floor?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/2a80d99c06ae.mp3",
+  "text": "Zazz the wizard is carrying a key to the castle. What is Zazz carrying?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/2b3eabdb517f.mp3",
+  "text": "Tap the yellow map.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/2b4e17ae25d5.mp3",
+  "text": "Tap the gem, then the heart, then the map, then the mushroom.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/2bb184cc48c8.mp3",
+  "text": "Tap the big potion.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/2bb407f47c9b.mp3",
+  "text": "Tap the potion, then the mushroom, then the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/2bbc212b82e2.mp3",
+  "text": "First, tap the map. Then, tap the book. Last, tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/2cd74f91081b.mp3",
+  "text": "Tap the crown on the right.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/2cf41a3bc8e2.mp3",
+  "text": "The dragon gave a ring to the fox. Who gave the ring away?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/2d2bfaa51f63.mp3",
+  "text": "Tap the orange heart, then the green bell.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/2d593e73865d.mp3",
+  "text": "First, tap the crown. Then, tap the sword.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/2dd3874a3538.mp3",
+  "text": "Tap the green key.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/2e81d723e394.mp3",
+  "text": "Tap the purple book, then the green key.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/2eb89fe843b7.mp3",
+  "text": "Tap all the red drums.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/2f0444151e2b.mp3",
+  "text": "Tap the small blue star.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/2f3bb7056e09.mp3",
+  "text": "Tap the one between the potion and the egg.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/2fc5de2afbf4.mp3",
+  "text": "Hoot the owl picked up a flag. Then she picked up a book. Last, she picked up a mushroom. What did Hoot pick up right before the mushroom?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/3064467941b3.mp3",
+  "text": "Tap the blue ring.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/30b5b734bd26.mp3",
+  "text": "Tap the orange crown.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/30ce1f6702fc.mp3",
+  "text": "Tap the red bell.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/3109a7aa85fd.mp3",
+  "text": "Tap the purple egg, then the red coin.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/317021c1ee23.mp3",
+  "text": "Tap the small key.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/3173ab450366.mp3",
+  "text": "Tap the small ring.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/31c96b3d6f92.mp3",
+  "text": "Tap the green bell, then the purple book, then the blue crown.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/320c25a14d9b.mp3",
+  "text": "Tap the one to the left of the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/3237a6b64990.mp3",
+  "text": "Tap the red hat, then the orange drum, then the purple mushroom.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/32562420ecbb.mp3",
+  "text": "Before you tap the bell, tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/329172840882.mp3",
+  "text": "If there is a heart, tap the bell. If not, tap the book.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/3292b4504580.mp3",
+  "text": "The cat gave a book to the knight. Who gave the book away?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/32ad8259f6ee.mp3",
+  "text": "Tap the blue potion, then the blue torch.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/3321f318ffce.mp3",
+  "text": "Tap the boot. Oh, and tap the mushroom too.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/3416ff474fe6.mp3",
+  "text": "Tap the drum. After that, tap the crown.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/346e5d582487.mp3",
+  "text": "If the flag is yellow, tap it.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/3559ef6ee226.mp3",
+  "text": "Tap the flag. Then tap the sword.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/35cebae2a5c8.mp3",
+  "text": "Tap the small red hat.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/365d6f420f1a.mp3",
+  "text": "Tap the big bell.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/368b171baea1.mp3",
+  "text": "If there is a potion, tap the flag. If not, tap the key.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/369ab7349d49.mp3",
+  "text": "Tap the one between the mushroom and the heart.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/36bd4dd42677.mp3",
+  "text": "Tap the map on the right.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/36ea58bf0f27.mp3",
+  "text": "Tap the boot. Then tap the key.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/37abc05951ae.mp3",
+  "text": "Tap the drum that is not orange.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/37baf6adf200.mp3",
+  "text": "Tap the boot, but only if it is orange.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/37e17d843411.mp3",
+  "text": "Tap the purple ring, then the orange crown.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/385e424bd6fb.mp3",
+  "text": "Tap the key in the bottom row.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/38788ffb561a.mp3",
+  "text": "Tap the shield next to the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/389f35f860cb.mp3",
+  "text": "On the shelf there was a potion, a flag, and a torch. A cat knocked the potion onto the floor. What fell on the floor?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/390785af2949.mp3",
+  "text": "Before tapping the coin, tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/39c35d7759bf.mp3",
+  "text": "Puff the dragon picked up a key. Then he picked up a shield. Last, he picked up a coin. Tap them in the same order.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/3b486fcd9e8e.mp3",
+  "text": "Tap the crown, then the shield, then the egg, then the potion.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/3b4d08fb4c8e.mp3",
+  "text": "Tap the green gem.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/3b6518f9e5d1.mp3",
+  "text": "Tap the red potion.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/3b8ffc12c505.mp3",
+  "text": "First, tap the drum. Then, tap the hat. Last, tap the book.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/3bd8e4c8556e.mp3",
+  "text": "Tap all the maps except the green one.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/3bedfa009d9c.mp3",
+  "text": "Boo the ghost picked up an egg. Then he picked up a key. Last, he picked up a torch. What did Boo pick up right before the torch?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/3c036cedd53d.mp3",
+  "text": "Tap the chest. The small one.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/3c3c0544911c.mp3",
+  "text": "Tap the drum before the bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/3c6a8f06f69a.mp3",
+  "text": "Tap the key. Oh, and tap the potion too.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/3c6b31aa857a.mp3",
+  "text": "Tap the big blue chest.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/3ca64c43f445.mp3",
+  "text": "First, tap the bell. Then, tap the potion. Last, tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/3d0a0b986f5e.mp3",
+  "text": "Tap the orange star, then the green book.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/3d1e22f820b4.mp3",
+  "text": "Tap both potions.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/3d886e959fcc.mp3",
+  "text": "Tap the yellow crown.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/3daa7ff0a9aa.mp3",
+  "text": "Dash the fox hid the key behind the shield. Where is the key?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/3dbddb8ceb0a.mp3",
+  "text": "Tap the rocket, but only if it is yellow.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/3ddad413b084.mp3",
+  "text": "Blip polished his antenna today. Now, tap the blue mushroom.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/3df384daf0d7.mp3",
+  "text": "Tap the big orange crown.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/3e5f0d3fa908.mp3",
+  "text": "Tap the purple shield.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/3f42f05de15a.mp3",
+  "text": "Tap the heart, then tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/3f8f375a5940.mp3",
+  "text": "Tap the bell.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/3fd93754a9f0.mp3",
+  "text": "If you see a cat, tap the mushroom. If not, tap the map.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/3fe4071db5ae.mp3",
+  "text": "Tap all the crowns except the purple one.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/401fd51d86bb.mp3",
+  "text": "Tap the torch. Then tap the boot.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/4042c457835c.mp3",
+  "text": "Everybody is waiting for you. Now, tap the orange bell.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/407c1df7f1ba.mp3",
+  "text": "Tap the blue chest, then the blue star, then the yellow coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/408dd0608b86.mp3",
+  "text": "If you see a fox, tap the flag. If not, tap the potion.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/40a65e17a58a.mp3",
+  "text": "Zazz the wizard picked up a gem. Then he picked up a rocket. Last, he picked up a map. What did Zazz pick up right after the gem?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/40ae1651894e.mp3",
+  "text": "Tap the flag on the left.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4194a1f06aad.mp3",
+  "text": "Tap the hat on the left.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/42e1b71ca0e5.mp3",
+  "text": "Tap the chest next to the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4508f2a9dafc.mp3",
+  "text": "Tap the blue heart, then the red key, then the purple flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/456e1d985e5c.mp3",
+  "text": "Tap the boot that is not red.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4575a0f54882.mp3",
+  "text": "Tap the blue sword.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/46964920ba99.mp3",
+  "text": "Tap the big chest.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/46fc26a8de58.mp3",
+  "text": "Tap all the shields except the red one.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/47b5c2cdcfa7.mp3",
+  "text": "Tap the rocket, but only if it is green.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/47c11953ff8c.mp3",
+  "text": "Tap the purple rocket.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/47c98faf1298.mp3",
+  "text": "Tap the green boot.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/482667339cad.mp3",
+  "text": "Tap the big rocket.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/4884bd5f99fa.mp3",
+  "text": "Dash the fox hid the ring behind the shield. Where is the ring?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/49a2547f8bd7.mp3",
+  "text": "If you see a wizard, tap the potion.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4a52b240761a.mp3",
+  "text": "Tap the key. No, wait! Tap the mushroom instead.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4a5f3c9e985e.mp3",
+  "text": "Captain says, tap the green hat.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4a69f99d9fea.mp3",
+  "text": "Tap the gem, then the key, then the ring.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4a9c47a06db7.mp3",
+  "text": "Before you tap the ring, tap the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4ae98e082b1c.mp3",
+  "text": "Captain says, tap the red torch.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4b34ea3c599e.mp3",
+  "text": "Tap the small heart.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/4b8694b00684.mp3",
+  "text": "Tap the chest, then the heart, then the bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4c23f05a719f.mp3",
+  "text": "Before you tap the sword, tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4c41b4b145aa.mp3",
+  "text": "Tap the big yellow egg.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/4cb09254ba21.mp3",
+  "text": "Tap the heart. No, wait! Tap the boot instead.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4d01a77ff717.mp3",
+  "text": "Tap the yellow map, then the purple shield, then the green gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4d191646a396.mp3",
+  "text": "Tap the flag, then the ring.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/4d68fddcc6ad.mp3",
+  "text": "Tap the key first. Then tap the shield.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4d6c6863006e.mp3",
+  "text": "Tap the drum, but only if it is purple.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4d9dfca1dcdc.mp3",
+  "text": "Tap the green chest.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/4dc7cb87d697.mp3",
+  "text": "Tap the ring, then the star.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4ddbf2db9287.mp3",
+  "text": "Tap the green gem, then the yellow flag.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/4de0fefd34b2.mp3",
+  "text": "Tap the yellow chest, then the purple mushroom.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/4df8bdca59c3.mp3",
+  "text": "If you see a robot, tap the star. If not, tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4dfa1809eda7.mp3",
+  "text": "The parrot says, tap the green key.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4e1e6d9ef2bd.mp3",
+  "text": "Tap the chest.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/4e62cde304a9.mp3",
+  "text": "Puff packed a star for the trip. Zazz packed a shield. Then they walked to the castle together. What did Puff pack?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4ee9c5987185.mp3",
+  "text": "Before you tap the hat, tap the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4f220415f5dc.mp3",
+  "text": "If there is a crown, tap the star. If not, tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4f52aa25de4b.mp3",
+  "text": "Tap the chest first, and the sword last.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4f60d811fedb.mp3",
+  "text": "After you tap the egg, tap the crown.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4fac712afe2d.mp3",
+  "text": "Tap the book. Then tap the potion.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/4fc72d6a0216.mp3",
+  "text": "Dash the fox picked up a flag. Then she picked up a drum. Last, she picked up a rocket. Tap them in the same order.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4fe7f21f1f12.mp3",
+  "text": "Tap the one that is not a book.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/4ff4c12c2172.mp3",
+  "text": "Zip packed a star for the trip. Puff packed a map. Then they walked to the castle together. What did Zip pack?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/4ff60295e870.mp3",
+  "text": "Tap the small red chest.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/515dce4a794e.mp3",
+  "text": "Tap the red boot.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/51d764fd504c.mp3",
+  "text": "On the shelf there was a potion, a shield, and an egg. A cat knocked the egg onto the floor. What fell on the floor?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/51dffb068951.mp3",
+  "text": "Captain says, tap the yellow ring.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/521178254186.mp3",
+  "text": "Tap the shield before you tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/52a296f59aeb.mp3",
+  "text": "Tap the flag before you tap the map.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/52d5a5e99254.mp3",
+  "text": "Tap the sword. After that, tap the mushroom.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/52d9825df8b1.mp3",
+  "text": "If there is a ring, tap the map. If not, tap the egg.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/5314af665e5a.mp3",
+  "text": "Tap the flag. No, wait! Tap the book instead.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/536f1909f1f5.mp3",
+  "text": "Dash the fox had a yellow hat and an orange rocket. She gave the hat to a friend. What does Dash have now?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/53dd46e49b9b.mp3",
+  "text": "Tap the shield in the top row.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/544c275034f7.mp3",
+  "text": "The dragon says, tap the green crown.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/5484b8953a3e.mp3",
+  "text": "Tap both rockets.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/54b3214d85e5.mp3",
+  "text": "Tap the rocket.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/54d774ea4656.mp3",
+  "text": "Tap the key, then tap the flag.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/550f95b278f5.mp3",
+  "text": "Before tapping the shield, tap the map.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/552bb14a81c2.mp3",
+  "text": "Tap the big blue rocket.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/55540141c019.mp3",
+  "text": "Tap the blue key, then the orange boot.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/5564a7409d41.mp3",
+  "text": "Tap the orange coin.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/560f87fa2246.mp3",
+  "text": "Tap the orange map, then the red sword.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/5650ba960049.mp3",
+  "text": "After you tap the heart, tap the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/5674bbd51545.mp3",
+  "text": "Before tapping the shield, tap the bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/56c11240c942.mp3",
+  "text": "Tap the potion. After that, tap the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/5705fc5461a0.mp3",
+  "text": "If there is a book, tap the crown. If not, tap the bell.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/586b7aed3dc2.mp3",
+  "text": "Tap the green gem, then the purple hat, then the green chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/589c46343ff5.mp3",
+  "text": "Tap the one to the right of the ring.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/597d52f8d39e.mp3",
+  "text": "Tap the boot in the top row.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/5a071022b009.mp3",
+  "text": "Tap the yellow boot.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/5a578c17c596.mp3",
+  "text": "Tap the bell two times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/5a9bfda144f8.mp3",
+  "text": "Tap the boot after the key.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/5aa288d5c145.mp3",
+  "text": "If there is an egg, tap the map. If not, tap the rocket.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/5aaddb71f511.mp3",
+  "text": "Tap the sword first, and the map last.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/5ab912503895.mp3",
+  "text": "Tap the rocket two times, then tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/5acbc7ebda93.mp3",
+  "text": "Tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/5acd56d4c3f1.mp3",
+  "text": "Tap the purple shield.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/5b373e211d0e.mp3",
+  "text": "Tap the book after the ring.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/5c281af41288.mp3",
+  "text": "Tap the egg. Then tap the book.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/5cb76fe31a86.mp3",
+  "text": "Puff the dragon picked up a hat. Then he picked up a potion. Last, he picked up a torch. What did Puff pick up first?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/5d5dcb3fa387.mp3",
+  "text": "Zazz the wizard hid the star inside the chest. Where is the star?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/5e282c21d79e.mp3",
+  "text": "Tap the hat that is not red.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/5e75eda53e28.mp3",
+  "text": "Tap both boots.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/5eaa9015911f.mp3",
+  "text": "Tap the sword before you tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/5ec4869a43f9.mp3",
+  "text": "Tap the mushroom.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/5f6f9d826d06.mp3",
+  "text": "The path up the mountain is long. Now, tap the yellow star.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/5f7fbf7861eb.mp3",
+  "text": "If the egg is purple, tap it.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/5f9108d1d679.mp3",
+  "text": "If the bell is blue, tap it.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/5fea45ec2bbb.mp3",
+  "text": "Tap the bell two times, then tap the drum.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/6046a4db12e8.mp3",
+  "text": "The prince wants to give the princess something small and shiny to wear on her finger. What is it?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/604fd957ffbf.mp3",
+  "text": "Tap the yellow book, then the red potion, then the red shield.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/606d77f2e255.mp3",
+  "text": "Tap the heart. After that, tap the ring.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/60791ef2e521.mp3",
+  "text": "Tap the torch that is not red.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/61bdb2a26a54.mp3",
+  "text": "Boo the ghost picked up a chest. Then he picked up a flag. Last, he picked up a shield. What did Boo pick up first?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/62dc8c850e72.mp3",
+  "text": "Tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/638599cccc4d.mp3",
+  "text": "Puff the dragon picked up a hat. Then he picked up a sword. Last, he picked up a gem. What did Puff pick up right before the gem?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/63b0ab4285e7.mp3",
+  "text": "Tap the orange star.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/63c37cfc42dc.mp3",
+  "text": "Tap the green crown, then the orange egg.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/63e2ae5a2135.mp3",
+  "text": "The king wants to show how much he loves his people. Which shape means love?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/6406cb528138.mp3",
+  "text": "The wizard says, tap the green key.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/650366786d81.mp3",
+  "text": "Hoot the owl found an orange potion under the bridge. What did Hoot find?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/658d218fca02.mp3",
+  "text": "First, tap the crown. Then, tap the gem. Last, tap the map.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/6594aed100c9.mp3",
+  "text": "Tap the chest, then the crown, then the key.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/663c186de089.mp3",
+  "text": "First, tap the map. Then, tap the ring. Last, tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/667edbe4478c.mp3",
+  "text": "Hoot the owl picked up a heart. Then she picked up a shield. Last, she picked up a key. What did Hoot pick up first?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/66e314958ec1.mp3",
+  "text": "The knight gave a shield to the fox. Who gave the shield away?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/677cd266f5d1.mp3",
+  "text": "Tap the potion, but only if it is yellow.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/678d7fed073e.mp3",
+  "text": "Tap the hat that is not purple.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/68491476dced.mp3",
+  "text": "Tap the bell. The green one.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/689ca2c10748.mp3",
+  "text": "Tap the sword after the ring.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/68f9a0a75e9e.mp3",
+  "text": "Tap the yellow coin, then the red drum.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/6947e7b4324c.mp3",
+  "text": "Sir Clank the knight hid the coin under the hat. Where is the coin?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/695711034cda.mp3",
+  "text": "Tap the big orange boot.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/69f6883b19ca.mp3",
+  "text": "After you tap the chest, tap the key.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/6a168d5e1a55.mp3",
+  "text": "Tap the blue map.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/6a38cbb9a9a9.mp3",
+  "text": "Tap the red flag.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/6b7fe39763ce.mp3",
+  "text": "First, tap the flag. Next, the crown. Then, the mushroom. Last, the bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/6bcb80c19065.mp3",
+  "text": "Tap the heart. Then tap the flag.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/6bf53db21a04.mp3",
+  "text": "Tap the red rocket, then the red torch.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/6c0e5cc74e73.mp3",
+  "text": "Tap the heart after you tap the star.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/6cd96087234a.mp3",
+  "text": "Tap the bell first. Then tap the mushroom.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/6cf425a0cdaf.mp3",
+  "text": "Tap the big yellow hat.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/6cf5f9bc44a1.mp3",
+  "text": "Tap the coin before you tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/6d440789da34.mp3",
+  "text": "Tap the sword first. Then tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/6d56ed0dcc9a.mp3",
+  "text": "It is very dark inside the cave. What should Zip take to help him see?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/6e457fe4e5a9.mp3",
+  "text": "Tap the green map, then the red key.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/6e96a5c8574d.mp3",
+  "text": "Wow, what a windy morning. Now, tap the blue chest.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/6e9c272fb47c.mp3",
+  "text": "Before tapping the mushroom, tap the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/6f37cfddfcdd.mp3",
+  "text": "If the torch is blue, tap it.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/6f4996b34962.mp3",
+  "text": "Captain says, tap the purple book.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/7007d0dfe7f5.mp3",
+  "text": "If the rocket is yellow, tap it.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/701ce18c73c7.mp3",
+  "text": "Tap the potion, then the chest.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/702aba6360cb.mp3",
+  "text": "Tap the egg.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/705df0ae783a.mp3",
+  "text": "Tap all the coins.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/705fec030dce.mp3",
+  "text": "Tap the potion first, and the coin last.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/70b9bae2ed98.mp3",
+  "text": "Tap the shield, then the rocket, then the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/70ff32b088c5.mp3",
+  "text": "Tap the bell. Then tap the potion.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/713e0898ed53.mp3",
+  "text": "First, tap the book. Then, tap the heart. Last, tap the key.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/718b147f8448.mp3",
+  "text": "Captain says, tap the yellow hat.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/71b249b66943.mp3",
+  "text": "Tap the orange rocket, then the orange map, then the purple hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/71b5cba71bad.mp3",
+  "text": "Boo the ghost picked up a shield. Then he picked up a rocket. Last, he picked up a key. What did Boo pick up first?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/720fb7cbd381.mp3",
+  "text": "Tap the one that is not a gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/727b2ec3a0f8.mp3",
+  "text": "First, tap the crown. Then, tap the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/72820b426d02.mp3",
+  "text": "It is time to wake up the whole castle. What makes a loud ringing sound?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/72c3b0d63ddd.mp3",
+  "text": "Tap the egg, then the gem, then the bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/72e8c810192e.mp3",
+  "text": "After you tap the star, tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/733f613bbb0b.mp3",
+  "text": "Tap the purple egg, then the purple chest.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/7350ab932ef0.mp3",
+  "text": "Tap the drum on the left.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/735a0b197dde.mp3",
+  "text": "Tap the boot first, and the chest last.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/742647a14c48.mp3",
+  "text": "Tap the key, then the flag, then the mushroom.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/74e7a85d377c.mp3",
+  "text": "First, tap the chest. Then, tap the ring. Last, tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/74feee89e9a6.mp3",
+  "text": "Tap the green crown.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/75ca4b909e54.mp3",
+  "text": "Tap the sword before the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/76093a95561d.mp3",
+  "text": "Tap the chest, then the book, then the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/767386ecacae.mp3",
+  "text": "Zazz the wizard picked up a torch. Then he picked up an egg. Last, he picked up a book. What did Zazz pick up last?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/76e2f2e3c681.mp3",
+  "text": "Tap the coin, then tap the star.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/76f2c24b7318.mp3",
+  "text": "Tap the torch, then the hat.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/77190f3ba363.mp3",
+  "text": "Tap the purple rocket.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/777a5ca5c88d.mp3",
+  "text": "Blip just woke up from a long nap. Now, tap the blue key.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/7783bec9afb9.mp3",
+  "text": "Tap the drum.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/77be4df9d920.mp3",
+  "text": "Tap the red gem, then the purple chest, then the blue map.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/77f6d97559c7.mp3",
+  "text": "Tap the egg, then the potion, then the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/782db1914d6c.mp3",
+  "text": "Tap the coin before the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/789ae892fc58.mp3",
+  "text": "Tap both coins.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/78fa07850f0b.mp3",
+  "text": "Tap the heart. The blue one.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/791e87d431a3.mp3",
+  "text": "Tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/7926d4081ce5.mp3",
+  "text": "A little bird is singing outside. Now, tap the green coin.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/7932bd819a9d.mp3",
+  "text": "Tap the one that is not a heart.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/799b68d5a5dc.mp3",
+  "text": "Tap the big heart.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/79bf02d8531d.mp3",
+  "text": "Tap the bell before you tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/7a0d45e5b072.mp3",
+  "text": "Tap the book.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/7a16f793904c.mp3",
+  "text": "First, tap the mushroom. Then, tap the egg. Last, tap the ring.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/7aa433d4cf00.mp3",
+  "text": "Hoot the owl went to the market. She bought a yellow crown, and then she went home for lunch. What did Hoot buy?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/7b2682395c24.mp3",
+  "text": "Tap the one to the right of the rocket.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/7c4b18d78a12.mp3",
+  "text": "First, tap the sword. Then, tap the shield. Last, tap the key.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/7c5579a2e3ad.mp3",
+  "text": "Tap the orange shield.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/7c6c3c246441.mp3",
+  "text": "Tap the hat first, and the book last.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/7c7d2bea57d9.mp3",
+  "text": "Tap the boot after you tap the bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/7c92c6312b02.mp3",
+  "text": "The pirate says, tap the green potion.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/7cd486626068.mp3",
+  "text": "Tap the crown, then the heart, then the map, then the ring.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/7ce9bf7cb9b1.mp3",
+  "text": "First, tap the torch. Next, the heart. Then, the crown. Last, the boot.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/7fc2343930c1.mp3",
+  "text": "If you see a robot, tap the crown.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/7fccb39b119d.mp3",
+  "text": "First, tap the mushroom. Then, tap the coin. Last, tap the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/7fe619bac90a.mp3",
+  "text": "Puff the dragon found a green drum in the cave. What did Puff find?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/80073bb33b41.mp3",
+  "text": "Find the blue ring and tap it.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/80c13111149b.mp3",
+  "text": "Tap the small orange boot.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/82292d52355a.mp3",
+  "text": "Tap the gem, but only if it is green.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/8273715c7c67.mp3",
+  "text": "Zip wants to fly all the way to the moon. What should he ride in?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/82a9d9bae8be.mp3",
+  "text": "Tap the blue gem.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/8382efd6be5c.mp3",
+  "text": "Tap the red sword.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/83dc853bd6bb.mp3",
+  "text": "Tap the coin two times, then tap the ring.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/83f71db501f2.mp3",
+  "text": "The heroes are getting ready for an adventure. Now, tap the orange crown.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/840cf3c01921.mp3",
+  "text": "Tap the yellow potion, then the orange egg, then the yellow mushroom.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/847d817f3daa.mp3",
+  "text": "If there is a gem, tap the key. If not, tap the drum.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/84b7e10ee183.mp3",
+  "text": "Boo the ghost found an orange hat in the cave. What did Boo find?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/84e2431fb87b.mp3",
+  "text": "Sir Clank the knight is carrying a shield to the castle. What is Sir Clank carrying?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/851dd1da7856.mp3",
+  "text": "Tap the torch. After that, tap the sword.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/852483e29ec4.mp3",
+  "text": "Tap the red drum.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/852de75b9b18.mp3",
+  "text": "Tap the drum, then the rocket.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/85309c10c76a.mp3",
+  "text": "Tap the heart, then the key.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/8562e14f4309.mp3",
+  "text": "Tap the book, then tap the shield.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/85983cfd61d7.mp3",
+  "text": "Tap the shield.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/87556c5597d0.mp3",
+  "text": "Tap the star that is not purple.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/880982ec28ed.mp3",
+  "text": "Tap the yellow coin, then the yellow star, then the orange potion.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/884136f850ad.mp3",
+  "text": "Tap the flag, then tap the egg two times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/88b2da2964b0.mp3",
+  "text": "Captain says, tap the green map.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/88b36a134f0c.mp3",
+  "text": "Tap the coin before the shield.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/88e8f65c736d.mp3",
+  "text": "Tap the crown two times, then tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/896dfc74ceaa.mp3",
+  "text": "First, tap the key. Then, tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/899bb2e52d4d.mp3",
+  "text": "Tap the shield after the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/89fc2e383385.mp3",
+  "text": "Tap the purple star.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/8a59540524f2.mp3",
+  "text": "Tap the coin after you tap the heart.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/8a7059d7aa12.mp3",
+  "text": "Tap the potion.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/8b4937c9b07f.mp3",
+  "text": "Tap the egg two times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/8ba6dd04b63f.mp3",
+  "text": "If you see a dragon, tap the book. If not, tap the crown.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/8c38ce36e85a.mp3",
+  "text": "Tap the egg, then tap the heart.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/8c49fe195f70.mp3",
+  "text": "If you see a dragon, tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/8cd5bbe5a2eb.mp3",
+  "text": "Captain says, tap the blue chest.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/8cd8c11a57f5.mp3",
+  "text": "Hoot the owl picked up a key. Then she picked up a mushroom. Last, she picked up a shield. What did Hoot pick up right before the shield?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/8d1299187051.mp3",
+  "text": "Tap the chest, then tap the map two times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/8d3f7e339862.mp3",
+  "text": "Tap all the red mushrooms.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/8e549f1fa397.mp3",
+  "text": "First, tap the shield. Next, the boot. Then, the key. Last, the rocket.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/8e635014d854.mp3",
+  "text": "Boo the ghost went to the market. He bought a blue mushroom, and then he went home for lunch. What did Boo buy?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/8e9122a281d3.mp3",
+  "text": "Tap the red potion.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/8ea04f27589f.mp3",
+  "text": "If the key is yellow, tap it.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/8ed03fea73b7.mp3",
+  "text": "Find the blue bell and tap it.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/8f0f3a9cfadd.mp3",
+  "text": "Tap the small mushroom.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/8f7988937dfe.mp3",
+  "text": "If you see a dragon, tap the potion.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/8f848d138e0a.mp3",
+  "text": "If there is a bell, tap the key. If not, tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/8fc68c333ce9.mp3",
+  "text": "Tap all the yellow mushrooms.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/9006d76ef732.mp3",
+  "text": "First, tap the chest. Then, tap the map. Last, tap the book.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/900e7ec071da.mp3",
+  "text": "If you see a ghost, tap the map. If not, tap the star.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/90401fbb688d.mp3",
+  "text": "Hoot the owl picked up a book. Then she picked up a coin. Last, she picked up a ring. Tap them in the same order.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/9076cae36e87.mp3",
+  "text": "Tap the key, then the drum, then the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/908f5fd4f404.mp3",
+  "text": "If there is a gem, tap the torch. If not, tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/90c35837a461.mp3",
+  "text": "Tap the gem. No, wait! Tap the chest instead.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/90dc7b1c4eca.mp3",
+  "text": "If you see a cat, tap the egg.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/913fa3e661e0.mp3",
+  "text": "The wizard is lost in the forest. What should he look at to find his way?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/92252e4f3182.mp3",
+  "text": "If the ring is green, tap it.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/923598569612.mp3",
+  "text": "Tap the yellow sword, then the red crown, then the yellow heart.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/9354c9261049.mp3",
+  "text": "On the shelf there was a key, a book, and a ring. A cat knocked the book onto the floor. What fell on the floor?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/936b7dd94da2.mp3",
+  "text": "Tap the shield that is not green.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/93795a71866d.mp3",
+  "text": "Tap the bell in the bottom row.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/93b203116648.mp3",
+  "text": "Captain says, tap the red flag.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/93ddbcf06a9d.mp3",
+  "text": "First, tap the book. Then, tap the ring. Last, tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/94011e959223.mp3",
+  "text": "Tap the egg, then the drum.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/94024b32ab4f.mp3",
+  "text": "First, tap the potion. Then, tap the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/94323581b32e.mp3",
+  "text": "Tap the heart. The yellow one.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/948aadfa3915.mp3",
+  "text": "Tap the coin before you tap the sword.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/954732926a27.mp3",
+  "text": "Tap the green flag, then the yellow potion.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/958c5eb0a865.mp3",
+  "text": "The castle is very quiet today. Now, tap the blue coin.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/95a37f8cd88a.mp3",
+  "text": "Tap the orange rocket.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/967c489e17f5.mp3",
+  "text": "Tap the egg before you tap the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/96f3033cb4b1.mp3",
+  "text": "Tap the book, then the key, then the mushroom, then the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/97312d9a7ba3.mp3",
+  "text": "Tap the yellow boot, then the blue star.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/975790da3aa8.mp3",
+  "text": "Tap the egg. After that, tap the heart.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/98313302ec6d.mp3",
+  "text": "Tap the shield two times, then tap the key.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/983768886e2a.mp3",
+  "text": "Tap the red star, then the red book, then the purple flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/9865f9d14941.mp3",
+  "text": "Tap the orange hat.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/98814f332826.mp3",
+  "text": "Tap the chest, then the egg.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/98c3b7cd5720.mp3",
+  "text": "Tap the small star.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/98f49d669a70.mp3",
+  "text": "Tap the chest, then the mushroom.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/992395a93112.mp3",
+  "text": "Zip the robot hid the gem under the hat. Where is the gem?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/997380a24e85.mp3",
+  "text": "Boo the ghost picked up a shield. Then he picked up a star. Last, he picked up a gem. What did Boo pick up right before the gem?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/99b1ffa50a9e.mp3",
+  "text": "Tap the mushroom, then tap the key.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/99c9a62a67db.mp3",
+  "text": "Tap the coin first, and the drum last.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/99cc5636ad84.mp3",
+  "text": "If you see a ghost, tap the sword. If not, tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/9a1aeab9d5e2.mp3",
+  "text": "Arrows are flying toward the knight! What should he hold up to stay safe?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/9a42384bdcdc.mp3",
+  "text": "Tap the star on the right.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/9be2cb58a332.mp3",
+  "text": "Tap the green egg.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/9c52836dbabe.mp3",
+  "text": "Tap the yellow bell, then the green rocket.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/9ca72597174f.mp3",
+  "text": "Dash wants to buy an apple at the market. What does she need to pay with?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/9ca948993883.mp3",
+  "text": "Before you tap the ring, tap the star.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/9d2877509809.mp3",
+  "text": "Captain says, tap the blue ring.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/9d511876fc0d.mp3",
+  "text": "Tap all the potions except the green one.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/9df6737bcbdd.mp3",
+  "text": "Tap the potion three times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/9df88e3dd0fb.mp3",
+  "text": "Tap the key, but only if it is blue.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/9e2ce87e9dce.mp3",
+  "text": "Tap the boot, then the map, then the star.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/9e2e632577a7.mp3",
+  "text": "Tap the torch, then the heart.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/9e7deafe829b.mp3",
+  "text": "Tap the rocket after the book.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/9e8567092409.mp3",
+  "text": "Tap the big red coin.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/9eddda87bab0.mp3",
+  "text": "Tap the torch, then the boot, then the star.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/9ef502ff7108.mp3",
+  "text": "Captain says, tap the yellow rocket.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/9f106bc4657a.mp3",
+  "text": "Tap the map that is not orange.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/9f832e449d2d.mp3",
+  "text": "Before you tap the egg, tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/a01f84bbd3f2.mp3",
+  "text": "Tap the ring.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/a1485c144f77.mp3",
+  "text": "Captain says, tap the red bell.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/a1a5e1fc55c2.mp3",
+  "text": "Tap the mushroom. After that, tap the bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/a1f876cf57fb.mp3",
+  "text": "First, tap the sword. Then, tap the shield. Last, tap the egg.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/a26714539dd3.mp3",
+  "text": "The queen is ready for the royal party. What goes on top of her head?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/a2d1f4842eb1.mp3",
+  "text": "Hoot is looking up at the night sky. What does she see twinkling?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/a30414cd4aa6.mp3",
+  "text": "Tap the sword that is not green.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/a33fad6f48b1.mp3",
+  "text": "Tap the star.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/a3749b9e6ef1.mp3",
+  "text": "Tap the small blue sword.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/a40e5d7dbb88.mp3",
+  "text": "Tap the yellow mushroom, then the green key.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/a495d3e6be39.mp3",
+  "text": "Tap the yellow flag.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/a52e75c703e6.mp3",
+  "text": "The pirates have a pile of gold to hide. What should they lock it in?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/a58899060ab2.mp3",
+  "text": "Tap the big map.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/a5da5304740a.mp3",
+  "text": "Dash the fox picked up a torch. Then she picked up a potion. Last, she picked up a heart. What did Dash pick up right after the torch?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/a60c0d0dbc82.mp3",
+  "text": "Tap everything that is purple.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/a66c03c23405.mp3",
+  "text": "Tap the red flag, then the orange drum, then the orange chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/a68919d0302e.mp3",
+  "text": "Tap the potion two times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/a6f1bbcbd7df.mp3",
+  "text": "Tap the hat first. Then tap the map.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/a71313310f36.mp3",
+  "text": "First, tap the coin. Then, tap the drum. Last, tap the key.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/a714d9e9c95c.mp3",
+  "text": "Tap the yellow boot, then the orange egg.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/a7b269343644.mp3",
+  "text": "Tap the mushroom. After that, tap the boot.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/a7b9a82fe11d.mp3",
+  "text": "Tap the ring after the potion.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/a86c7c9e7981.mp3",
+  "text": "Tap the ring on the right.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/a8a8d6f2c3d3.mp3",
+  "text": "Tap the orange map, then the purple crown, then the orange torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/a9307a6f3386.mp3",
+  "text": "Sir Clank the knight went to the market. He bought a yellow chest, and then he went home for lunch. What did Sir Clank buy?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/a94023221a32.mp3",
+  "text": "Tap everything except the star.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/aa47d75d108e.mp3",
+  "text": "Tap the ring in the top row.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/aa506b6cd4e8.mp3",
+  "text": "The cat gave a heart to the owl. Who gave the heart away?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/aa55bb63273a.mp3",
+  "text": "Tap the blue book.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/aa75302913b4.mp3",
+  "text": "Tap the hat after the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/aab82ba90a28.mp3",
+  "text": "A miner was digging and found something sparkly inside a rock. What was it?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/ab330ce01df1.mp3",
+  "text": "Tap the orange mushroom, then the purple hat, then the blue coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ab99c17834ea.mp3",
+  "text": "Tap all the orange things except the key.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/abd1f5d54555.mp3",
+  "text": "Tap the sword.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/abf4652b96a4.mp3",
+  "text": "Tap the torch on the left.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ac67355ac517.mp3",
+  "text": "Tap the rocket. Then tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/ac7c412085a4.mp3",
+  "text": "Tap the mushroom, then the heart.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/ad156ad818b2.mp3",
+  "text": "Tap the big shield.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/ad60a39807e0.mp3",
+  "text": "Tap the boot, then the shield.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/adbf5b13ae4b.mp3",
+  "text": "Blip had pancakes for breakfast. Now, tap the blue flag.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/adc6cb0996d0.mp3",
+  "text": "Tap the map that is not red.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/add1e0cb0b95.mp3",
+  "text": "Tap all the stars.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ae039bb3ab4f.mp3",
+  "text": "If there is a gem, tap the crown. If not, tap the flag.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/ae201023b014.mp3",
+  "text": "If you see an owl, tap the bell. If not, tap the flag.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/ae5ec03f35d3.mp3",
+  "text": "Tap the boot before you tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/aed733177565.mp3",
+  "text": "Tap the crown after the map.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/af24c77e4097.mp3",
+  "text": "Tap the shield next to the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/af9618da2400.mp3",
+  "text": "Tap the purple flag.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/afdd25cfa5b0.mp3",
+  "text": "Before tapping the map, tap the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/afe237bf5efe.mp3",
+  "text": "Tap the rocket before the egg.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/b0655852dbd1.mp3",
+  "text": "If the map is purple, tap it.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/b08e4a62eac4.mp3",
+  "text": "Tap the purple torch, then the green key.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/b0c7cd10815f.mp3",
+  "text": "Tap the crown. No, wait! Tap the rocket instead.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/b0f502cba344.mp3",
+  "text": "Tap the yellow coin.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/b10e03566468.mp3",
+  "text": "Tap the blue star.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/b17a9c8a7fa1.mp3",
+  "text": "Tap the big purple potion.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/b2287a70e299.mp3",
+  "text": "Sir Clank the knight picked up a sword. Then he picked up a boot. Last, he picked up a drum. What did Sir Clank pick up last?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/b233ebd8ae21.mp3",
+  "text": "Captain says, tap the red heart.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/b2c4bcaa8d91.mp3",
+  "text": "Tap the heart, then the potion.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/b304a2348858.mp3",
+  "text": "Tap the green key, then the blue mushroom.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/b3140018965a.mp3",
+  "text": "Tap the book, then the ring, then the potion, then the egg.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/b32a281e83d9.mp3",
+  "text": "Tap the key, then tap the bell.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/b3344b873aae.mp3",
+  "text": "Tap the star next to the map.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/b35bead8a184.mp3",
+  "text": "Tap the heart.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/b3b003ce2ac3.mp3",
+  "text": "Tap the shield, then the chest, then the flag, then the book.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/b42490b4d646.mp3",
+  "text": "Tap the drum three times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/b4660548184b.mp3",
+  "text": "Tap the blue crown, then the yellow flag.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/b5108506a5b6.mp3",
+  "text": "If you see a ghost, tap the drum. If not, tap the egg.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/b51272e26dcf.mp3",
+  "text": "Tap the hat, then the book, then the ring.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/b634bf8685ce.mp3",
+  "text": "First, tap the egg. Then, tap the star. Last, tap the heart.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/b6426a58ed8e.mp3",
+  "text": "Tap the star, then the heart, then the shield.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/b6bd4f9c464c.mp3",
+  "text": "Before you tap the egg, tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/b6f4042fb27e.mp3",
+  "text": "Boo packed a ring for the trip. Sir Clank packed a coin. Then they walked to the castle together. What did Boo pack?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/b79d63619b6d.mp3",
+  "text": "Tap everything except the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/b7d4e22b4c79.mp3",
+  "text": "The wizard says, tap the red gem.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/b7f033e8a8a9.mp3",
+  "text": "Zazz the wizard had a green coin and a blue torch. He gave the coin to a friend. What does Zazz have now?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/b80f34b56d64.mp3",
+  "text": "Tap the shield on the right.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/b87d17f9af08.mp3",
+  "text": "Tap the yellow ring, then the orange coin.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/b8afae6ab3d0.mp3",
+  "text": "If you see a knight, tap the drum.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/b9cfe92e8d96.mp3",
+  "text": "Captain says, tap the blue rocket.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/ba2da598b9ea.mp3",
+  "text": "Before you tap the drum, tap the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ba38f9af84e3.mp3",
+  "text": "If you see a dragon, tap the egg. If not, tap the shield.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/baec5553f17c.mp3",
+  "text": "Tap the big sword.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/bb46105b3146.mp3",
+  "text": "Tap the egg. After that, tap the book.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/bb60ebbe7182.mp3",
+  "text": "Tap all the books.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/bb6145211525.mp3",
+  "text": "If the key is purple, tap it.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/bb6ec462296c.mp3",
+  "text": "Tap the crown before the rocket.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/bb918d7d9503.mp3",
+  "text": "Before tapping the shield, tap the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/bba72ed39cb4.mp3",
+  "text": "Tap the one between the ring and the crown.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/bbb69d170374.mp3",
+  "text": "Tap the flag.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/bbd37779dbd9.mp3",
+  "text": "Tap the one to the left of the star.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/bc15121200e4.mp3",
+  "text": "Tap the drum, but only if it is blue.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/bc3c7ef2e6ee.mp3",
+  "text": "Boo packed a rocket for the trip. Zazz packed a mushroom. Then they walked to the castle together. What did Boo pack?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/bcacb4454028.mp3",
+  "text": "The dragon gave a book to the cat. Who got the book?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/bcc8b7a45e81.mp3",
+  "text": "Tap the yellow mushroom.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/bddbf8dd6bc8.mp3",
+  "text": "Captain says, tap the mushroom, then the sword.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/be72e8e3e8c1.mp3",
+  "text": "First, tap the drum. Then, tap the ring. Last, tap the key.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/be921f8174de.mp3",
+  "text": "Tap the key.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/bfe823f08065.mp3",
+  "text": "Tap the boot. No, wait! Tap the star instead.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/c004644b23fd.mp3",
+  "text": "Tap the big orange flag.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/c05adaba95cd.mp3",
+  "text": "Captain says, tap the red drum.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/c0730b8840ca.mp3",
+  "text": "Find the green hat and tap it.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/c085c74d27a7.mp3",
+  "text": "Tap the green crown.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/c0a4c25c7e6d.mp3",
+  "text": "Tap the big blue crown.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/c0d3c489b8bf.mp3",
+  "text": "First, tap the key. Then, tap the potion.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c163abd0f180.mp3",
+  "text": "Tap the orange shield, then the orange book.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/c1d8a558bac7.mp3",
+  "text": "Tap the blue hat, then the purple coin.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/c2430e297add.mp3",
+  "text": "Tap the potion, then the star, then the rocket.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c2473e405250.mp3",
+  "text": "Captain says, tap the orange book.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/c3461d56a217.mp3",
+  "text": "Tap the egg, then the flag.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/c3539a9e6eb2.mp3",
+  "text": "Tap the big key.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/c372e1b17341.mp3",
+  "text": "Tap both rings.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c395427c45b9.mp3",
+  "text": "Tap all the rings.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c42fbad181b2.mp3",
+  "text": "The team won the race, and they want to wave something high in the air. What should they wave?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/c531693ec1ca.mp3",
+  "text": "Tap the map, then tap the chest.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/c531db285a16.mp3",
+  "text": "Pounce the cat picked up a flag. Then she picked up a gem. Last, she picked up a ring. Tap them in the same order.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/c54b4026fabe.mp3",
+  "text": "Before you tap the mushroom, tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c59d0eb6cb3e.mp3",
+  "text": "Tap everything that is green.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c5cba51ec0ba.mp3",
+  "text": "Tap the gem. No, wait! Tap the torch instead.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/c5d5eb235c7c.mp3",
+  "text": "Tap the map after you tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c5ef3be05886.mp3",
+  "text": "After you tap the egg, tap the mushroom.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c60db68c9dff.mp3",
+  "text": "Tap the blue shield.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/c6656377b470.mp3",
+  "text": "Tap the hat. After that, tap the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c7170f3174fc.mp3",
+  "text": "After you tap the key, tap the egg.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c7214f93b32e.mp3",
+  "text": "Tap the star first. Then tap the book.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c7dd04501a93.mp3",
+  "text": "Tap the green key.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/c7fc4bbd85cf.mp3",
+  "text": "Tap everything except the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c809ecebb146.mp3",
+  "text": "Tap all the green mushrooms.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c815b2abfb3d.mp3",
+  "text": "Tap the yellow flag.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/c817281bef24.mp3",
+  "text": "Tap the yellow hat.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/c871591f6158.mp3",
+  "text": "Tap the key, then the mushroom, then the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c89d89bacee6.mp3",
+  "text": "Tap the map before the star.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/c8d642120c89.mp3",
+  "text": "Captain says, tap the green torch.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/c9119aeac86e.mp3",
+  "text": "Pounce found something growing under a tree in the damp forest. What was it?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/c94874b11175.mp3",
+  "text": "Tap the flag, then tap the star two times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/ca3b9f2409e9.mp3",
+  "text": "Tap the blue egg, then the blue heart.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/ca646e836e8e.mp3",
+  "text": "Tap the egg after you tap the book.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ca6acc2981cb.mp3",
+  "text": "Tap the yellow rocket.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/cb8842fd7e90.mp3",
+  "text": "Before tapping the bell, tap the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/cbd8d2921901.mp3",
+  "text": "Tap the yellow star.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/cbf56e05c0de.mp3",
+  "text": "Boo the ghost picked up a gem. Then he picked up a mushroom. Last, he picked up an egg. What did Boo pick up right after the gem?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/cc2f93e6efdd.mp3",
+  "text": "Tap the orange gem, then the orange drum.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/cc4377352931.mp3",
+  "text": "If there is a drum, tap the flag. If not, tap the map.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/cc563bac895f.mp3",
+  "text": "Tap the small orange coin.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/cc9152c48e0f.mp3",
+  "text": "If the star is blue, tap it.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/cce42e6b7ec4.mp3",
+  "text": "First, tap the drum. Next, the key. Then, the rocket. Last, the boot.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/cd35271f0018.mp3",
+  "text": "Tap the small sword.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/cd67b56449cd.mp3",
+  "text": "A baby dragon is about to hatch. What is it inside?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/cd9a83a1c0f5.mp3",
+  "text": "Tap the sword. After that, tap the potion.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/cdca915bdaad.mp3",
+  "text": "Tap the one to the right of the boot.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/cdd09119325c.mp3",
+  "text": "Before you tap the shield, tap the mushroom.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/cfca73effa54.mp3",
+  "text": "Tap the one to the right of the potion.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d0589b825415.mp3",
+  "text": "Tap the rocket. Then tap the book.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/d0864d646d80.mp3",
+  "text": "Tap the potion, then the flag, then the egg, then the star.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d0b4f9a44141.mp3",
+  "text": "Tap the yellow torch, then the yellow drum.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/d0bb4ba389c4.mp3",
+  "text": "Tap all the orange things except the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d0be83631135.mp3",
+  "text": "Tap all the purple keys.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d0ec5e168cc0.mp3",
+  "text": "The witch wants a magic drink that will make her invisible. What should she mix?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/d135024dda22.mp3",
+  "text": "Tap all the orange things except the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d1aa628f7061.mp3",
+  "text": "Sir Clank’s feet are getting wet in the puddles. What should he put on?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/d24a69052316.mp3",
+  "text": "Captain says, tap the blue key.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/d353642fde9a.mp3",
+  "text": "Tap the one to the left of the gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d3945c9d4ba0.mp3",
+  "text": "Tap the sword on the left.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d3edddec6673.mp3",
+  "text": "Tap the heart, then the rocket, then the shield, then the book.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d408f4c173e7.mp3",
+  "text": "Tap the boot.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/d43f36a4a770.mp3",
+  "text": "If you see an owl, tap the key. If not, tap the crown.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/d45d8e1815df.mp3",
+  "text": "Tap the big yellow torch.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/d4cc98af8141.mp3",
+  "text": "Tap the red ring, then the purple chest, then the green gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d4fa1b3f6abe.mp3",
+  "text": "Tap the egg before the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d59985236b92.mp3",
+  "text": "Tap the drum, then the hat, then the chest, then the bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d5f7d1df51ee.mp3",
+  "text": "First, tap the hat. Next, the rocket. Then, the gem. Last, the coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d60e7912527e.mp3",
+  "text": "Before tapping the egg, tap the star.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d6af4b847b15.mp3",
+  "text": "Tap the red key.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/d6b7dc4616c0.mp3",
+  "text": "Hoot the owl is carrying a potion to the castle. What is Hoot carrying?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/d6f4abe35bf5.mp3",
+  "text": "If there is a heart, tap the shield. If not, tap the potion.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/d75520303e12.mp3",
+  "text": "Tap all the green things except the star.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d7f3f8a27faa.mp3",
+  "text": "Tap all the boots except the blue one.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d8313a5d13fe.mp3",
+  "text": "Tap the bell. The small one.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/d8f46ae5974a.mp3",
+  "text": "Tap the purple rocket, then the green egg.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/d953235135b5.mp3",
+  "text": "Tap all the maps.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d9682afe153e.mp3",
+  "text": "Tap all the purple crowns.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/d982012bdad7.mp3",
+  "text": "If you see a dragon, tap the sword.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/d9c1d0a972ba.mp3",
+  "text": "Tap the yellow shield.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/d9ccbf532e90.mp3",
+  "text": "Tap the sword first. Then tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/da030b2f345f.mp3",
+  "text": "Tap the map. The small one.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/da0d5a1bd1f7.mp3",
+  "text": "Tap the key after the rocket.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/da26930181ac.mp3",
+  "text": "Tap the map that is not blue.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/da9452120ce0.mp3",
+  "text": "Tap the ring, but only if it is yellow.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/dabeacf82569.mp3",
+  "text": "Tap the gem after the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/db4b250e94e8.mp3",
+  "text": "Tap the book two times, then tap the rocket.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/dceecfc1ec0c.mp3",
+  "text": "Tap the one that is not a potion.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/dcefb2aa7cee.mp3",
+  "text": "Tap the red drum, then the yellow mushroom, then the green chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/dd57f3f0e8fd.mp3",
+  "text": "Tap the small egg.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/dd7cb54160de.mp3",
+  "text": "Tap the orange mushroom, then the green crown, then the orange star.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/dd7edc5a3f60.mp3",
+  "text": "Tap the red torch.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/ddaba57c8cdf.mp3",
+  "text": "Tap the hat three times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/de9e09e0fcf0.mp3",
+  "text": "After you tap the crown, tap the map.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ded0ac151eab.mp3",
+  "text": "If you see a cat, tap the ring.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/def6668f7fb9.mp3",
+  "text": "Tap the green sword, then the yellow coin.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/df29171f0367.mp3",
+  "text": "Tap the one that is not a sword.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/df3a0ca9d111.mp3",
+  "text": "Tap the bell before you tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/e0362ed516a4.mp3",
+  "text": "Tap the yellow rocket.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/e116249de9d3.mp3",
+  "text": "Tap the big blue drum.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/e128bf019726.mp3",
+  "text": "Tap the yellow potion.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/e133df215a76.mp3",
+  "text": "Captain says, tap the red egg.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/e1569bff517d.mp3",
+  "text": "After you tap the shield, tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/e204d7c88613.mp3",
+  "text": "Tap the big blue mushroom.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/e2888310b4b8.mp3",
+  "text": "Find the orange torch and tap it.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/e37f73ecbd08.mp3",
+  "text": "Tap everything that is orange.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/e3e520d157a1.mp3",
+  "text": "Pounce the cat had a green key and a blue hat. She gave the key to a friend. What does Pounce have now?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/e4005640e66a.mp3",
+  "text": "Tap the mushroom, then the ring, then the boot.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/e468b5206b30.mp3",
+  "text": "Tap the small blue drum.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/e4a463981a8d.mp3",
+  "text": "Puff wants to learn a new magic spell. What should he read?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/e54079307671.mp3",
+  "text": "If you see a cat, tap the star. If not, tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/e57b48ccfeb1.mp3",
+  "text": "Tap the orange map.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/e58cd909c78b.mp3",
+  "text": "Tap all the flags except the red one.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/e60a9a055383.mp3",
+  "text": "On the shelf there was a heart, a crown, and a star. A cat knocked the crown onto the floor. What fell on the floor?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/e6235a40ad1d.mp3",
+  "text": "Tap the rocket, then tap the boot two times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/e62ff4865659.mp3",
+  "text": "Boo the ghost had a blue chest and an orange flag. He gave the chest to a friend. What does Boo have now?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/e65e5eec3ab7.mp3",
+  "text": "Tap the map, then tap the ring two times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/e65fb53424e8.mp3",
+  "text": "Tap all the green things except the sword.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/e687d8033654.mp3",
+  "text": "Tap the one in the middle.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/e6e32e081f32.mp3",
+  "text": "After you tap the potion, tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/e6ebdd79357d.mp3",
+  "text": "The owl gave a gem to the wizard. Who got the gem?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/e7c481501f49.mp3",
+  "text": "Tap the star after the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/e7d0caff4d61.mp3",
+  "text": "Tap the green potion.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/e870f6f7c432.mp3",
+  "text": "Tap the yellow chest.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/e88ad20ff125.mp3",
+  "text": "Tap the flag, then tap the crown.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/e8a1267756a6.mp3",
+  "text": "First, tap the chest. Then, tap the bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/e9db3d97de5e.mp3",
+  "text": "Tap the coin, then the rocket, then the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ea75565168aa.mp3",
+  "text": "First, tap the mushroom. Next, the star. Then, the torch. Last, the crown.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ea8215bc27cd.mp3",
+  "text": "First, tap the potion. Then, tap the shield.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/eacad045ab40.mp3",
+  "text": "Tap everything that is yellow.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/eb4a20573a1c.mp3",
+  "text": "Tap the small orange crown.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/eb851c382415.mp3",
+  "text": "Tap the mushroom before you tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/eb8d0af739c1.mp3",
+  "text": "Captain says, tap the blue egg.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/ebcd261ff2c0.mp3",
+  "text": "The camp fire is warm and cozy. Now, tap the purple torch.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/ec3d91058c18.mp3",
+  "text": "Tap the hat after you tap the egg.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ec3df08bfcca.mp3",
+  "text": "Tap everything except the heart.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ec906aa675f6.mp3",
+  "text": "The band is ready to march. What do you hit with sticks to keep the beat?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/ec9a879b8801.mp3",
+  "text": "Tap the gem first. Then tap the coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ece2c5d6d6d0.mp3",
+  "text": "First, tap the hat. Then, tap the bell. Last, tap the gem.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ed4322ec141a.mp3",
+  "text": "Captain says, tap the drum, then the heart.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/ed91c94df58b.mp3",
+  "text": "Boo the ghost had an orange star and a yellow shield. He gave the star to a friend. What does Boo have now?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/ed92420c852b.mp3",
+  "text": "Tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/ed963af9afac.mp3",
+  "text": "Tap the one that is not a bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/eda602c70283.mp3",
+  "text": "Tap both hearts.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/edc89d21bc11.mp3",
+  "text": "Tap the flag after you tap the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/edf7b4dbb828.mp3",
+  "text": "Tap the potion, then the heart, then the mushroom.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ee9076b30ae8.mp3",
+  "text": "First, tap the book. Next, the crown. Then, the potion. Last, the heart.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/eecfe5a09d64.mp3",
+  "text": "Dash the fox picked up a mushroom. Then she picked up a book. Last, she picked up a coin. What did Dash pick up right after the mushroom?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/ef574ce45f01.mp3",
+  "text": "If the bell is red, tap it.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/ef657b066cab.mp3",
+  "text": "Tap the key. No, wait! Tap the heart instead.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/efbb43550eae.mp3",
+  "text": "Tap the small gem.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/f0d259714b5b.mp3",
+  "text": "Tap the small hat.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/f10911f43dc1.mp3",
+  "text": "Tap the flag. Then tap the heart.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/f109f1b7a9f8.mp3",
+  "text": "The door to the tower is locked. What does the knight need to open it?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/f13f091e7b60.mp3",
+  "text": "Tap the green mushroom.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/f178ec384463.mp3",
+  "text": "Tap the red book.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/f1bcd2ca2e82.mp3",
+  "text": "Tap the orange star.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/f2892b2ae341.mp3",
+  "text": "Tap the ring, then the hat, then the boot.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f2937f9683e3.mp3",
+  "text": "The wizard’s head is cold, and he wants to look magical. What should he wear?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/f2a04b09fa9e.mp3",
+  "text": "It is a sunny day at camp. Now, tap the purple egg.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/f2c047d0151f.mp3",
+  "text": "Tap the rocket on the right.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f2e0bbf4ffb8.mp3",
+  "text": "Tap the small red heart.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/f302b086076d.mp3",
+  "text": "Tap the yellow map.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/f3972755ba2f.mp3",
+  "text": "Tap the torch after you tap the ring.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f3f72d96a485.mp3",
+  "text": "Tap the potion. The big one.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/f441835e108f.mp3",
+  "text": "Tap the drum. No, wait! Tap the bell instead.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/f4a3289c947c.mp3",
+  "text": "Boo the ghost went to the market. He bought a blue boot, and then he went home for lunch. What did Boo buy?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/f4b09dd55ced.mp3",
+  "text": "First, tap the coin. Then, tap the star. Last, tap the rocket.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f4c58be91156.mp3",
+  "text": "Boo the ghost is carrying a key to the castle. What is Boo carrying?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/f4d410a0ec78.mp3",
+  "text": "Tap everything except the egg.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f4d750b96cc0.mp3",
+  "text": "If the map is orange, tap it.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/f50e0f1a43e3.mp3",
+  "text": "Tap the mushroom before the potion.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f54f0b1bf129.mp3",
+  "text": "Tap the orange crown, then the orange sword, then the yellow rocket.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f5923534bb88.mp3",
+  "text": "Tap the blue chest.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/f5b69ab4ca2b.mp3",
+  "text": "Tap the red drum, then the purple star, then the orange potion.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f5eae482cd64.mp3",
+  "text": "Tap the one between the map and the ring.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f613829f5248.mp3",
+  "text": "Tap the map that is not purple.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f616fcc61934.mp3",
+  "text": "First, tap the chest. Then, tap the star. Last, tap the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f65fdfc3ac25.mp3",
+  "text": "Tap the gem. Oh, and tap the map too.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/f72e029a6d3d.mp3",
+  "text": "Tap the flag that is not red.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f75344b99784.mp3",
+  "text": "First, tap the torch. Next, the egg. Then, the shield. Last, the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f77a8f7ad004.mp3",
+  "text": "Tap the yellow egg, then the green hat, then the blue rocket.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f7afef05ab79.mp3",
+  "text": "Tap the key two times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/f7be87449800.mp3",
+  "text": "Tap the egg before the shield.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f7c4eec23973.mp3",
+  "text": "Tap the ring first, and the book last.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f7f97401530f.mp3",
+  "text": "Tap the mushroom after you tap the bell.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f867056ba86f.mp3",
+  "text": "Before you tap the chest, tap the crown.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f94b61931f40.mp3",
+  "text": "Zazz the wizard is carrying a rocket to the castle. What is Zazz carrying?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/f98a39d25261.mp3",
+  "text": "Tap everything except the drum.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/f9b54436719d.mp3",
+  "text": "Zazz the wizard picked up a torch. Then he picked up a book. Last, he picked up a ring. What did Zazz pick up last?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/f9ba8b239549.mp3",
+  "text": "Tap the crown two times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/f9f996e71626.mp3",
+  "text": "Tap the yellow bell.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/f9fe0c4a82d5.mp3",
+  "text": "Tap the one between the map and the flag.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/fa00e7cf574b.mp3",
+  "text": "Tap the book three times.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/fa66f5ecfd10.mp3",
+  "text": "Tap all the stars except the blue one.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/fadb361e4bac.mp3",
+  "text": "Before tapping the key, tap the potion.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/fae693a911fb.mp3",
+  "text": "Boo the ghost went to the market. He bought a purple drum, and then he went home for lunch. What did Boo buy?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/faff86e04840.mp3",
+  "text": "Boo packed a gem for the trip. Sir Clank packed a chest. Then they walked to the castle together. What did Sir Clank pack?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/fb6225b7779b.mp3",
+  "text": "First, tap the drum. Then, tap the star. Last, tap the egg.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/fb624e88377f.mp3",
+  "text": "Tap the small boot.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/fc40e9ca5038.mp3",
+  "text": "Tap the one between the sword and the hat.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/fc5093c0ea10.mp3",
+  "text": "Tap the one to the left of the coin.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/fcd3fae99995.mp3",
+  "text": "After you tap the book, tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/fced911d2032.mp3",
+  "text": "Tap the star. Then tap the boot.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/fd6ee0618cd1.mp3",
+  "text": "Tap the purple egg.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/fd90bb63bd8f.mp3",
+  "text": "Tap the green gem.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/fddb312871d6.mp3",
+  "text": "Tap the one to the left of the egg.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/fe4ebb3ce2ab.mp3",
+  "text": "Tap the one to the right of the egg.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/fe68be102e4d.mp3",
+  "text": "Tap the torch, then the rocket, then the key.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/fe7661beb067.mp3",
+  "text": "Captain says, tap the mushroom, then the coin.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/fe9f00a45d8f.mp3",
+  "text": "Tap the blue shield, then the green star.",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ {
+  "file": "assets/audio/listening/ff049d3fd44e.mp3",
+  "text": "After you tap the bell, tap the chest.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ff3c7bca2113.mp3",
+  "text": "Tap the shield. Oh, and tap the heart too.",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/listening/ff54699cb8dd.mp3",
+  "text": "Tap the purple crown.",
+  "voice": "af_heart",
+  "speed": 0.88
+ },
+ {
+  "file": "assets/audio/listening/ffbbc431eee4.mp3",
+  "text": "First, tap the sword. Then, tap the mushroom. Last, tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ffca4545fe15.mp3",
+  "text": "Tap the sword after you tap the torch.",
+  "voice": "af_heart",
+  "speed": 0.92
+ },
+ {
+  "file": "assets/audio/listening/ffdf599a3ea5.mp3",
+  "text": "Hoot packed a potion for the trip. Boo packed a bell. Then they walked to the castle together. What did Boo pack?",
+  "voice": "af_heart",
+  "speed": 0.95
+ },
+ {
+  "file": "assets/audio/ui/0051fdf15f8e.mp3",
+  "text": "This time the cards are hidden while I talk. Listen first, hold it in your head, then look.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/02ff47fcb0cd.mp3",
+  "text": "Perfect.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/0590d0992cbd.mp3",
+  "text": "Tower boss! Before and after, all mixed up. Think: what happens first?",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/0a2c1c0b38d6.mp3",
+  "text": "You got it!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/0ab5285a3041.mp3",
+  "text": "Careful again. Listen for AFTER, and think: what happens first?",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/0b2ba386e44d.mp3",
+  "text": "Welcome back, hero!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/0e3ce614d9ce.mp3",
+  "text": "Now there are two choices. If it is true, do the first thing. If not, do the second.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/0ed16647b9fa.mp3",
+  "text": "Captain’s rule: only do it if I say, Captain says. If I do not say Captain says, tap the hand.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/11b043cdaf15.mp3",
+  "text": "Awesome job. You earned two stars!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/1a7a8b0eb3fc.mp3",
+  "text": "Wow! Every single one on the first listen!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/1bbe8f106129.mp3",
+  "text": "Almost. Let’s hear it again.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/236b86647885.mp3",
+  "text": "Hero’s Trial, part two. Wait for the real order, and remember every step.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/25d68cf62d89.mp3",
+  "text": "That was a tricky one. Watch me.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/29ae86523822.mp3",
+  "text": "You finished the mission! Want to try for two stars?",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/2ba4d80c6faa.mp3",
+  "text": "IF is a tricky word. If it is true, do it. If it is not true, tap the hand.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/2d60706dcc1e.mp3",
+  "text": "That’s it. You got it!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/2f88f2a505fb.mp3",
+  "text": "Listen for the word BEFORE.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/32f1233ea5b5.mp3",
+  "text": "First, then, last. These words tell you the order.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/37ca7afee34e.mp3",
+  "text": "Hero’s Trial, part one. Clues, steps, and tricky words.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/3844274e2bf0.mp3",
+  "text": "Three clues! The size, the color, and the thing. Here is a trick: say it back in your head.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/39c9316ef462.mp3",
+  "text": "Left and right. Here is a trick: hold up your hands. Your left hand makes the letter L.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/3d6d7d3b0472.mp3",
+  "text": "Nice! You listened to every word.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/3e333e69e59e.mp3",
+  "text": "Yes!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/41e19e57d297.mp3",
+  "text": "Woods challenge! Not, all, except, and where. Listen for the tricky word.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/41f1a8b48957.mp3",
+  "text": "Listen for how many times.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/42ef4865bfe0.mp3",
+  "text": "Two steps, and the cards are hidden. Say them back in your head while you wait.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/4aab4355d250.mp3",
+  "text": "Not quite. Listen one more time.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/58d631548642.mp3",
+  "text": "Mission complete! Every mission makes your listening stronger.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/642df368e83e.mp3",
+  "text": "Listen for what happens first, next, and last.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/658f74501097.mp3",
+  "text": "Great training today! This is a good place to stop. See you next time!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/66901401c613.mp3",
+  "text": "Hi! I am Blip, your guide. Let’s train your super listening. Tap the glowing level to start.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/678b004de029.mp3",
+  "text": "You waited until I finished. Nice!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/6bffdcf6a68d.mp3",
+  "text": "That is how a captain listens.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/6e70ee27f6f2.mp3",
+  "text": "Camp challenge! A mix of everything you have learned so far.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/707a7def2113.mp3",
+  "text": "Trail boss! Two steps, counting, and hidden cards, all mixed up.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/7395a478df47.mp3",
+  "text": "Good to see you! Ready to train?",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/791d39be86c0.mp3",
+  "text": "Sometimes the important part comes at the very end. Keep listening until I stop talking.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/8d759d3cb2a3.mp3",
+  "text": "Great listening!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/91054483639c.mp3",
+  "text": "Story time! Listen to the story, then answer my question.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/9271559c4ca3.mp3",
+  "text": "Great waiting!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/933790ceb186.mp3",
+  "text": "When I say ALL, tap every one that fits. Then press Done.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/95abcb82226c.mp3",
+  "text": "Careful! Sometimes I say the second thing first. Listen for BEFORE, and think: what happens first?",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/96273778b706.mp3",
+  "text": "Nice. Listening again worked.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/97a1b95c8756.mp3",
+  "text": "These stories are a bit longer. Make a movie in your mind as you listen.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/99a18949404d.mp3",
+  "text": "Blip here. Let’s go!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/9e9c80ec8ee8.mp3",
+  "text": "Sometimes I change my mind at the end. Wait until I have completely finished.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/9eee5449b0e8.mp3",
+  "text": "Sneaky pirates are giving orders too. Only listen to the captain.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/a0a0c828e882.mp3",
+  "text": "Tricky word alert: NOT. Listen for the one I do not want.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/a40a7560a126.mp3",
+  "text": "Now there are two things to do. Tap them in the order I say, then press Done. If you slip, press Undo.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/a5aef63b419f.mp3",
+  "text": "Captain’s test! Wait for every word before you move.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/a840cf2ed7e5.mp3",
+  "text": "Three steps, with colors. Say them back in your head.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/b520cbc7b3b1.mp3",
+  "text": "This time, listen for big or small.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/bd84dd7986b8.mp3",
+  "text": "Four steps! Take a breath, listen all the way, and go one at a time.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/beb5ec4cdb93.mp3",
+  "text": "Great listening! Two stars!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/c2658c77581c.mp3",
+  "text": "Mountain boss! Long instructions. Breathe, listen, and go one step at a time.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/c2788c1603ff.mp3",
+  "text": "There you go!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/c9e6728d2a26.mp3",
+  "text": "Cave boss! Stories and clues. Make a movie in your mind.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/cc2557ddfc4c.mp3",
+  "text": "Now listen for where things are. Next to. Between. In the middle.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/cce0e6cd5a14.mp3",
+  "text": "Be a detective. I will not tell you the answer. Use the clues to work it out.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/ccf10f775500.mp3",
+  "text": "Two clues now: the color, and the thing. You need both.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/cd44110a29c8.mp3",
+  "text": "Let me show you this one.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/d185cc7dfe16.mp3",
+  "text": "Listen for the word AFTER.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/d4103729b7f5.mp3",
+  "text": "Tricky word: EXCEPT. Except means: leave that one out.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/d604d82b919d.mp3",
+  "text": "Three steps now. Here is a trick: count them on your fingers as you listen.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/d6cb7ec5d67d.mp3",
+  "text": "Now listen for the color. There is more than one, so the color tells you which.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/dcec2195a6d5.mp3",
+  "text": "Hmm, not yet. Listen again.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/e4e1bc291337.mp3",
+  "text": "Two steps, with colors. Here is a trick: make a picture of each one in your mind.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/e52928379695.mp3",
+  "text": "The Legend Run. Everything you have learned. You are ready.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/e5a4f278206a.mp3",
+  "text": "Perfect listening! Three stars!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/eafeb73ccea6.mp3",
+  "text": "You listened all the way to the end. Nice!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/ed63769ba358.mp3",
+  "text": "That’s it!",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/f0d004e4dc5a.mp3",
+  "text": "Three steps, and the cards are hidden. You can do it. Picture each one.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/f36b1426ed74.mp3",
+  "text": "Watch. Here is how it goes.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/fc7e78a5a6aa.mp3",
+  "text": "So close! One more listen.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/fca761fef652.mp3",
+  "text": "Boom! Nailed it.",
+  "voice": "af_heart",
+  "speed": 0.97
+ },
+ {
+  "file": "assets/audio/ui/fcb46234d064.mp3",
+  "text": "Welcome to Rookie Camp! Here is how it works. Tap the ear when you are ready to listen. Wait until I finish talking. Then tap what I said.",
+  "voice": "af_heart",
+  "speed": 0.97
+ }
+]

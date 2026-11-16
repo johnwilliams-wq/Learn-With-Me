@@ -1,0 +1,489 @@
+{
+ "version": 1,
+ "worlds": [
+  {
+   "id": "w1",
+   "name": "Rookie Camp",
+   "blurb": "One thing at a time. Listen for every clue.",
+   "levels": [
+    {
+     "id": "w1l1",
+     "title": "Name It",
+     "tip": "tip-w1l1",
+     "tipText": "Welcome to Rookie Camp! Here is how it works. Tap the ear when you are ready to listen. Wait until I finish talking. Then tap what I said.",
+     "trials": 6
+    },
+    {
+     "id": "w1l2",
+     "title": "Color It",
+     "tip": "tip-w1l2",
+     "tipText": "Now listen for the color. There is more than one, so the color tells you which.",
+     "trials": 6
+    },
+    {
+     "id": "w1l3",
+     "title": "Big or Small",
+     "tip": "tip-w1l3",
+     "tipText": "This time, listen for big or small.",
+     "trials": 6
+    },
+    {
+     "id": "w1l4",
+     "title": "Two Clues",
+     "tip": "tip-w1l4",
+     "tipText": "Two clues now: the color, and the thing. You need both.",
+     "trials": 6
+    },
+    {
+     "id": "w1l5",
+     "title": "Three Clues",
+     "tip": "tip-w1l5",
+     "tipText": "Three clues! The size, the color, and the thing. Here is a trick: say it back in your head.",
+     "trials": 6
+    },
+    {
+     "id": "w1l6",
+     "title": "Wait For It",
+     "tip": "tip-w1l6",
+     "tipText": "Sometimes the important part comes at the very end. Keep listening until I stop talking.",
+     "trials": 6
+    },
+    {
+     "id": "w1l7",
+     "title": "Camp Challenge",
+     "tip": "tip-w1l7",
+     "tipText": "Camp challenge! A mix of everything you have learned so far.",
+     "trials": 6,
+     "boss": true,
+     "mix": [
+      "w1l2",
+      "w1l3",
+      "w1l4",
+      "w1l5",
+      "w1l6"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "w2",
+   "name": "Two-Step Trail",
+   "blurb": "Two things to do, in the right order.",
+   "levels": [
+    {
+     "id": "w2l1",
+     "title": "This, Then That",
+     "tip": "tip-w2l1",
+     "tipText": "Now there are two things to do. Tap them in the order I say, then press Done. If you slip, press Undo.",
+     "trials": 6
+    },
+    {
+     "id": "w2l2",
+     "title": "Two Colors",
+     "tip": "tip-w2l2",
+     "tipText": "Two steps, with colors. Here is a trick: make a picture of each one in your mind.",
+     "trials": 6
+    },
+    {
+     "id": "w2l3",
+     "title": "How Many",
+     "tip": "tip-w2l3",
+     "tipText": "Listen for how many times.",
+     "trials": 6
+    },
+    {
+     "id": "w2l4",
+     "title": "Listen, Then Look",
+     "tip": "tip-w2l4",
+     "tipText": "This time the cards are hidden while I talk. Listen first, hold it in your head, then look.",
+     "trials": 6,
+     "holdMs": 700
+    },
+    {
+     "id": "w2l5",
+     "title": "Memory Trail",
+     "tip": "tip-w2l5",
+     "tipText": "Two steps, and the cards are hidden. Say them back in your head while you wait.",
+     "trials": 6,
+     "holdMs": 700
+    },
+    {
+     "id": "w2l6",
+     "title": "Trail Boss",
+     "tip": "tip-w2l6",
+     "tipText": "Trail boss! Two steps, counting, and hidden cards, all mixed up.",
+     "trials": 6,
+     "holdMs": 700,
+     "boss": true,
+     "mix": [
+      "w2l1",
+      "w2l2",
+      "w2l3",
+      "w2l4",
+      "w2l5"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "w3",
+   "name": "Word Woods",
+   "blurb": "Tricky words: not, all, except, next to.",
+   "levels": [
+    {
+     "id": "w3l1",
+     "title": "Not That One",
+     "tip": "tip-w3l1",
+     "tipText": "Tricky word alert: NOT. Listen for the one I do not want.",
+     "trials": 6
+    },
+    {
+     "id": "w3l2",
+     "title": "All of Them",
+     "tip": "tip-w3l2",
+     "tipText": "When I say ALL, tap every one that fits. Then press Done.",
+     "trials": 6
+    },
+    {
+     "id": "w3l3",
+     "title": "All Except",
+     "tip": "tip-w3l3",
+     "tipText": "Tricky word: EXCEPT. Except means: leave that one out.",
+     "trials": 6
+    },
+    {
+     "id": "w3l4",
+     "title": "Where Is It",
+     "tip": "tip-w3l4",
+     "tipText": "Now listen for where things are. Next to. Between. In the middle.",
+     "trials": 6
+    },
+    {
+     "id": "w3l5",
+     "title": "Left and Right",
+     "tip": "tip-w3l5",
+     "tipText": "Left and right. Here is a trick: hold up your hands. Your left hand makes the letter L.",
+     "trials": 6
+    },
+    {
+     "id": "w3l6",
+     "title": "Woods Wizard",
+     "tip": "tip-w3l6",
+     "tipText": "Woods challenge! Not, all, except, and where. Listen for the tricky word.",
+     "trials": 6,
+     "boss": true,
+     "mix": [
+      "w3l1",
+      "w3l2",
+      "w3l3",
+      "w3l4",
+      "w3l5"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "w4",
+   "name": "Time Tower",
+   "blurb": "First, then, before, after.",
+   "levels": [
+    {
+     "id": "w4l1",
+     "title": "First and Then",
+     "tip": "tip-w4l1",
+     "tipText": "First, then, last. These words tell you the order.",
+     "trials": 6
+    },
+    {
+     "id": "w4l2",
+     "title": "After That",
+     "tip": "tip-w4l2",
+     "tipText": "Listen for the word AFTER.",
+     "trials": 6
+    },
+    {
+     "id": "w4l3",
+     "title": "Before",
+     "tip": "tip-w4l3",
+     "tipText": "Listen for the word BEFORE.",
+     "trials": 6
+    },
+    {
+     "id": "w4l4",
+     "title": "Flip It: Before",
+     "tip": "tip-w4l4",
+     "tipText": "Careful! Sometimes I say the second thing first. Listen for BEFORE, and think: what happens first?",
+     "trials": 6
+    },
+    {
+     "id": "w4l5",
+     "title": "Flip It: After",
+     "tip": "tip-w4l5",
+     "tipText": "Careful again. Listen for AFTER, and think: what happens first?",
+     "trials": 6
+    },
+    {
+     "id": "w4l6",
+     "title": "Tower Boss",
+     "tip": "tip-w4l6",
+     "tipText": "Tower boss! Before and after, all mixed up. Think: what happens first?",
+     "trials": 6,
+     "boss": true,
+     "mix": [
+      "w4l1",
+      "w4l2",
+      "w4l3",
+      "w4l4",
+      "w4l5"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "w5",
+   "name": "Captain's Deck",
+   "blurb": "Wait for the real order.",
+   "levels": [
+    {
+     "id": "w5l1",
+     "title": "Captain Says",
+     "tip": "tip-w5l1",
+     "tipText": "Captain’s rule: only do it if I say, Captain says. If I do not say Captain says, tap the hand.",
+     "trials": 6,
+     "allowNone": true,
+     "quota": {
+      "go": 4,
+      "nogo": 2
+     }
+    },
+    {
+     "id": "w5l2",
+     "title": "Who Said It",
+     "tip": "tip-w5l2",
+     "tipText": "Sneaky pirates are giving orders too. Only listen to the captain.",
+     "trials": 6,
+     "allowNone": true,
+     "quota": {
+      "go": 4,
+      "nogo": 2
+     }
+    },
+    {
+     "id": "w5l3",
+     "title": "Only If",
+     "tip": "tip-w5l3",
+     "tipText": "IF is a tricky word. If it is true, do it. If it is not true, tap the hand.",
+     "trials": 6,
+     "allowNone": true,
+     "quota": {
+      "go": 3,
+      "nogo": 3
+     }
+    },
+    {
+     "id": "w5l4",
+     "title": "If Not",
+     "tip": "tip-w5l4",
+     "tipText": "Now there are two choices. If it is true, do the first thing. If not, do the second.",
+     "trials": 6,
+     "allowNone": true,
+     "quota": {
+      "yes": 3,
+      "no": 3
+     }
+    },
+    {
+     "id": "w5l5",
+     "title": "Change of Plan",
+     "tip": "tip-w5l5",
+     "tipText": "Sometimes I change my mind at the end. Wait until I have completely finished.",
+     "trials": 6,
+     "allowNone": true
+    },
+    {
+     "id": "w5l6",
+     "title": "Captain's Test",
+     "tip": "tip-w5l6",
+     "tipText": "Captain’s test! Wait for every word before you move.",
+     "trials": 6,
+     "allowNone": true,
+     "boss": true,
+     "mix": [
+      "w5l1",
+      "w5l2",
+      "w5l3",
+      "w5l4",
+      "w5l5"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "w6",
+   "name": "Memory Mountain",
+   "blurb": "Three and four steps.",
+   "levels": [
+    {
+     "id": "w6l1",
+     "title": "Three Steps",
+     "tip": "tip-w6l1",
+     "tipText": "Three steps now. Here is a trick: count them on your fingers as you listen.",
+     "trials": 6
+    },
+    {
+     "id": "w6l2",
+     "title": "Three With Colors",
+     "tip": "tip-w6l2",
+     "tipText": "Three steps, with colors. Say them back in your head.",
+     "trials": 6
+    },
+    {
+     "id": "w6l3",
+     "title": "Three From Memory",
+     "tip": "tip-w6l3",
+     "tipText": "Three steps, and the cards are hidden. You can do it. Picture each one.",
+     "trials": 6,
+     "holdMs": 900
+    },
+    {
+     "id": "w6l4",
+     "title": "Four Steps",
+     "tip": "tip-w6l4",
+     "tipText": "Four steps! Take a breath, listen all the way, and go one at a time.",
+     "trials": 6
+    },
+    {
+     "id": "w6l5",
+     "title": "Mountain Boss",
+     "tip": "tip-w6l5",
+     "tipText": "Mountain boss! Long instructions. Breathe, listen, and go one step at a time.",
+     "trials": 6,
+     "holdMs": 900,
+     "boss": true,
+     "mix": [
+      "w6l1",
+      "w6l2",
+      "w6l3",
+      "w6l4"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "w7",
+   "name": "Story Cave",
+   "blurb": "Listen to a story, then answer.",
+   "levels": [
+    {
+     "id": "w7l1",
+     "title": "Who and What",
+     "tip": "tip-w7l1",
+     "tipText": "Story time! Listen to the story, then answer my question.",
+     "trials": 6
+    },
+    {
+     "id": "w7l2",
+     "title": "Remember the Details",
+     "tip": "tip-w7l2",
+     "tipText": "These stories are a bit longer. Make a movie in your mind as you listen.",
+     "trials": 6
+    },
+    {
+     "id": "w7l3",
+     "title": "What Happened First",
+     "tip": "tip-w7l3",
+     "tipText": "Listen for what happens first, next, and last.",
+     "trials": 6
+    },
+    {
+     "id": "w7l4",
+     "title": "Story Detective",
+     "tip": "tip-w7l4",
+     "tipText": "Be a detective. I will not tell you the answer. Use the clues to work it out.",
+     "trials": 6
+    },
+    {
+     "id": "w7l5",
+     "title": "Cave Boss",
+     "tip": "tip-w7l5",
+     "tipText": "Cave boss! Stories and clues. Make a movie in your mind.",
+     "trials": 6,
+     "boss": true,
+     "mix": [
+      "w7l1",
+      "w7l2",
+      "w7l3",
+      "w7l4"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "w8",
+   "name": "Hero's Trial",
+   "blurb": "Everything, mixed up.",
+   "levels": [
+    {
+     "id": "w8l1",
+     "title": "Hero Mix",
+     "tip": "tip-w8l1",
+     "tipText": "Hero’s Trial, part one. Clues, steps, and tricky words.",
+     "trials": 6,
+     "allowNone": true,
+     "holdMs": 700,
+     "boss": true,
+     "mix": [
+      "w1l5",
+      "w1l6",
+      "w2l2",
+      "w2l5",
+      "w3l3",
+      "w3l5",
+      "w4l4",
+      "w4l5"
+     ]
+    },
+    {
+     "id": "w8l2",
+     "title": "Champion Mix",
+     "tip": "tip-w8l2",
+     "tipText": "Hero’s Trial, part two. Wait for the real order, and remember every step.",
+     "trials": 6,
+     "allowNone": true,
+     "holdMs": 900,
+     "boss": true,
+     "mix": [
+      "w5l2",
+      "w5l4",
+      "w5l5",
+      "w6l2",
+      "w6l3",
+      "w7l2",
+      "w7l3"
+     ]
+    },
+    {
+     "id": "w8l3",
+     "title": "Legend Run",
+     "tip": "tip-w8l3",
+     "tipText": "The Legend Run. Everything you have learned. You are ready.",
+     "trials": 6,
+     "allowNone": true,
+     "holdMs": 900,
+     "boss": true,
+     "mix": [
+      "w3l3",
+      "w4l4",
+      "w4l5",
+      "w5l3",
+      "w5l5",
+      "w6l3",
+      "w6l4",
+      "w7l3",
+      "w7l4"
+     ]
+    }
+   ]
+  }
+ ]
+}
