@@ -79,4 +79,6 @@
   .mine .rung .rung-pic { width: 56px; height: 56px; font-size: 36px; }
   .mine .rung .reward-title { font-size: 16px; padding-right: 0; padding-top: 22px; }
   .mine .rung .reward-need { font-size: 13px; white-space: normal; text-align: left; }
+  .mine .rung .stamp { font-size: 14px; padding: 4px 9px; }
+  .mine .rung .stamp.waits { gap: 4px; }
 }
