@@ -1,0 +1,108 @@
+/* Activity "put" (Move and Pack): a shelf of things on top, and below it the places they go
+   into, onto or under. Sizes (--put-*) are worked out by the scene's fit(). */
+.put-scene {
+  --put-cell: 92px; --put-gap: 8px; --put-tile: 76px; --put-under: 64px; --put-per: 3;
+  --put-colw: 270px; --put-colh: 300px; --put-arth: 202px; --put-tableh: 151px;
+  --put-floor: 113px; --put-top: 140px; --put-legs: 105px; --put-between: 200px;
+  --put-wood: #b9793f; --put-wood-dark: #8a5527;
+  width: 100%; height: 100%; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+}
+
+/* ---- the shelf ---- */
+.put-shelf { display: flex; flex-direction: column; align-items: center; flex: none; }
+.put-row {
+  display: flex; justify-content: center; gap: var(--put-gap); padding: 0 14px;
+  border-bottom: 10px solid var(--put-wood); border-radius: 0 0 9px 9px;
+  box-shadow: 0 4px 0 var(--put-wood-dark); margin-bottom: 4px;
+}
+.put-slot { position: relative; width: var(--put-cell); height: var(--put-cell); flex: none; display: grid; place-items: center; }
+.put-slot.put-empty::before {
+  content: ''; position: absolute; inset: 24%; border-radius: 50%;
+  border: 3px dashed rgba(255, 255, 255, 0.2);
+}
+
+/* ---- a thing (on the shelf, or inside a place) ---- */
+.put-thing {
+  appearance: none; position: relative; padding: 0; margin: 0; cursor: pointer; flex: none;
+  width: var(--put-cell); height: var(--put-cell);
+  border-radius: 22%; border: 4px solid transparent; background: rgba(255, 255, 255, 0.07);
+  display: grid; place-items: center;
+  transition: transform 0.12s, background 0.15s, border-color 0.15s, box-shadow 0.15s, opacity 0.2s;
+}
+.put-thing:active { transform: scale(0.95); }
+.put-thing-art { width: 88%; height: 88%; pointer-events: none; }
+.put-thing.put-small .put-thing-art { width: 52%; height: 52%; }
+.put-thing.put-held {
+  transform: translateY(-12px) scale(1.08); z-index: 4;
+  border-color: var(--gold); background: rgba(255, 210, 63, 0.24);
+  box-shadow: 0 14px 0 -5px rgba(0, 0, 0, 0.3), 0 0 0 7px rgba(255, 210, 63, 0.22);
+}
+.put-thing.put-inside { width: var(--put-tile); height: var(--put-tile); background: none; border-width: 0; border-radius: 18%; }
+.put-thing.put-inside .put-thing-art { width: 94%; height: 94%; }
+.put-thing.put-inside.put-small .put-thing-art { width: 56%; height: 56%; align-self: end; margin-bottom: 6%; }
+.put-under .put-thing.put-inside { width: var(--put-under); height: var(--put-under); }
+.put-under .put-thing.put-inside .put-thing-art { width: 106%; height: 106%; }
+.put-under .put-thing.put-inside.put-small .put-thing-art { width: 62%; height: 62%; }
+/* the order he put things away in - only shown for sentences that give an order */
+.put-badge {
+  position: absolute; top: -2px; right: -2px; z-index: 3; pointer-events: none;
+  min-width: 28px; height: 28px; padding: 0 5px; border-radius: 14px; background: var(--gold); color: var(--gold-ink);
+  font-weight: 800; font-size: 17px; line-height: 1; display: grid; place-items: center; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+.put-badge:empty { display: none; }
+.put-q {
+  display: none; position: absolute; inset: 0; place-items: center; pointer-events: none;
+  font-size: calc(var(--put-cell) * 0.5); font-weight: 800; color: rgba(255, 255, 255, 0.35);
+}
+
+/* ---- the places ---- */
+.put-places { display: flex; align-items: flex-end; justify-content: center; gap: 14px; flex: none; }
+.put-place { position: relative; flex: none; width: var(--put-colw); height: var(--put-colh); transition: opacity 0.2s; }
+.put-zone { position: absolute; inset: 0; cursor: pointer; border-radius: 26px; }
+.put-layer { position: absolute; left: 0; right: 0; bottom: 0; height: var(--put-arth); pointer-events: none; }
+.put-back { z-index: 0; }
+.put-front { z-index: 2; }
+.put-pile {
+  position: absolute; z-index: 1; left: 50%; transform: translateX(-50%); bottom: var(--put-floor);
+  width: calc(var(--put-per) * var(--put-tile));
+  display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start;
+}
+
+/* the table: things go on its top, or between its legs */
+.put-table-art { height: var(--put-tableh); }
+.put-zone.put-on { inset: 0 0 var(--put-legs) 0; }
+.put-zone.put-under { inset: auto 0 0 0; height: var(--put-legs); }
+.put-on .put-pile { bottom: calc(var(--put-top) - var(--put-legs)); }
+.put-under .put-pile { bottom: 3px; width: calc(3 * var(--put-under)); flex-wrap: nowrap; }
+
+/* with a thing in his hand, every place that has room shows that it can take it */
+.put-drop {
+  position: absolute; inset: 3px; z-index: 3; pointer-events: none; opacity: 0;
+  border: 4px dashed var(--gold); border-radius: 24px; background: rgba(255, 210, 63, 0.07);
+  transition: opacity 0.15s;
+}
+.put-under .put-drop { left: calc((100% - var(--put-between)) / 2); right: calc((100% - var(--put-between)) / 2); top: 4px; bottom: 0; border-radius: 16px; }
+.put-on .put-drop { bottom: 2px; }
+.put-holding .put-zone:not(.put-full) .put-drop { opacity: 1; animation: put-breathe 1.1s ease-in-out infinite; }
+
+/* ---- frozen, covered ---- */
+.put-locked .put-thing, .put-locked .put-place { opacity: 0.8; }
+.put-cover {
+  display: none; position: absolute; inset: 0; z-index: 6; place-items: center; pointer-events: none;
+  border-radius: 26px; background: var(--panel-2); border: 4px solid rgba(255, 255, 255, 0.12);
+  font-size: calc(var(--put-colw) * 0.36); font-weight: 800; color: rgba(255, 255, 255, 0.35);
+}
+.put-covered .put-cover { display: grid; }
+.put-covered .put-thing { background: var(--panel-2); border-color: rgba(255, 255, 255, 0.12); }
+.put-covered .put-thing-art { visibility: hidden; }
+.put-covered .put-q { display: grid; }
+
+/* ---- little flourishes ---- */
+.put-hint { animation: put-hint 0.55s ease-in-out; }
+.put-land .put-thing-art { animation: put-land 0.3s ease-out; }
+.put-glow { animation: put-glow 0.8s ease-out; }
+@keyframes put-hint { 30% { transform: translateY(-9px); } 60% { transform: translateY(0); } 80% { transform: translateY(-4px); } }
+@keyframes put-land { 40% { transform: scale(1.14, 0.84) translateY(6%); } }
+@keyframes put-glow { 30% { box-shadow: 0 0 0 8px rgba(61, 220, 151, 0.4); background: rgba(61, 220, 151, 0.14); } }
+@keyframes put-breathe { 50% { border-color: rgba(255, 210, 63, 0.35); background: rgba(255, 210, 63, 0.02); } }

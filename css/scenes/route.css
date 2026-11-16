@@ -1,0 +1,83 @@
+/* Activity "route": a map of squares, a little rover, and four big steering arrows. */
+.route-scene { display: flex; align-items: center; justify-content: center; gap: var(--gap, 20px); width: 100%; height: 100%; min-width: 0; min-height: 0; }
+.route-scene[data-layout='stack'] { flex-direction: column; }
+.route-scene[data-layout='stack'] .route-pad { margin-top: 8px; }
+
+/* ---------- the map ---------- */
+.route-map {
+  position: relative; flex: none; display: grid;
+  grid-template-columns: repeat(var(--cols), var(--cell, 100px)); grid-auto-rows: var(--cell, 100px);
+  border-radius: 20px; overflow: hidden; background: #2c7a52; isolation: isolate;
+  box-shadow: 0 0 0 5px #1d5239, 0 8px 0 5px rgba(0, 0, 0, 0.3);
+}
+.route-sq {
+  appearance: none; border: 0; margin: 0; padding: 0; position: relative; cursor: pointer;
+  background: #3a9463; display: grid; place-items: center;
+  box-shadow: inset 0 0 0 1px rgba(15, 60, 38, 0.35);
+}
+.route-sq.route-alt { background: #338859; }
+.route-sq.route-on { background: #4aa873; }
+.route-sq.route-alt.route-on { background: #44a06c; }
+/* stacking inside the map: squares, then the trail (1), the things on the squares (2), the rover (3), badges (4), the cover (5) */
+.route-thing { position: relative; z-index: 2; width: 86%; height: 86%; pointer-events: none; transition: transform 0.2s; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.22)); }
+.route-loot { width: 60%; height: 60%; }
+/* the rover is standing on this square: the thing steps aside so both can be seen */
+.route-sq.route-here .route-thing { transform: translate(-17%, -18%) scale(0.68); }
+.route-sq.route-here .route-loot { transform: translate(-30%, -30%) scale(0.7); }
+/* picked up: it shrinks into the corner and gets a tick */
+.route-sq.route-got:not(.route-here) .route-thing { transform: translate(-30%, -30%) scale(0.7); }
+.route-home { position: absolute; inset: 14%; border-radius: 50%; border: 4px dashed rgba(255, 255, 255, 0.7); pointer-events: none; }
+.route-badge {
+  position: absolute; top: 5%; right: 5%; min-width: 30px; height: 30px; padding: 0 5px; border-radius: 15px;
+  background: var(--gold); color: var(--gold-ink); font-weight: 800; font-size: 19px;
+  display: grid; place-items: center; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3); pointer-events: none; z-index: 4;
+}
+.route-badge:empty { display: none; }
+
+.route-trail { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.route-line { fill: none; stroke: var(--gold); stroke-width: 15; stroke-linecap: round; stroke-linejoin: round; }
+.route-line-edge { fill: none; stroke: rgba(20, 26, 58, 0.55); stroke-width: 23; stroke-linecap: round; stroke-linejoin: round; }
+.route-dots circle { fill: var(--gold-ink); }
+
+.route-rover {
+  position: absolute; left: 0; top: 0; width: var(--cell, 100px); height: var(--cell, 100px); z-index: 3; pointer-events: none;
+  transform: translate(calc(var(--x, 0) * var(--cell, 100px)), calc(var(--y, 0) * var(--cell, 100px)));
+  transition: transform 0.16s ease-out;
+}
+.route-rover-body { width: 100%; height: 100%; display: grid; place-items: center; transition: transform 0.16s ease-out; }
+/* standing on a landmark: the rover moves down a little so that both can be seen */
+.route-rover.route-parked .route-rover-body { transform: translate(17%, 19%) scale(0.78); }
+.route-rover-art { width: 72%; height: 72%; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.28)); }
+.route-hop { animation: route-hop 0.8s ease-out; }
+.route-cheer { animation: route-cheer 0.8s ease-out; }
+@keyframes route-cheer { 30% { box-shadow: 0 0 0 5px #1d5239, 0 0 0 17px rgba(61, 220, 151, 0.4), 0 8px 0 5px rgba(0, 0, 0, 0.3); } }
+@keyframes route-hop { 25% { transform: translateY(-22%) scale(1.12); } 50% { transform: translateY(0) scale(1); } 70% { transform: translateY(-10%) scale(1.06); } 100% { transform: none; } }
+
+/* "listen first, then look": the whole map is covered while the voice talks */
+.route-fog {
+  display: none; position: absolute; inset: 0; z-index: 5; place-items: center; pointer-events: none;
+  font-weight: 800; font-size: calc(var(--cell, 100px) * 1.6); color: rgba(255, 255, 255, 0.3);
+}
+.route-covered .route-fog { display: grid; }
+.route-covered .route-sq { background: var(--panel-2); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08); }
+.route-covered .route-sq.route-alt { background: #293478; }
+.route-covered .route-thing, .route-covered .route-home, .route-covered .route-rover,
+.route-covered .route-trail, .route-covered .route-badge { visibility: hidden; }
+.route-covered .route-map { box-shadow: 0 0 0 5px var(--panel), 0 8px 0 5px rgba(0, 0, 0, 0.3); }
+
+/* ---------- the steering arrows ---------- */
+.route-pad { flex: none; display: grid; grid-template-columns: repeat(3, var(--pad, 84px)); grid-template-rows: repeat(3, var(--pad, 84px)); gap: 8px; }
+.route-arrow {
+  appearance: none; border: 0; cursor: pointer; padding: 20%; border-radius: 26%;
+  background: #f3f5ff; color: #2b3a8c; box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
+  transition: transform 0.08s, box-shadow 0.08s, opacity 0.2s;
+}
+.route-arrow:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35); }
+.route-arrow[data-dir='up'] { grid-area: 1 / 2; }
+.route-arrow[data-dir='left'] { grid-area: 2 / 1; }
+.route-arrow[data-dir='right'] { grid-area: 2 / 3; }
+.route-arrow[data-dir='down'] { grid-area: 3 / 2; }
+.route-pad-mid { grid-area: 2 / 2; padding: 14%; border-radius: 50%; background: rgba(255, 255, 255, 0.08); }
+.route-arrow.route-blocked { opacity: 0.4; }
+.route-locked .route-arrow { opacity: 0.4; }
+.route-locked .route-pad-mid { opacity: 0.5; }

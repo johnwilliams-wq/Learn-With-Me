@@ -1,15 +1,48 @@
-/* Activity "truth": a picture to look at and two big answer buttons. */
-.truth-scene { display: grid; grid-template-rows: 1fr auto; gap: 12px; width: 100%; height: 100%; justify-items: center; }
-.truth-picture { width: 100%; display: grid; place-items: center; min-height: 0; }
-.truth-picture .obj { cursor: default; }
-.truth-buttons { display: flex; gap: 28px; justify-content: center; }
+/* Activity "truth": a framed picture to look at and two big answer buttons (tick = true, cross = not true). */
+.truth-scene { display: flex; flex-direction: column; align-items: center; gap: 24px; width: 100%; height: 100%; }
+.truth-picture { width: 100%; display: grid; place-items: center; min-height: 0; flex: none; }
+
+/* The picture: things sit in one frame instead of on separate buttons, so it reads as "look", not "tap these". */
+.truth-frame {
+  position: relative; box-sizing: border-box; padding: 14px; border-radius: 32px;
+  background: var(--panel); border: 4px solid var(--line); box-shadow: 0 8px 0 rgba(0, 0, 0, 0.22);
+}
+.truth-frame .obj { cursor: default; background: transparent; border-color: transparent; border-radius: 22%; }
+.truth-frame .board.locked .obj { opacity: 1; }
+.truth-frame .obj:active { transform: none; }
+/* touching a thing marks it - a finger to count with */
+.truth-frame .obj.truth-mark { border-color: var(--gold); background: rgba(255, 210, 63, 0.16); }
+
+/* "hide" levels: one curtain over the whole picture while the voice talks */
+.truth-curtain {
+  display: none; position: absolute; inset: 0; border-radius: 26px; place-items: center; color: rgba(255, 255, 255, 0.4);
+  background: repeating-linear-gradient(135deg, var(--panel-2) 0 26px, var(--panel) 26px 52px);
+}
+.truth-curtain-icon { width: min(42%, 150px); aspect-ratio: 1; display: grid; }
+.truth-frame.covered .truth-curtain { display: grid; }
+.truth-frame.covered .board { visibility: hidden; }
+
+/* the two answers */
+.truth-buttons { display: flex; gap: 44px; justify-content: center; flex: none; }
 .truth-btn {
-  appearance: none; cursor: pointer; width: 132px; height: 112px; border-radius: 28px; border: 5px solid transparent; padding: 20px;
-  display: grid; place-items: center; box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35); transition: transform 0.08s, opacity 0.2s;
+  appearance: none; cursor: pointer; width: 150px; height: 108px; border-radius: 28px; border: 5px solid transparent; padding: 0;
+  display: grid; place-items: center; box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35); transition: transform 0.08s, opacity 0.2s, filter 0.2s;
 }
 .truth-btn:active { transform: translateY(4px); }
 .truth-yes { background: var(--good); color: #05301e; }
 .truth-no { background: #ff8a7a; color: #4a0d06; }
-.truth-icon { width: 64px; height: 64px; }
+.truth-icon { width: 64px; height: 64px; display: grid; pointer-events: none; }
 .truth-btn.chosen { border-color: #fff; }
-.truth-scene.locked .truth-btn { opacity: 0.45; }
+.truth-scene.locked .truth-btn { opacity: 0.4; filter: saturate(0.6); cursor: default; }
+.truth-scene.locked .truth-btn.chosen { opacity: 1; filter: none; }
+
+/* after two misses: the things the sentence is about light up one by one, then the right button */
+.truth-scene.demo .truth-frame .obj { opacity: 0.3; }
+.truth-scene.demo .truth-frame .obj.truth-about { opacity: 1; border-color: var(--gold); background: rgba(255, 210, 63, 0.16); }
+.truth-scene.locked .truth-btn.answer { opacity: 1; filter: none; border-color: #fff; box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35), 0 0 0 8px rgba(255, 255, 255, 0.22); }
+
+@media (max-height: 520px), (max-width: 420px) {
+  .truth-btn { width: 116px; height: 76px; border-radius: 22px; }
+  .truth-icon { width: 46px; height: 46px; }
+  .truth-buttons { gap: 28px; }
+}

@@ -1,0 +1,48 @@
+/* Activity "build" (Robot Workshop): the robot being built, and one row of picture buttons per part. */
+.bld {
+  --bld-cell: 104px; --bld-gap: 10px; --bld-pad: 8px; --bld-rw: 280px; --bld-rh: 400px;
+  display: grid; gap: var(--bld-gap); width: 100%; height: 100%;
+  grid-template-columns: 1fr; grid-template-rows: auto auto; justify-items: center; align-content: center; min-height: 0;
+}
+.bld.bld-side { grid-template-columns: auto auto; grid-template-rows: 1fr; justify-content: center; align-items: center; }
+
+.bld-robot {
+  width: var(--bld-rw); height: var(--bld-rh); padding: 6px 12px 2px; border-radius: 28px;
+  background: radial-gradient(120% 70% at 50% 100%, rgba(143, 155, 255, 0.28), transparent 70%), var(--panel);
+  border: 3px solid var(--line); display: grid; place-items: center; min-height: 0;
+}
+.bld-robot .bld-svg { width: 100%; height: 100%; }
+.bld-robot.bld-pop .bld-svg { animation: bld-pop 0.25s ease-out; }
+.bld-robot.bld-cheer .bld-svg { animation: bld-cheer 0.9s ease-in-out; transform-origin: 50% 100%; }
+.bld-robot.bld-cheer { border-color: var(--good); }
+
+.bld-rows { display: grid; gap: var(--bld-gap); align-content: center; justify-items: center; }
+.bld-side .bld-rows { justify-items: start; }
+.bld-tight .bld-rows { max-height: 100%; min-height: 0; overflow-y: auto; align-content: start; padding: 6px; }
+.bld-row {
+  display: flex; gap: var(--bld-gap); padding: var(--bld-pad); border-radius: 24px;
+  background: rgba(255, 255, 255, 0.05); border: 2px dashed rgba(255, 255, 255, 0.22); transition: border-color 0.15s, background 0.15s;
+}
+.bld-row.done { border: 2px solid rgba(255, 210, 63, 0.55); background: rgba(255, 210, 63, 0.07); }
+.bld-opt {
+  appearance: none; position: relative; padding: 0; cursor: pointer; flex: none;
+  width: var(--bld-cell); height: var(--bld-cell); border-radius: 20%;
+  background: rgba(255, 255, 255, 0.08); border: 4px solid rgba(255, 255, 255, 0.12);
+  display: grid; place-items: center; transition: transform 0.08s, background 0.15s, border-color 0.15s, opacity 0.2s;
+}
+.bld-opt:active { transform: scale(0.95); }
+.bld-art { width: 88%; height: 88%; pointer-events: none; }
+.bld-cover { display: none; position: absolute; inset: 0; place-items: center; font-size: calc(var(--bld-cell) * 0.5); font-weight: 800; color: rgba(255, 255, 255, 0.35); pointer-events: none; }
+.bld-tick {
+  display: none; position: absolute; top: -7px; right: -7px; min-width: 30px; height: 30px; border-radius: 15px; place-items: center;
+  background: var(--gold); color: var(--gold-ink); font-weight: 800; font-size: 19px; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3); pointer-events: none;
+}
+.bld-opt.chosen { border-color: var(--gold); background: rgba(255, 210, 63, 0.22); }
+.bld-opt.chosen .bld-tick { display: grid; }
+.bld.locked .bld-opt { opacity: 0.8; }
+.bld.covered .bld-art { visibility: hidden; }
+.bld.covered .bld-cover { display: grid; }
+.bld.covered .bld-opt { background: var(--panel-2); opacity: 1; }
+
+@keyframes bld-pop { 40% { transform: scale(1.05); } }
+@keyframes bld-cheer { 20% { transform: translateY(-7%) rotate(-4deg); } 45% { transform: translateY(0) rotate(3deg); } 65% { transform: translateY(-4%) rotate(-2deg); } 100% { transform: none; } }

@@ -1,0 +1,103 @@
+/* Activity "panel" (Control Room): a spaceship console with buttons, switches, a dial, a number pad,
+   a status light and a launch button. Every size is a multiple of --u, which the play area sets so
+   the whole console fits the space it has (see fit() in src/listening/scenes/panel.js). */
+.panel-scene { --u: 1px; display: grid; place-items: center; width: max-content; }
+.panel-scene .pnl-console {
+  position: relative; width: max-content; display: flex; align-items: center; justify-content: center;
+  gap: calc(var(--u) * 16); padding: calc(var(--u) * 18); border-radius: calc(var(--u) * 34);
+  background: linear-gradient(180deg, #4a5796, #2c356e);
+  border: calc(var(--u) * 5) solid #0d1230;
+  box-shadow: inset 0 calc(var(--u) * 4) 0 rgba(255, 255, 255, 0.22), inset 0 calc(var(--u) * -6) 0 rgba(0, 0, 0, 0.22), 0 calc(var(--u) * 8) 0 rgba(0, 0, 0, 0.35);
+}
+.panel-scene.pnl-wide .pnl-console { flex-direction: row; }
+.panel-scene.pnl-tall .pnl-console { flex-direction: column; }
+.panel-scene .pnl-bay { flex: none; display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 12); }
+.panel-scene.pnl-tall .pnl-bay-side { flex-direction: row; }
+.panel-scene .pnl-row:empty { display: none; }
+.panel-scene .pnl-row { flex: none; display: flex; align-items: stretch; justify-content: center; gap: calc(var(--u) * 12); }
+.panel-scene .pnl-mod {
+  flex: none; display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 12);
+  padding: calc(var(--u) * 10) calc(var(--u) * 14); border-radius: calc(var(--u) * 24);
+  background: rgba(10, 14, 36, 0.42); box-shadow: inset 0 calc(var(--u) * 3) 0 rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- things he can press ---------- */
+.panel-scene .pnl-ctl { position: relative; flex: none; transition: opacity 0.2s; }
+.panel-scene button {
+  appearance: none; -webkit-appearance: none; border: 0; margin: 0; padding: 0; background: none; cursor: pointer; flex: none;
+  font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.panel-scene .pnl-art { pointer-events: none; overflow: visible; }
+
+.panel-scene .pnl-btn { width: calc(var(--u) * 104); display: grid; justify-items: center; gap: calc(var(--u) * 5); padding: calc(var(--u) * 4) 0 calc(var(--u) * 6); border-radius: calc(var(--u) * 22); }
+.panel-scene .pnl-btn-art { display: block; width: calc(var(--u) * 96); height: calc(var(--u) * 96); pointer-events: none; }
+.panel-scene .pnl-cap { transition: transform 0.07s; }
+.panel-scene .pnl-btn:active .pnl-cap, .panel-scene .pnl-btn.pnl-press .pnl-cap { transform: translateY(10px); }
+.panel-scene .pnl-pips { display: flex; gap: calc(var(--u) * 5); pointer-events: none; }
+.panel-scene .pnl-pips i { width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: rgba(4, 6, 20, 0.6); box-shadow: inset 0 calc(var(--u) * 2) 0 rgba(0, 0, 0, 0.5); }
+.panel-scene .pnl-pips i.on { background: var(--gold); box-shadow: 0 0 0 calc(var(--u) * 2) rgba(255, 210, 63, 0.35); }
+
+.panel-scene .pnl-switch { width: calc(var(--u) * 84); height: calc(var(--u) * 126); border-radius: calc(var(--u) * 18); }
+.panel-scene .pnl-switch-art { display: block; width: 100%; height: 100%; pointer-events: none; }
+.panel-scene .pnl-switch.pnl-press { transform: scale(0.95); }
+
+.panel-scene .pnl-dial { display: flex; align-items: center; gap: calc(var(--u) * 8); padding: calc(var(--u) * 2) calc(var(--u) * 4); border-radius: calc(var(--u) * 26); }
+.panel-scene .pnl-gauge { position: relative; flex: none; width: calc(var(--u) * 124); height: calc(var(--u) * 124); }
+.panel-scene .pnl-gauge-art { display: block; width: 100%; height: 100%; }
+.panel-scene .pnl-digit {
+  position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
+  font-size: calc(var(--u) * 52); font-weight: 800; line-height: 1; color: #fff; font-variant-numeric: tabular-nums;
+}
+.panel-scene .pnl-step, .panel-scene .pnl-key {
+  background: #f4f6fb; color: #1b1f3b; border: calc(var(--u) * 4) solid #1b1f3b; border-radius: calc(var(--u) * 18);
+  box-shadow: 0 calc(var(--u) * 6) 0 #6f7896; transition: transform 0.07s, box-shadow 0.07s, opacity 0.2s;
+}
+.panel-scene .pnl-step:active, .panel-scene .pnl-key:active, .panel-scene .pnl-step.pnl-press, .panel-scene .pnl-key.pnl-press {
+  transform: translateY(calc(var(--u) * 5)); box-shadow: 0 calc(var(--u) * 1) 0 #6f7896;
+}
+.panel-scene .pnl-step { width: calc(var(--u) * 74); height: calc(var(--u) * 74); padding: calc(var(--u) * 10); margin-bottom: calc(var(--u) * 6); }
+.panel-scene .pnl-step.pnl-end { opacity: 0.35; }
+
+.panel-scene .pnl-keypad { display: grid; gap: calc(var(--u) * 10); justify-items: center; padding: calc(var(--u) * 2); border-radius: calc(var(--u) * 20); }
+.panel-scene .pnl-display {
+  width: 100%; height: calc(var(--u) * 60); border-radius: calc(var(--u) * 14); background: #06130e; border: calc(var(--u) * 4) solid #0d1230;
+  box-shadow: inset 0 calc(var(--u) * 4) 0 rgba(0, 0, 0, 0.6); display: grid; place-items: center; overflow: hidden;
+}
+.panel-scene .pnl-typed {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: calc(var(--u) * 38); font-weight: 800; line-height: 1;
+  letter-spacing: calc(var(--u) * 5); margin-right: calc(var(--u) * -5); color: #7dffb5;
+}
+.panel-scene .pnl-typed:empty::before { content: ''; display: block; width: calc(var(--u) * 22); height: calc(var(--u) * 5); margin-top: calc(var(--u) * 24); border-radius: calc(var(--u) * 3); background: #2f7a55; }
+.panel-scene .pnl-keys { display: grid; grid-template-columns: repeat(3, calc(var(--u) * 68)); grid-auto-rows: calc(var(--u) * 68); gap: calc(var(--u) * 10) calc(var(--u) * 9); padding-bottom: calc(var(--u) * 6); }
+.panel-scene .pnl-key { font-size: calc(var(--u) * 36); font-weight: 800; line-height: 1; display: grid; place-items: center; font-variant-numeric: tabular-nums; }
+
+.panel-scene .pnl-launch { width: calc(var(--u) * 212); height: calc(var(--u) * 100); border-radius: calc(var(--u) * 22); }
+.panel-scene .pnl-launch-art { display: block; width: 100%; height: 100%; pointer-events: none; }
+.panel-scene .pnl-launch.pnl-press { transform: scale(0.97); }
+
+.panel-scene .pnl-light { flex: none; width: calc(var(--u) * 80); height: calc(var(--u) * 120); }
+
+/* ---------- what he has done so far ---------- */
+.panel-scene .pnl-changed { background: rgba(255, 210, 63, 0.1); box-shadow: 0 0 0 calc(var(--u) * 4) var(--gold); }
+.panel-scene .pnl-badge {
+  position: absolute; top: calc(var(--u) * -12); right: calc(var(--u) * -12); z-index: 2; pointer-events: none;
+  min-width: calc(var(--u) * 36); height: calc(var(--u) * 36); padding: 0 calc(var(--u) * 6); border-radius: calc(var(--u) * 18);
+  background: var(--gold); color: var(--gold-ink); font-weight: 800; font-size: calc(var(--u) * 22); line-height: 1;
+  display: grid; place-items: center; box-shadow: 0 calc(var(--u) * 2) 0 rgba(0, 0, 0, 0.35);
+}
+.panel-scene .pnl-badge:empty { display: none; }
+.panel-scene .pnl-show { animation: pnl-show 0.6s ease-out; }
+@keyframes pnl-show { 30% { transform: scale(1.08); box-shadow: 0 0 0 calc(var(--u) * 10) rgba(61, 220, 151, 0.45); } }
+
+/* ---------- not his turn / covered ---------- */
+.panel-scene.pnl-locked .pnl-ctl { opacity: 0.84; }
+.panel-scene .pnl-shutter {
+  position: absolute; inset: calc(var(--u) * -1); z-index: 4; display: none; place-items: center; border-radius: calc(var(--u) * 29);
+  background: repeating-linear-gradient(180deg, #5b679c 0, #5b679c calc(var(--u) * 26), #39437a calc(var(--u) * 26), #39437a calc(var(--u) * 32));
+}
+.panel-scene.pnl-covered .pnl-shutter { display: grid; }
+.panel-scene .pnl-shutter-mark {
+  width: calc(var(--u) * 130); height: calc(var(--u) * 130); border-radius: 50%; display: grid; place-items: center;
+  background: #2c356e; border: calc(var(--u) * 5) solid #0d1230; box-shadow: 0 calc(var(--u) * 6) 0 rgba(0, 0, 0, 0.3);
+  font-size: calc(var(--u) * 84); font-weight: 800; line-height: 1; color: rgba(255, 255, 255, 0.6);
+}

@@ -1,0 +1,51 @@
+/* Activity "paint": a picture of unpainted things, and a shelf of paint pots with a soapy sponge. */
+.paint-scene { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 14px; width: 100%; height: 100%; min-width: 0; justify-items: center; align-items: center; --pot: 92px; --pgap: 12px; }
+.paint-picture { width: 100%; min-height: 0; display: grid; place-items: center; }
+
+/* a painted thing: its sprite is redrawn in the colour, and its tile takes the colour too */
+.paint-scene .obj.painted { border-color: var(--paint); background: rgba(255, 255, 255, 0.16); background: color-mix(in srgb, var(--paint) 24%, rgba(255, 255, 255, 0.13)); }
+.paint-scene .board.covered .obj.painted { border-color: rgba(255, 255, 255, 0.12); background: var(--panel-2); }
+.paint-pop .obj-art { animation: paint-pop 0.3s ease-out; }
+@keyframes paint-pop { 40% { transform: scale(1.22) rotate(-6deg); } }
+
+/* the shelf */
+.paint-shelf {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--pgap);
+  padding: 12px 16px 10px; max-width: 100%;
+  background: var(--panel); border: 2px solid var(--line); border-radius: 28px; box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
+  transition: opacity 0.2s;
+}
+.paint-pot {
+  appearance: none; position: relative; cursor: pointer; padding: 0; flex: none;
+  width: var(--pot); height: var(--pot); min-width: 60px; min-height: 60px;
+  border-radius: 24%; border: 4px solid transparent; background: rgba(255, 255, 255, 0.06);
+  display: grid; place-items: center;
+  transition: transform 0.12s, background 0.15s, border-color 0.15s, opacity 0.2s;
+}
+.paint-pot:active { transform: scale(0.94); }
+.paint-pot-art { width: 90%; height: 90%; pointer-events: none; }
+.paint-pot.on { border-color: var(--gold); background: rgba(255, 210, 63, 0.22); transform: translateY(-12px) scale(1.06); box-shadow: 0 12px 0 -4px rgba(0, 0, 0, 0.28); z-index: 1; }
+/* the brush stands in the pot he has picked */
+.paint-brush { position: absolute; left: 36%; bottom: 50%; width: 84%; height: 84%; pointer-events: none; opacity: 0; transform: translateY(26%) scale(0.6); transition: transform 0.16s ease-out, opacity 0.12s; }
+.paint-pot.on .paint-brush { opacity: 1; transform: none; }
+.paint-sep { width: 4px; height: calc(var(--pot) * 0.7); border-radius: 2px; background: var(--line); flex: none; }
+.paint-wash { border-radius: 50%; background: rgba(134, 189, 255, 0.16); }
+.paint-wash.idle { opacity: 0.55; }
+.paint-pick { animation: paint-pick 0.28s ease-out; }
+@keyframes paint-pick { 45% { transform: translateY(-20px) scale(1.12); } }
+
+/* nothing on the brush yet: the pots bob one after another (twice, then they keep still), so it is plain where to start */
+.paint-scene.need-tool:not(.locked) .paint-pot:not(.paint-wash) { animation: paint-bob 1.5s ease-in-out 2; }
+.paint-scene.need-tool:not(.locked) .paint-pot:nth-child(2) { animation-delay: 0.12s; }
+.paint-scene.need-tool:not(.locked) .paint-pot:nth-child(3) { animation-delay: 0.24s; }
+.paint-scene.need-tool:not(.locked) .paint-pot:nth-child(4) { animation-delay: 0.36s; }
+.paint-scene.need-tool:not(.locked) .paint-pot:nth-child(5) { animation-delay: 0.48s; }
+.paint-scene.need-tool:not(.locked) .paint-pot:nth-child(6) { animation-delay: 0.6s; }
+@keyframes paint-bob { 0%, 60%, 100% { transform: none; } 30% { transform: translateY(-9px); } }
+.paint-hint { animation: paint-hint 0.34s ease-in-out 2; }
+@keyframes paint-hint { 50% { transform: scale(1.05); box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25), 0 0 0 10px rgba(255, 210, 63, 0.3); border-color: var(--gold); } }
+
+/* waiting for the ear, or the voice is talking (but not while the guide is showing the answer) */
+.paint-scene.locked .paint-shelf { opacity: 0.62; }
+.paint-scene.locked.showing .paint-shelf { opacity: 1; }
+.paint-scene.showing .paint-pot:not(.on) { opacity: 0.55; }
