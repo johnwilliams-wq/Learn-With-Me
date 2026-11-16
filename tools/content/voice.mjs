@@ -17,6 +17,7 @@ export const LINES = {
   'hello-first': `${N ? `Hi ${N}!` : 'Hi!'} I am Blip, your guide. Let’s train your super listening. Tap the glowing level to start.`,
   // Said when he touches something before the voice has finished (wording chosen by his parent).
   'wait-please': `${N ? `${N}, please` : 'Please'} try your best to listen until I am finished talking.`,
+  'skip-hint': 'Too easy? Beat the boss to skip ahead. It is the gold star.',
   'reward-won': 'You earned a reward! Go and show a grown-up.',
   'chore-sent': 'Nice work! A grown-up will check it soon.',
   'expect-done': `${named('All done')} Your rewards are unlocked.`,

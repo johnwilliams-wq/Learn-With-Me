@@ -67,6 +67,7 @@ async function go(name, p = {}) {
     current?.destroy?.();
     current = next;
     mount(app, next.el);
+    ctx.prev = ctx.debug.screen; // where he came from
     ctx.debug.screen = name;
     next.shown?.();
   } catch (err) {
@@ -100,7 +101,7 @@ async function boot() {
     ctx.voice = createVoice(audio, catalog);
     if (sandbox) {
       const box = await (await fetch(sandbox, { cache: 'no-store' })).json();
-      const level = { world: 'sandbox', worldName: 'Preview', tipText: '', trials: box.items.length, ...box.level, id: box.level?.id || 'sandbox' };
+      const level = { world: 'sandbox', worldName: 'Preview', tipText: '', trials: box.items.length, ...box.level, id: box.level?.id || 'sandbox', needs: [], needsCount: 0, starter: true };
       ctx.levels = [...ctx.levels, level];
       return void (await go('mission', { levelId: level.id, items: box.items.slice(0, level.trials) }));
     }

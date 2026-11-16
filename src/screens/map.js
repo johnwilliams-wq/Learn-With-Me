@@ -118,6 +118,13 @@ export function mapScreen(ctx) {
     el,
     shown() {
       el.querySelector('.level-node.next')?.scrollIntoView({ block: 'center', inline: 'center' });
+      // Once, after his first mission: tell him about the skip-ahead (the boss is always open).
+      const firstWorld = main[0];
+      if (ctx.prev === 'results' && firstWorld && !s.flags.skipHint && !worldCleared(firstWorld.id, levels, s) && voice.has('skip-hint')) {
+        store.update((st) => { st.flags.skipHint = true; });
+        pulse(el.querySelector(`.world[data-world="${firstWorld.id}"] .level-node.boss`), 'hint', 900);
+        voice.say('skip-hint');
+      }
     },
   };
 }

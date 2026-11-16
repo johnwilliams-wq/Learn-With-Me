@@ -144,7 +144,7 @@ export function createStore(backend) {
       fresh.rewards = { ...fresh.rewards, daily: state.rewards.daily, tiers: state.rewards.tiers, countPerfected: state.rewards.countPerfected };
       fresh.chores = { ...fresh.chores, list: state.chores.list, requirePhoto: state.chores.requirePhoto };
       fresh.expectations = { ...fresh.expectations, list: state.expectations.list, confirm: state.expectations.confirm };
-      fresh.flags = { welcomed: state.flags.welcomed, installHintClosed: state.flags.installHintClosed };
+      fresh.flags = { welcomed: state.flags.welcomed, installHintClosed: state.flags.installHintClosed, unlockAll: state.flags.unlockAll };
       state = fresh;
       save();
       for (const l of listeners) l(state);
