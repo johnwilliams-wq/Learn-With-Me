@@ -91,7 +91,7 @@ export function overview(state) {
   const sum = (list, f) => list.reduce((n, t) => n + f(t), 0);
   const days = Object.values(state.days || {}).filter((d) => d.missions > 0);
   return {
-    missions: (state.missions || []).length,
+    missions: sum(days, (d) => d.missions || 0), // (from the day records: the list of missions itself only keeps the latest few hundred)
     days: days.length,
     minutes: Math.round(sum(days, (d) => d.ms || 0) / 60000),
     trials: trials.length,

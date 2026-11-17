@@ -70,6 +70,13 @@ export function createStore(backend) {
   }
   let state = load();
   const listeners = new Set();
+  // The game open in a second tab on this device writes the same save: take over what it wrote,
+  // or the next change made here would silently undo it.
+  globalThis.addEventListener?.('storage', (e) => {
+    if (e.key !== KEY || e.storageArea !== storage) return;
+    state = load();
+    for (const l of listeners) l(state);
+  });
 
   function load() {
     let raw = null;
@@ -150,18 +157,25 @@ export function createStore(backend) {
       fresh.settings = state.settings;
       fresh.admin = state.admin;
       fresh.rewards = { ...fresh.rewards, daily: state.rewards.daily, tiers: state.rewards.tiers, countPerfected: state.rewards.countPerfected };
-      fresh.chores = { ...fresh.chores, list: state.chores.list, requirePhoto: state.chores.requirePhoto };
+      // (a one-time chore that is finished stays finished: its approval is the record of that)
+      const once = new Set(state.chores.list.filter((c) => c.repeat === 'once').map((c) => c.id));
+      fresh.chores = { ...fresh.chores, list: state.chores.list, requirePhoto: state.chores.requirePhoto,
+        log: state.chores.log.filter((e) => e.status === 'approved' && once.has(e.chore)) };
       fresh.expectations = { ...fresh.expectations, list: state.expectations.list, confirm: state.expectations.confirm };
       fresh.flags = { welcomed: state.flags.welcomed, installHintClosed: state.flags.installHintClosed, unlockAll: state.flags.unlockAll };
       state = fresh;
       save();
       for (const l of listeners) l(state);
     },
-    exportJSON: () => JSON.stringify(state),
+    // The PIN belongs to the device, not to the save: a backup carries none (not even its hash),
+    // and restoring one leaves this device's PIN as it is.
+    exportJSON: () => JSON.stringify({ ...state, admin: undefined }),
     importJSON(text) {
       const parsed = JSON.parse(text);
       if (!parsed || typeof parsed !== 'object' || parsed.v !== 1) throw new Error('Not a Learn With Me backup');
+      const admin = state.admin;
       state = migrate(parsed);
+      state.admin = admin;
       save();
       for (const l of listeners) l(state);
     },

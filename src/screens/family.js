@@ -88,11 +88,14 @@ export function familySection(ctx, redraw) {
   /** A button that asks to be pressed twice before it does something that cannot be taken back. */
   const twice = (label, sure, fn, opts) => button(label, job(async (ev) => {
     const b = ev.currentTarget;
-    if (!b.dataset.sure) {
-      b.dataset.sure = '1';
+    const armed = Number(b.dataset.sure) || 0;
+    if (!armed) {
+      b.dataset.sure = String(Date.now());
       b.textContent = sure;
+      setTimeout(() => { if (b.isConnected && b.dataset.sure) { delete b.dataset.sure; b.textContent = label; } }, 10000); // the warning wears off again
       return ' ';
     }
+    if (Date.now() - armed < 700) return ' '; // the tail of a double tap is not a second press
     return fn();
   }), opts);
   const section = (...kids) => h('section', { class: 'panel family', dataset: { family: st.signedIn ? st.role || 'choose' : 'out' } }, h('h2', {}, 'Family account'), ...kids);

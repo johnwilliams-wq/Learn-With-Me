@@ -96,7 +96,13 @@ export function choreStatus(chore, log, now = new Date()) {
   const week = weekKey(now);
   const mine = log.filter((e) => e.chore === chore.id && (chore.repeat === 'daily' ? e.day === day : chore.repeat === 'weekly' ? e.week === week : e.t >= (chore.since || 0)));
   const last = mine[mine.length - 1] || null;
-  if (!last) return { state: 'open', entry: null };
+  if (!last) {
+    // Nothing sent in this period. If the last thing a grown-up did with this chore was to send it
+    // back - the next morning, say, with a note - he must still hear why, and may try again.
+    const all = log.filter((e) => e.chore === chore.id);
+    const prev = all[all.length - 1] || null;
+    return prev && prev.status === 'rejected' && prev.t >= (chore.since || 0) ? { state: 'rejected', entry: prev } : { state: 'open', entry: null };
+  }
   if (last.status === 'pending') return { state: 'pending', entry: last };
   if (last.status === 'approved') return { state: chore.repeat === 'once' ? 'finished' : 'approved', entry: last };
   return { state: 'rejected', entry: last };
@@ -109,8 +115,26 @@ export function submitChore(state, chore, photoId, now = new Date()) {
     t: +now, day: todayKey(now), week: weekKey(now), status: 'pending', photo: photoId || null, note: '',
   };
   state.chores.log.push(entry);
-  if (state.chores.log.length > 300) state.chores.log.splice(0, state.chores.log.length - 300);
+  trimLog(state);
   return entry;
+}
+
+/**
+ * The chore log is kept to a sensible length - but never by cutting away an entry that still
+ * decides something: one that waits for a check, or the approval that finished a one-time chore
+ * (without it the chore would be back on his list, to be done and paid a second time).
+ */
+function trimLog(state, most = 300) {
+  const log = state.chores.log;
+  let over = log.length - most;
+  if (over <= 0) return;
+  const once = new Set(state.chores.list.filter((c) => c.repeat === 'once').map((c) => c.id));
+  const decides = (e) => e.status === 'pending' || (e.status === 'approved' && once.has(e.chore));
+  state.chores.log = log.filter((e) => {
+    if (over <= 0 || decides(e)) return true;
+    over--;
+    return false;
+  });
 }
 
 /**
@@ -144,7 +168,9 @@ export function decideChore(state, entryId, approve, note = '', now = new Date()
  */
 export function expectationsToday(state, now = new Date()) {
   const ticks = state.expectations.days[todayKey(now)] || {};
-  const items = state.expectations.list.map((e) => ({ ...e, state: ticks[e.id] || 'open' }));
+  // (a tick that was waiting for a grown-up's OK counts as done once "needs my OK" is switched off)
+  const stateOf = (tick) => (tick === 'pending' && !state.expectations.confirm ? 'done' : tick || 'open');
+  const items = state.expectations.list.map((e) => ({ ...e, state: stateOf(ticks[e.id]) }));
   const done = items.filter((i) => i.state === 'done').length;
   return { items, total: items.length, done, waiting: items.filter((i) => i.state === 'pending').length, allDone: done === items.length };
 }
@@ -156,7 +182,9 @@ function dayTicks(state, now) {
   const days = state.expectations.days;
   const key = todayKey(now);
   days[key] ||= {};
-  for (const old of Object.keys(days).sort().slice(0, -14)) delete days[old]; // two weeks of history is plenty
+  // two weeks of history is plenty - but the day being written is never the one that goes
+  // (it can be older than fourteen others: a clock that was put back, a late word from another device)
+  for (const old of Object.keys(days).filter((k) => k !== key).sort().slice(0, -13)) delete days[old];
   return days[key];
 }
 
@@ -263,7 +291,11 @@ export function editItem(state, kind, id, changes, now = new Date()) {
   if (!next.title) return null;
   const oldPhoto = item.photo && item.photo !== next.photo ? item.photo : null;
   // A chore that becomes "one time only" starts afresh: what was approved while it still repeated does not finish it.
-  if (kind === 'chore' && next.repeat === 'once' && item.repeat !== 'once') next.since = +now;
+  // (An entry of it that is waiting for a check still belongs to it: otherwise he could send it a second time.)
+  if (kind === 'chore' && next.repeat === 'once' && item.repeat !== 'once') {
+    const waiting = state.chores.log.find((e) => e.chore === id && e.status === 'pending');
+    next.since = waiting ? waiting.t : +now;
+  }
   Object.assign(item, next);
   if (kind === 'daily' || kind === 'tier') {
     // A reward he has won and is still owed follows the new wording (a spelling fix must reach it too);

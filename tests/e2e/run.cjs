@@ -435,15 +435,25 @@ scenario('12 parent area: PIN, settings, backup / erase / restore', async (t) =>
   t.must(text.length > 20 && JSON.parse(text).xp === 95, 'Make backup did not put the progress in the box');
   await page.click('[data-act="erase"]');
   t.check((await getState(page)).xp === 95, 'one tap on Erase must not erase yet');
+  await page.click('[data-act="erase"]'); // straight after: the tail of a double tap
+  t.check((await getState(page)).xp === 95, 'a double tap on Erase must not erase either: the second press only counts after a moment');
+  await sleep(800);
   await page.click('[data-act="erase"]');
   const wiped = await getState(page);
   t.check(wiped.xp === 0 && !wiped.levels.w1l1 && wiped.cards.length === 0, 'two taps on Erase should wipe his progress');
+  t.check(/erased/.test((await page.textContent('.backup ~ .gate-msg')) || ''), 'Erase should say what it did');
+  t.check(!('admin' in JSON.parse(text)) && !text.includes(saved.admin.hash), 'a backup must not carry the PIN - not even its hash');
   t.check(wiped.admin.hash === saved.admin.hash && wiped.settings.dailyMissions === 5, 'Erase must keep the PIN and the settings');
   t.check((await page.inputValue('.backup')) === text, 'the backup box must keep its text after Erase');
   await page.click('button:has-text("Restore")');
   let s = await getState(page);
   const restored = () => s.xp === 95 && s.levels.w1l1?.stars === 3 && s.cards.length === 1 && s.settings.dailyMissions === 5;
   t.check(restored(), 'Make backup -> Erase -> Restore did not bring the progress back');
+  t.check(s.admin.hash === saved.admin.hash && /restored/.test((await page.textContent('.backup ~ .gate-msg')) || ''), 'Restore must leave this device\'s PIN alone, and say that it worked');
+  // an older backup that still carries a PIN (or one without any) must not replace or remove this device's PIN
+  await page.fill('.backup', JSON.stringify({ ...JSON.parse(text), admin: { hash: 'someone-elses-hash', salt: 'x', tries: 0, lockUntil: 0 } }));
+  await page.click('button:has-text("Restore")');
+  t.check((await getState(page)).admin.hash === saved.admin.hash, 'a backup that carries another PIN must not replace this device\'s PIN');
   await page.reload();
   await page.waitForSelector('.screen.title .btn-huge');
   s = await getState(page);
@@ -820,6 +830,10 @@ scenario('18 rewards and chores: set up by a grown-up, earned by him, checked an
   await H.openTab(page, 'rewards');
   t.check((await page.locator('[data-earned]').count()) === 2, 'two rewards should be waiting to be handed out');
   await page.click('[data-earned] >> nth=0 >> button');
+  await page.click('[data-earned] >> nth=0 >> button'); // straight after: the tail of a double tap - by now the NEXT reward sits under the finger
+  s = await getState(page);
+  t.check(s.rewards.earned.filter((e) => e.given).length === 1, 'a double tap on Given must hand out one reward - not the next one as well');
+  await sleep(600);
   await page.click('[data-earned] >> nth=0 >> button');
   s = await getState(page);
   t.check(s.rewards.earned.every((e) => e.given), 'marking as given should clear the list');
@@ -1463,6 +1477,139 @@ scenario('23 family account: a grown-up signs in on their own device and manages
   t.check((await status(ipad)).role === 'player', 'his device should still be signed in after the app is opened again');
   s = await getState(ipad);
   t.check(s.xp === 484 && s.rewards.tiers.length === 4, `and nothing of his should have changed by that (xp ${s.xp}, ${s.rewards.tiers.length} rewards)`);
+});
+
+// ---------------------------------------------------------------------------------------------
+scenario('24 the parent area, as a bug hunt left it: double taps, a phone held upright, typed text that stays, the page staying where it is', async (t) => {
+  const pad = (n) => String(n).padStart(2, '0');
+  const now = new Date();
+  const day = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
+  const week = `w${mon.getFullYear()}-${pad(mon.getMonth() + 1)}-${pad(mon.getDate())}`;
+  const tier = (n, title, points) => ({ id: `tier0000${n}`, title, icon: '🎁', note: '', points, photo: null });
+  const won = (n, title) => ({ id: `ttier0000${n}`, src: 'tier', ref: `tier0000${n}`, title, icon: '🎁', day, t: Date.now(), given: false });
+  const sent = (n, title) => ({ id: `entry000${n}`, chore: `chore000${n}`, title, icon: '✅', points: 30, reward: '', t: Date.now() - 60000, day, week, status: 'pending', photo: null, note: '' });
+  const trial = (i) => ({ t: i, l: 'camp1', i: `x${i}`, k: ['detail'], c1: 1, c2: 0, e: '', rp: 0, et: (i < 60 ? i % 2 === 0 : i % 10 === 0) ? 1 : 0, ms: 900 }); // he used to jump in early on half his turns, now on one in ten
+  const state = { flags: { welcomed: true }, xp: 640, settings: { hardStop: true, dailyMissions: 3 },
+    trials: Array.from({ length: 120 }, (_, i) => trial(i)),
+    rewards: { daily: [{ id: 'daily0001', title: 'Game time', icon: '🎮', note: '', missions: 2 }, { id: 'daily0002', title: 'Big treat', icon: '🍦', note: '', missions: 5 }],
+      tiers: [tier(1, 'One', 100), tier(2, 'Two', 200), tier(3, 'Three', 3000), tier(4, 'Four', 4000), tier(5, 'Five', 5000), tier(6, 'Six', 6000)],
+      earned: [won(1, 'One'), won(2, 'Two')] },
+    chores: { list: [{ id: 'chore0001', title: 'Make your bed', icon: '🛏️', note: '', points: 30, repeat: 'daily', reward: '' }, { id: 'chore0002', title: 'Feed the dog', icon: '🐕', note: '', points: 30, repeat: 'daily', reward: '' }],
+      log: [sent(1, 'Make your bed'), sent(2, 'Feed the dog')] },
+    expectations: { list: [{ id: 'expect001', title: 'Brush your teeth', icon: '🦷', note: '' }, { id: 'expect002', title: 'Pack your bag', icon: '🎒', note: '' }] } };
+  const rowOf = (page, title) => page.locator(`.admin-row:not([data-earned]):has(b:text-is("${title}"))`);
+  const top = (page) => page.evaluate(() => document.querySelector('.parent-body').scrollTop);
+
+  // --- a phone held upright: every button of the map is on the screen (his cards and For parents used to be off it)
+  const small = await t.open({ state, viewport: { width: 390, height: 844 } });
+  await toMap(small.page);
+  for (const name of ['rewards', 'chores', 'expectations', 'collection', 'parent']) {
+    const box = await small.page.locator(`[data-open="${name}"]`).boundingBox();
+    t.check(!!box && box.x >= 0 && box.x + box.width <= 390, `on a phone the "${name}" button of the map should be on the screen (${box ? `${Math.round(box.x)}..${Math.round(box.x + box.width)}` : 'missing'})`);
+  }
+  await H.openParent(small.page);
+  await H.openTab(small.page, 'chores');
+  const howOften = await small.page.locator('[data-form="chore"] select').last().boundingBox();
+  t.check(howOften.width >= 165, `the "How often" choice should be wide enough for "One time only" (${Math.round(howOften.width)}px)`);
+  t.check((await small.page.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 0, 'the parent area must not scroll sideways on a phone');
+
+  // --- the tablet
+  const { page } = await t.open({ state });
+  await toMap(page);
+  await H.openParent(page);
+  t.check(/jumping in early \(down from 50%\)/.test(await page.textContent('.parent-body')), 'the Progress tab should say that jumping in early went DOWN when it fell from 50% to 10%');
+
+  // a double tap acts once, on the row that was tapped
+  await H.openTab(page, 'rewards');
+  await page.locator('[data-earned] [data-act="given"]').first().dblclick();
+  let s = await getState(page);
+  t.check(s.rewards.earned.filter((e) => e.given).length === 1, 'a double tap on Given must hand out one reward, not the one below it as well');
+
+  // a button on the tab leaves the page where it is
+  await page.evaluate(() => { const b = document.querySelector('.parent-body'); b.scrollTop = b.scrollHeight; });
+  const before = await top(page);
+  await rowOf(page, 'Five').locator('[data-act="edit"]').click();
+  const open = await page.locator('.admin-row.is-open').boundingBox();
+  t.check(before > 80 && Math.abs((await top(page)) - before) < 80 && open.y > 0 && open.y < 820, `Edit should open the row where it is, not throw the page back to the top (was at ${before}, now ${await top(page)}, form at ${Math.round(open.y)})`);
+
+  // what is typed stays until it is saved or cancelled - whatever else is pressed on the tab
+  await page.fill('[data-edit="tier"] input[type="text"]', 'Five, renamed');
+  await rowOf(page, 'Four').locator('[data-act="edit"]').click();
+  t.check((await page.inputValue('[data-edit="tier"] input[type="text"]')) === 'Five, renamed' && /Save or cancel this one first/.test(await page.textContent('.admin-row.is-open .form-msg')),
+    'pressing Edit on another row must not drop a change that is half made: it should ask to save or cancel first');
+  await page.click('.parts [data-part="daily"]');
+  t.check((await page.locator('[data-section="mine"]').count()) === 1, 'nor may switching to the daily rewards drop it');
+  await page.click('[data-edit="tier"] [data-act="cancel"]');
+  t.check((await rowOf(page, 'Five').count()) === 1 && (await getState(page)).rewards.tiers.some((x) => x.title === 'Five'), 'Cancel should leave the reward as it was');
+  await page.fill('[data-form="tier"] input[type="text"]', 'Half typed');
+  await page.fill('[data-form="tier"] input[type="number"]', '2500');
+  await sleep(600);
+  await rowOf(page, 'Three').locator('[data-act="delete"]').dblclick();
+  s = await getState(page);
+  t.check(s.rewards.tiers.length === 5 && !s.rewards.tiers.some((x) => x.title === 'Three') && s.rewards.tiers.some((x) => x.title === 'Four'), `a double tap on Delete must delete one reward, not the next one too (left: ${s.rewards.tiers.map((x) => x.title).join(', ')})`);
+  t.check((await page.inputValue('[data-form="tier"] input[type="text"]')) === 'Half typed' && (await page.inputValue('[data-form="tier"] input[type="number"]')) === '2500', 'what was typed into the add form must survive another button on the tab');
+  await H.rewardsPart(page, 'daily');
+  t.check(/out of reach/.test(await rowOf(page, 'Big treat').textContent()) && !/out of reach/.test(await rowOf(page, 'Game time').textContent()),
+    'a daily reward that needs more missions than "Lock for the day" allows should say that it is out of reach');
+  await H.rewardsPart(page, 'mine');
+  t.check((await page.inputValue('[data-form="tier"] input[type="text"]')) === 'Half typed', 'and it must still be there after a look at the daily rewards');
+  await page.click('[data-form="tier"] button[type="submit"]');
+  await rowOf(page, 'Half typed').waitFor();
+  t.check((await page.inputValue('[data-form="tier"] input[type="text"]')) === '', 'once it is added the form should be empty again');
+
+  // chores: a note typed for one chore survives the check of another; a double tap checks one
+  await H.openTab(page, 'chores');
+  await page.fill('.check-card[data-entry="entry0002"] input', 'The water bowl too');
+  await page.locator('.check-card[data-entry="entry0001"] [data-act="approve"]').dblclick();
+  s = await getState(page);
+  t.check(s.chores.log.filter((e) => e.status === 'approved').length === 1 && s.chores.log.find((e) => e.id === 'entry0002').status === 'pending' && s.xp === 670,
+    `a double tap on Approve must approve one chore, not the next one unseen (xp ${s.xp})`);
+  t.check((await page.inputValue('.check-card[data-entry="entry0002"] input')) === 'The water bowl too', 'the note typed for the other chore must still be there');
+  await sleep(600);
+  await page.click('.check-card[data-entry="entry0002"] [data-act="reject"]');
+  t.check((await getState(page)).chores.log.find((e) => e.id === 'entry0002').note === 'The water bowl too', 'and it should go with "Not yet"');
+
+  // expectations: a double tap on Mark done marks it done (the second tap used to land on "Not done")
+  await H.openTab(page, 'expectations');
+  await page.locator('[data-expect="expect001"] [data-act="ok"]').dblclick();
+  s = await getState(page);
+  t.check(s.expectations.days[day]?.expect001 === 'done', 'a double tap on Mark done should leave it done');
+
+  // the PIN: a mismatch says so; OK with nothing typed is not a try
+  await H.openTab(page, 'settings');
+  await page.click('[data-act="change-pin"]');
+  await H.typePin(page, '1234');
+  await H.typePin(page, '9999');
+  await page.waitForFunction(() => /not the same/.test(document.querySelector('.gate-msg')?.textContent || ''));
+  await page.click('.sub-head .icon-btn');
+  await page.click('[data-open="parent"]');
+  await page.waitForSelector('.pin-pad');
+  await page.click('.pin-key[data-key="ok"]');
+  await page.click('.pin-key[data-key="ok"]');
+  t.check((await getState(page)).admin.tries === 0, 'OK with nothing typed must not count as a wrong try');
+  await H.typePin(page, '246810');
+  await page.waitForSelector('.tabs:not([hidden])', { timeout: 5000 }).catch(() => t.check(false, 'the PIN that was never replaced should still open the parent area'));
+
+  // "total practice" is time spent playing: a mission left open for three hours is not three hours of practice
+  await page.click('.sub-head .icon-btn');
+  await page.waitForSelector('.screen.map');
+  await page.evaluate(() => { const real = Date.now.bind(Date); let ahead = 0; Date.now = () => real() + ahead; globalThis.__later = (ms) => { ahead += ms; }; });
+  await openLevel(page, 'camp1');
+  await page.waitForSelector('.overlay.intro .btn-primary:not([disabled])', { timeout: 20000 });
+  await page.click('.overlay.intro .btn-primary');
+  const turns = await page.evaluate(() => globalThis.__lwm.debug.mission.items.length);
+  for (let i = 0; i < turns; i++) {
+    await waitPhase(page, 'ready');
+    if (i === 2) await page.evaluate(() => globalThis.__later(3 * 3600000)); // he is called away, the game stays open
+    await page.click('.btn-listen', { force: true });
+    await waitPhase(page, 'respond');
+    await answer(page);
+  }
+  await page.waitForSelector('.screen.results', { timeout: 30000 });
+  s = await getState(page);
+  const spent = s.missions[s.missions.length - 1].ms;
+  t.check(spent > 0 && spent < 10 * 60000 && s.days[day].ms < 10 * 60000, `a mission with a three-hour break in it should count as a few minutes of practice (counted ${Math.round(spent / 60000)} min)`);
 });
 
 async function main() {

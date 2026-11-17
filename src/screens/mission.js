@@ -42,7 +42,16 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
   let firstError = '';
   let answerStart = 0;
   const results = [];
-  const startedAt = Date.now();
+  // Time really spent on this mission: each stretch between two turns counts, up to two minutes of
+  // it, and none of the time the game was out of sight. (He chooses himself when to tap the ear - a
+  // mission left open over lunch is not three hours of practice.)
+  let active = 0;
+  let mark = Date.now();
+  const tally = () => {
+    const now = Date.now();
+    active += Math.max(0, Math.min(now - mark, 120000));
+    mark = now;
+  };
   let gate = Promise.resolve(); // held shut while the "leave?" box is open
   let talking = false; // the instruction is being spoken right now (not the short pause after it)
   let told = 0; // when the play area last reported a touch itself (see onStray)
@@ -252,6 +261,7 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
     const r = { correctFirst, correctSecond, earlyTaps, replays, error: firstError };
     results[index] = r;
     store.recordTrial({ level: levelId, item: item.id, skills: item.s, ...r, ms });
+    tally();
     renderPips();
   }
 
@@ -340,7 +350,8 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
     const prevStars = before.levels[levelId]?.stars || 0;
     const card = nextCard(before.cards);
     const openBefore = openCount(ctx.levels, before);
-    store.recordMission({ level: levelId, ...sum, ms: Date.now() - startedAt, counted: missionCounts(prevStars, before.rewards) });
+    tally();
+    store.recordMission({ level: levelId, ...sum, ms: active, counted: missionCounts(prevStars, before.rewards) });
     let won = [];
     store.update((s) => {
       if (card) s.cards.push(card.id);
@@ -364,7 +375,12 @@ export async function missionScreen(ctx, { levelId, items: given = null }) {
           h('button', { class: 'btn', type: 'button', onclick: () => ctx.go('map') }, h('span', { class: 'btn-icon', html: iconSVG('home') }), h('span', {}, 'Leave')))));
     root.append(overlay);
   }
-  const onHide = () => { if (document.hidden) audio.stop(); };
+  const onHide = () => {
+    if (document.hidden) {
+      audio.stop();
+      tally();
+    } else mark = Date.now(); // back in sight: the time away does not count
+  };
   const onResize = () => view?.fit(boardWrap);
   document.addEventListener('visibilitychange', onHide);
   window.addEventListener('resize', onResize);

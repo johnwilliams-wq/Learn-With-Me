@@ -42,7 +42,7 @@ export function snapshot(state, now = new Date()) {
     expectations: { list: state.expectations.list, days: { [today]: state.expectations.days[today] || {} }, confirm: !!state.expectations.confirm },
     summary: {
       missions: days.reduce((n, d) => n + (d.missions || 0), 0),
-      days: days.length,
+      days: days.filter((d) => d.missions > 0).length, // days on which he finished a mission - the number his own device shows
       minutes: Math.round(days.reduce((n, d) => n + (d.ms || 0), 0) / 60000),
       last: state.missions.length ? state.missions[state.missions.length - 1].t : 0,
     },

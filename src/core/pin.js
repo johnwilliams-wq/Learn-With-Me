@@ -40,7 +40,8 @@ export async function setPin(store, pin) {
 /** @returns {'ok' | 'wrong' | 'locked'} - five wrong tries lock the door for half a minute. */
 export async function checkPin(store, pin, now = Date.now()) {
   const a = store.get().admin;
-  if (a.lockUntil && now < a.lockUntil) return 'locked';
+  // (never longer than the lock itself: a clock that was put back must not shut a grown-up out for hours)
+  if (a.lockUntil && now < a.lockUntil && a.lockUntil - now <= LOCK_MS) return 'locked';
   const ok = (await digest(`${a.salt}:${pin}`)) === a.hash;
   store.update((s) => {
     if (ok) {

@@ -34,6 +34,7 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
   const tabs = h('nav', { class: 'tabs', hidden: true });
   let tab = startTab || 'progress';
   let backupText = ''; // survives a redraw of the Settings tab, so Make backup -> Erase -> Restore works
+  let backupSaid = ''; // what Erase / Restore just did (they redraw the tab, so the line must survive that too)
   const el = h('div', { class: 'screen parent' },
     h('header', { class: 'sub-head' },
       h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Back', html: iconSVG('back'), onclick: () => ctx.go('map') }),
@@ -68,7 +69,7 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
     mount(tabs, [['progress', 'Progress', 0], ['rewards', 'Rewards', b.rewardsOwed], ['chores', 'Chores', b.toCheck], ['expectations', 'Expectations', b.toConfirm], ['settings', 'Settings', 0]].map(([id, label, n]) =>
       h('button', { class: `tab${id === tab ? ' on' : ''}`, type: 'button', dataset: { tab: id }, onclick: () => show(id) }, label, n ? h('span', { class: 'dot' }, String(n)) : null)));
     tabs.hidden = false;
-    const refresh = () => show(tab);
+    const refresh = () => show(tab, { keep: true }); // a button on the tab redraws it where it is - only another tab starts at the top
     mount(body, tab === 'settings' ? null : familyNote(ctx),
       tab === 'rewards' ? rewardsTab(ctx, refresh) : tab === 'chores' ? choresTab(ctx, refresh) : tab === 'expectations' ? expectationsTab(ctx, refresh) : tab === 'settings' ? settingsTab(refresh) : progressTab());
     body.scrollTop = keep ? at : 0;
@@ -97,11 +98,11 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
     const recent = s.trials.slice(-150);
     const skills = skillStats(recent);
     const errors = errorStats(recent);
-    const trend = (now, before, lowerIsBetter) => {
+    const trend = (now, before) => {
       if (before === null) return '';
       const d = now - before;
       if (Math.abs(d) < 5) return ' (steady)';
-      return (d > 0) !== !!lowerIsBetter ? ` (up from ${before}%)` : ` (down from ${before}%)`;
+      return d > 0 ? ` (up from ${before}%)` : ` (down from ${before}%)`; // (says which way the number went; whether that is good is for the reader)
     };
     const stat = (value, label) => h('div', { class: 'stat' }, h('b', {}, String(value)), h('span', {}, label));
     return [
@@ -109,7 +110,7 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
         h('div', { class: 'stats' },
           stat(o.missions, 'missions'), stat(o.days, 'days played'), stat(`${o.minutes} min`, 'total practice'),
           stat(`${s.xp}`, `points (${rank.name})`), stat(o.trials ? `${o.firstPct}%` : '-', 'right on the first try'), stat(o.trials ? `${o.earlyPct}%` : '-', 'turns he jumped in early')),
-        o.trials ? h('p', { class: 'fine' }, `Based on his last ${Math.min(60, o.trials)} turns. First-try accuracy${trend(o.firstPct, o.prevPct, false)}; jumping in early${trend(o.earlyPct, o.prevEarlyPct, true)}; asked to hear it again on ${o.replayPct}% of turns (asking again is a good habit). Levels get harder as he goes, so a small dip after a new level opens is normal.`) : null),
+        o.trials ? h('p', { class: 'fine' }, `Based on his last ${Math.min(60, o.trials)} turns. First-try accuracy${trend(o.firstPct, o.prevPct)}; jumping in early${trend(o.earlyPct, o.prevEarlyPct)}; asked to hear it again on ${o.replayPct}% of turns (asking again is a good habit). Levels get harder as he goes, so a small dip after a new level opens is normal.`) : null),
       section('What stands out', h('ul', { class: 'obs' }, observations(s).map((t) => h('li', {}, t)))),
       section('By skill (right on the first try)',
         skills.length
@@ -140,7 +141,8 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
     daily.value = String(s.settings.dailyMissions || 3);
     daily.addEventListener('change', () => store.update((st) => { st.settings.dailyMissions = Number(daily.value); }));
     const backup = h('textarea', { class: 'backup', rows: 3, placeholder: 'Paste a backup here, then press Restore', 'aria-label': 'Backup text' });
-    const backupMsg = h('p', { class: 'gate-msg' });
+    const backupMsg = h('p', { class: 'gate-msg', role: 'status' }, backupSaid);
+    backupSaid = '';
     backup.value = backupText;
     backup.addEventListener('input', () => { backupText = backup.value; });
     const afar = family.desk().remote;
@@ -156,7 +158,7 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
         toggle('Unlock every level', (st) => st.flags.unlockAll, (st, v) => { st.flags.unlockAll = v; }, 'Lets you jump anywhere. Leave off for normal step-by-step progress.'),
         h('div', { class: 'row', style: { justifyContent: 'flex-start' } }, changePinButton(ctx, body, () => show('settings')))),
       section('Backup',
-        h('p', { class: 'fine' }, 'His progress is stored only on the device he plays on. Copy a backup if you want to move it or keep it safe. (Chore photos, reward pictures and the family account sign-in are not part of a backup.)'),
+        h('p', { class: 'fine' }, 'His progress is stored only on the device he plays on. Copy a backup if you want to move it or keep it safe. (Chore photos, reward pictures, the PIN and the family account sign-in are not part of a backup.)'),
         h('div', { class: 'row' },
           h('button', { class: 'btn', type: 'button', onclick: async () => {
             backup.value = backupText = store.exportJSON();
@@ -169,16 +171,29 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
               const st = store.get(); // pictures that the restored save does not point to are of no use any more
               keepOnlyPhotos([...st.rewards.tiers.map((t) => t.photo), ...st.chores.log.map((e) => e.photo)]);
               ctx.applySettings();
+              backupSaid = 'The backup has been restored. (This device keeps its own PIN.)';
               refresh();
             }
             catch { backupMsg.textContent = 'That does not look like a backup.'; }
           } }, 'Restore'),
           h('button', { class: 'btn btn-danger', type: 'button', dataset: { act: 'erase' }, onclick: (e) => {
+            // Two presses, with a moment between them: a double tap must not erase, and the warning wears off again.
             const b = e.currentTarget;
-            if (b.dataset.sure) { store.resetProgress(); ctx.applySettings(); refresh(); }
-            else { b.dataset.sure = '1'; b.textContent = 'Tap again to erase his progress'; }
+            const armed = Number(b.dataset.sure) || 0;
+            if (armed && Date.now() - armed > 700) {
+              store.resetProgress();
+              const st = store.get(); // photos of chores that were waiting for a check have nothing pointing to them any more
+              keepOnlyPhotos([...st.rewards.tiers.map((t) => t.photo), ...st.chores.log.map((x) => x.photo)]);
+              ctx.applySettings();
+              backupSaid = 'His progress has been erased.';
+              refresh();
+            } else if (!armed) {
+              b.dataset.sure = String(Date.now());
+              b.textContent = 'Tap again to erase his progress';
+              setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = 'Erase his progress'; } }, 10000);
+            }
           } }, 'Erase his progress')),
-        h('p', { class: 'fine' }, 'Erasing clears his levels, points, cards and history. Your rewards, chores, expectations, settings and PIN are kept.'),
+        h('p', { class: 'fine' }, 'Erasing clears his levels, points, cards and history - and with them the rewards waiting to be handed out, chores waiting for a check and today\'s ticks. Your rewards, chores, expectations, settings and PIN are kept.'),
         backup, backupMsg),
       section('About this game',
         h('p', { class: 'fine' }, 'Each turn follows one routine: he chooses when to listen, waits while the voice talks, then does what was said. Levels add one difficulty at a time: more details, more steps, tricky words (not, except, before, after, if), listening from memory, and stories. A level opens when the one before it earns two stars, or after a few honest tries, so he is never stuck.'),
