@@ -398,7 +398,7 @@ async function readScreens(page, opts = {}) {
     out.parent.tabs = await page.evaluate(() => [...document.querySelectorAll('.tab')].map((t) => t.textContent.trim()));
     out.parent.stats = await page.evaluate(() => [...document.querySelectorAll('.stat')].map((s) => `${s.querySelector('b').textContent} ${s.querySelector('span').textContent}`));
     await openTab(page, 'rewards');
-    out.parent.rewards = await page.evaluate(() => {
+    const readRewards = () => page.evaluate(() => {
       const sec = (title) => [...document.querySelectorAll('.parent-body section.panel')].find((s) => s.querySelector('h2')?.textContent.startsWith(title));
       const rows = (s) => [...(s?.querySelectorAll('.admin-row') || [])].map((r) => `${r.querySelector('.emoji').textContent} ${r.querySelector('b').textContent} | ${r.querySelector('small').textContent}`);
       return {
@@ -409,6 +409,16 @@ async function readScreens(page, opts = {}) {
         countRepeats: sec('Daily rewards')?.querySelector('label.setting input')?.checked ?? null,
       };
     });
+    out.parent.rewards = await readRewards();
+    if (await page.locator('.parts [data-part]').count()) {
+      // Later versions give the two kinds of reward a section each, with a switch between them: read both.
+      await page.click('.parts [data-part="daily"]');
+      await page.waitForSelector('[data-section="daily"]');
+      const daily = await readRewards();
+      await page.click('.parts [data-part="mine"]');
+      await page.waitForSelector('[data-section="mine"]');
+      out.parent.rewards = { ...(await readRewards()), daily: daily.daily, countRepeats: daily.countRepeats };
+    }
     await shot('handOut');
     await openTab(page, 'chores');
     if (await page.locator('.check-card').count()) await page.waitForSelector('.check-card img', { timeout: 5000 }).catch(() => {});
