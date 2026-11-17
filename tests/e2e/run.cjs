@@ -441,7 +441,7 @@ scenario('12 parent area: PIN, settings, backup / erase / restore', async (t) =>
   await page.click('[data-act="erase"]');
   const wiped = await getState(page);
   t.check(wiped.xp === 0 && !wiped.levels.w1l1 && wiped.cards.length === 0, 'two taps on Erase should wipe his progress');
-  t.check(/erased/.test((await page.textContent('.backup ~ .gate-msg')) || ''), 'Erase should say what it did');
+  t.check(/erased/.test((await page.textContent('.backup-said')) || ''), 'Erase should say what it did');
   t.check(!('admin' in JSON.parse(text)) && !text.includes(saved.admin.hash), 'a backup must not carry the PIN - not even its hash');
   t.check(wiped.admin.hash === saved.admin.hash && wiped.settings.dailyMissions === 5, 'Erase must keep the PIN and the settings');
   t.check((await page.inputValue('.backup')) === text, 'the backup box must keep its text after Erase');
@@ -449,7 +449,7 @@ scenario('12 parent area: PIN, settings, backup / erase / restore', async (t) =>
   let s = await getState(page);
   const restored = () => s.xp === 95 && s.levels.w1l1?.stars === 3 && s.cards.length === 1 && s.settings.dailyMissions === 5;
   t.check(restored(), 'Make backup -> Erase -> Restore did not bring the progress back');
-  t.check(s.admin.hash === saved.admin.hash && /restored/.test((await page.textContent('.backup ~ .gate-msg')) || ''), 'Restore must leave this device\'s PIN alone, and say that it worked');
+  t.check(s.admin.hash === saved.admin.hash && /restored/.test((await page.textContent('.backup-said')) || ''), 'Restore must leave this device\'s PIN alone, and say that it worked');
   // an older backup that still carries a PIN (or one without any) must not replace or remove this device's PIN
   await page.fill('.backup', JSON.stringify({ ...JSON.parse(text), admin: { hash: 'someone-elses-hash', salt: 'x', tries: 0, lockUntil: 0 } }));
   await page.click('button:has-text("Restore")');

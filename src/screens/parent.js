@@ -35,6 +35,7 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
   let tab = startTab || 'progress';
   let backupText = ''; // survives a redraw of the Settings tab, so Make backup -> Erase -> Restore works
   let backupSaid = ''; // what Erase / Restore just did (they redraw the tab, so the line must survive that too)
+  let eraseArmed = 0; // when "Erase his progress" was pressed for the first time (a redraw must not forget it)
   const el = h('div', { class: 'screen parent' },
     h('header', { class: 'sub-head' },
       h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Back', html: iconSVG('back'), onclick: () => ctx.go('map') }),
@@ -54,13 +55,38 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
   const touched = (e) => { const form = e.target.closest?.('form'); if (form) form.dataset.dirty = '1'; };
   body.addEventListener('input', touched);
   body.addEventListener('change', touched);
+  // A double tap: after the first tap the tab has been redrawn and something else sits under the
+  // finger - the second tap would hand out, approve, delete or save THAT. A press on the same spot
+  // within half a second of one whose button has since been redrawn away is not a second press.
+  // (A press elsewhere, or on a button that is still there - a key of the PIN pad - is.)
+  let pressed = { t: 0, x: 0, y: 0, on: null };
+  body.addEventListener('click', (e) => {
+    const t = performance.now();
+    if (t - pressed.t < 500 && Math.hypot(e.clientX - pressed.x, e.clientY - pressed.y) < 40 && pressed.on && !pressed.on.isConnected) {
+      e.stopPropagation();
+      e.preventDefault();
+      return;
+    }
+    pressed = { t, x: e.clientX, y: e.clientY, on: e.target };
+  }, true);
+
   const stopNews = family.subscribe((what) => {
-    if (!open || typing() || (what !== 'data' && tab !== 'settings')) return;
-    show(tab, { keep: true });
+    if (!open) return;
+    if (!typing() && (what === 'data' || tab === 'settings')) return void show(tab, { keep: true });
+    // Only how the account is doing has changed (or something is being typed): the note above his
+    // lists is brought up to date on its own - how long ago his device reported, what is waiting.
+    const old = body.querySelector('[data-note="family"]');
+    const note = tab === 'settings' ? null : familyNote(ctx);
+    if (old && note) old.replaceWith(note);
+    else if (old) old.remove();
+    else if (note) body.prepend(note);
   });
 
   function show(which, { keep = false } = {}) {
-    if (which !== tab) closeForms(); // a form left open on another tab does not come back
+    if (which !== tab) {
+      closeForms(); // a form left open on another tab does not come back
+      pressed.t = 0; // (and a press on the new tab is never the tail of one on the old)
+    }
     if (!keep) family.kick('look'); // a grown-up is looking: fetch what is new
     open = true;
     tab = which;
@@ -141,10 +167,11 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
     daily.value = String(s.settings.dailyMissions || 3);
     daily.addEventListener('change', () => store.update((st) => { st.settings.dailyMissions = Number(daily.value); }));
     const backup = h('textarea', { class: 'backup', rows: 3, placeholder: 'Paste a backup here, then press Restore', 'aria-label': 'Backup text' });
-    const backupMsg = h('p', { class: 'gate-msg', role: 'status' }, backupSaid);
-    backupSaid = '';
+    const backupMsg = h('p', { class: 'gate-msg backup-said', role: 'status' }, backupSaid); // (kept until the next press here: the tab may be redrawn meanwhile)
     backup.value = backupText;
     backup.addEventListener('input', () => { backupText = backup.value; });
+    const said = (text) => { backupSaid = text; backupMsg.textContent = text; };
+    const armed = () => (eraseArmed && Date.now() - eraseArmed < 10000 ? eraseArmed : 0);
     const afar = family.desk().remote;
     return [
       familySection(ctx, refresh),
@@ -159,11 +186,11 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
         h('div', { class: 'row', style: { justifyContent: 'flex-start' } }, changePinButton(ctx, body, () => show('settings')))),
       section('Backup',
         h('p', { class: 'fine' }, 'His progress is stored only on the device he plays on. Copy a backup if you want to move it or keep it safe. (Chore photos, reward pictures, the PIN and the family account sign-in are not part of a backup.)'),
-        h('div', { class: 'row' },
+        h('div', { class: 'row', style: { justifyContent: 'flex-start' } },
           h('button', { class: 'btn', type: 'button', onclick: async () => {
             backup.value = backupText = store.exportJSON();
-            try { await navigator.clipboard.writeText(backup.value); backupMsg.textContent = 'Backup copied. It is also in the box below.'; }
-            catch { backupMsg.textContent = 'Backup is in the box below - select it and copy.'; }
+            try { await navigator.clipboard.writeText(backup.value); said('Backup copied. It is also in the box below.'); }
+            catch { said('Backup is in the box below - select it and copy.'); }
           } }, 'Make backup'),
           h('button', { class: 'btn', type: 'button', onclick: () => {
             try {
@@ -173,28 +200,40 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
               ctx.applySettings();
               backupSaid = 'The backup has been restored. (This device keeps its own PIN.)';
               refresh();
+              body.querySelector('.backup-said')?.scrollIntoView({ block: 'nearest' });
             }
-            catch { backupMsg.textContent = 'That does not look like a backup.'; }
-          } }, 'Restore'),
-          h('button', { class: 'btn btn-danger', type: 'button', dataset: { act: 'erase' }, onclick: (e) => {
+            catch { said('That does not look like a backup.'); }
+          } }, 'Restore')),
+        backupMsg,
+        backup,
+        // On a line of its own: its label changes when it is armed, and it must not move from under the finger.
+        h('div', { class: 'row', style: { justifyContent: 'flex-start' } },
+          h('button', { class: 'btn btn-danger', type: 'button', dataset: { act: 'erase' }, onclick: () => {
             // Two presses, with a moment between them: a double tap must not erase, and the warning wears off again.
-            const b = e.currentTarget;
-            const armed = Number(b.dataset.sure) || 0;
-            if (armed && Date.now() - armed > 700) {
+            const since = armed();
+            if (since && Date.now() - since > 700) {
+              const waiting = store.get().chores.log.filter((x) => x.status === 'pending' && x.photo).map((x) => x.photo);
               store.resetProgress();
-              const st = store.get(); // photos of chores that were waiting for a check have nothing pointing to them any more
+              const st = store.get();
+              family.forget(waiting); // photos of chores that were waiting for a check: off this device and out of the family's folder
               keepOnlyPhotos([...st.rewards.tiers.map((t) => t.photo), ...st.chores.log.map((x) => x.photo)]);
               ctx.applySettings();
+              eraseArmed = 0;
               backupSaid = 'His progress has been erased.';
               refresh();
-            } else if (!armed) {
-              b.dataset.sure = String(Date.now());
-              b.textContent = 'Tap again to erase his progress';
-              setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = 'Erase his progress'; } }, 10000);
+              body.querySelector('.backup-said')?.scrollIntoView({ block: 'nearest' });
+            } else if (!since) {
+              eraseArmed = Date.now();
+              said('');
+              for (const b of body.querySelectorAll('[data-act="erase"]')) b.textContent = 'Tap again to erase his progress';
+              setTimeout(() => {
+                if (armed()) return;
+                eraseArmed = 0;
+                for (const b of body.querySelectorAll('[data-act="erase"]')) b.textContent = 'Erase his progress';
+              }, 10100);
             }
-          } }, 'Erase his progress')),
-        h('p', { class: 'fine' }, 'Erasing clears his levels, points, cards and history - and with them the rewards waiting to be handed out, chores waiting for a check and today\'s ticks. Your rewards, chores, expectations, settings and PIN are kept.'),
-        backup, backupMsg),
+          } }, armed() ? 'Tap again to erase his progress' : 'Erase his progress')),
+        h('p', { class: 'fine' }, 'Erasing clears his levels, points, cards and history - and with them the rewards waiting to be handed out, chores waiting for a check and today\'s ticks. Your rewards, chores, expectations, settings and PIN are kept.')),
       section('About this game',
         h('p', { class: 'fine' }, 'Each turn follows one routine: he chooses when to listen, waits while the voice talks, then does what was said. Levels add one difficulty at a time: more details, more steps, tricky words (not, except, before, after, if), listening from memory, and stories. A level opens when the one before it earns two stars, or after a few honest tries, so he is never stuck.'),
         h('p', { class: 'fine' }, 'This is practice, not a test or a diagnosis. If you are worried about his hearing, understanding or attention - for example he often mishears, struggles to follow speech in noise, or things are not improving - talk to his teacher, your family doctor, an audiologist or a speech-language pathologist.'),

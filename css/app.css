@@ -466,8 +466,9 @@ svg { display: block; width: 100%; height: 100%; }
 .row-note { font-style: italic; overflow-wrap: anywhere; }
 .grow b { overflow-wrap: anywhere; }
 .check-card { display: flex; gap: 14px; flex-wrap: wrap; background: rgba(10, 14, 36, 0.5); border-radius: 16px; padding: 12px; }
-.check-photo { width: min(320px, 100%); min-height: 120px; border-radius: 12px; overflow: hidden; background: rgba(255, 255, 255, 0.08); display: grid; place-items: center; color: var(--ink-dim); font-size: 14px; }
-.check-photo img { width: 100%; display: block; }
+/* (a fixed height: the photo arrives a moment after the card - the cards below must not jump when it does) */
+.check-photo { width: min(320px, 100%); height: 230px; border-radius: 12px; overflow: hidden; background: rgba(255, 255, 255, 0.08); display: grid; place-items: center; color: var(--ink-dim); font-size: 14px; }
+.check-photo img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .check-info { flex: 1; min-width: 220px; display: grid; gap: 8px; align-content: start; }
 .check-info small { color: var(--ink-dim); }
 .check-info .row { justify-content: flex-start; }

@@ -15,11 +15,16 @@ export function choresScreen(ctx) {
 
   // The camera opens through a file input: the most dependable way on an iPad.
   const camera = h('input', { type: 'file', accept: 'image/*', capture: 'environment', class: 'visually-hidden', tabindex: '-1', 'aria-hidden': 'true' });
+  // While he is taking a photo and sending it, this screen must not be drawn again under him (news
+  // from a grown-up's device would do that): `ctx.debug.camera` says "he is in the middle of it".
+  const busy = (on) => { ctx.debug.camera = on; };
   camera.addEventListener('change', () => {
     const file = camera.files && camera.files[0];
     camera.value = '';
     if (file && chosen) preview(chosen, file);
+    else busy(false);
   });
+  camera.addEventListener('cancel', () => busy(false));
 
   const say = (text) => h('button', { class: 'icon-btn small', type: 'button', 'aria-label': 'Read it to me', html: iconSVG('speaker'),
     onclick: () => { audio.unlock(); audio.speak(text); } });
@@ -65,6 +70,7 @@ export function choresScreen(ctx) {
     sfx.unlock();
     if (store.get().chores.requirePhoto === false) return send(chore, null);
     chosen = chore;
+    busy(true);
     camera.click();
   }
 
@@ -73,7 +79,7 @@ export function choresScreen(ctx) {
     try {
       blob = await shrinkImage(file);
     } catch { /* fall through: offer to send without the picture */ }
-    if (!alive) return;
+    if (!alive) return void busy(false);
     const url = blob ? URL.createObjectURL(blob) : null;
     if (url) urls.push(url);
     const close = () => overlay.remove();
@@ -84,7 +90,7 @@ export function choresScreen(ctx) {
         h('div', { class: 'row' },
           h('button', { class: 'btn btn-done btn-big', type: 'button', dataset: { act: 'send' }, onclick: () => { close(); send(chore, blob); } }, 'Send it'),
           h('button', { class: 'btn', type: 'button', onclick: () => { close(); start(chore); } }, 'Take it again'),
-          h('button', { class: 'btn', type: 'button', onclick: close }, 'Cancel'))));
+          h('button', { class: 'btn', type: 'button', onclick: () => { close(); busy(false); } }, 'Cancel'))));
     el.append(overlay);
   }
 
@@ -96,6 +102,7 @@ export function choresScreen(ctx) {
       } catch { /* storage unavailable: send it without the picture rather than lose his effort */ }
     }
     store.update((s) => { submitChore(s, chore, photoId); });
+    busy(false);
     sfx.good();
     voice.say('chore-sent');
     if (alive) render();
@@ -113,6 +120,7 @@ export function choresScreen(ctx) {
     el,
     destroy() {
       alive = false;
+      busy(false);
       audio.stop();
       for (const u of urls) URL.revokeObjectURL(u);
     },

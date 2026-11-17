@@ -74,6 +74,7 @@ globalThis.__lwm = ctx;
 let current = null;
 let nav = 0;
 let reloadWhenIdle = false;
+let shownWith = {}; // what the screen that is showing was opened with
 
 async function go(name, p = {}) {
   const my = ++nav;
@@ -86,6 +87,7 @@ async function go(name, p = {}) {
     mount(app, next.el);
     ctx.prev = ctx.debug.screen; // where he came from
     ctx.debug.screen = name;
+    shownWith = p;
     next.shown?.();
   } catch (err) {
     if (my === nav) showError(err, () => go(name, p));
@@ -179,6 +181,18 @@ async function warmAudio() {
 // The device he plays on reports after every change and looks for what grown-ups asked for;
 // a grown-up's own device only looks while its parent area is open - except that
 // a change that has not left it yet is sent as soon as it can be, whatever is on screen.
+// What a grown-up does from their own device is carried out here - and must show on the screen he
+// is looking at: an expectation ticked for him that still looks empty would be un-ticked by his own
+// tap. His list screens are drawn again (not while he is in the middle of something: a big view
+// that is open, the camera).
+family.subscribe((what) => {
+  if (what !== 'data' || family.status().role !== 'player') return;
+  const on = ctx.debug.screen;
+  if (!['map', 'rewards', 'chores', 'expectations'].includes(on)) return;
+  if (ctx.debug.camera || document.querySelector('#app .overlay')) return;
+  go(on, shownWith);
+});
+
 const inStep = () => { const st = family.status(); return st.role === 'player' || ctx.debug.screen === 'parent' || st.unsent > 0; };
 store.subscribe(() => family.kick('change'));
 document.addEventListener('visibilitychange', () => { if (!document.hidden && inStep()) family.kick('look'); });

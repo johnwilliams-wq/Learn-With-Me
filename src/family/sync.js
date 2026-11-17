@@ -339,6 +339,7 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
 
   async function managerRound() {
     const dev = device();
+    const sentAtStart = `${B().snap?.at}|${B().outbox.length}|${B().outbox.filter((c) => !c.sent).length}`;
     // 1. what was done here, in the order it was done
     for (const c of [...B().outbox]) {
       if (c.sent) continue;
@@ -361,13 +362,14 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
     }
     // 3. how things stand on his device
     const row = (await api.get('family_state', 'select=data,player_device,updated_at'))[0] || null;
-    const before = `${B().snap?.at}|${B().outbox.length}`;
+    const mark = () => `${B().snap?.at}|${B().outbox.length}|${B().outbox.filter((c) => !c.sent).length}`;
+    const before = sentAtStart; // (taken before anything was sent: a round that only sends is news too - for the note above the lists)
     box.set((b) => {
       b.snap = row ? { data: row.data, at: row.updated_at, player: row.player_device || '' } : null;
       b.outbox = b.outbox.filter((c) => !finished.has(c.id));
     });
     view = null;
-    return before !== `${B().snap?.at}|${B().outbox.length}`;
+    return before !== mark();
   }
 
   // ------------------------------------------------------------------ rounds
@@ -463,6 +465,8 @@ export function createFamily({ store, api, box, photos, screen = () => '', clock
     /** How the parent area reads and changes his lists: this device's own save, or (a grown-up's device) his device from afar. */
     desk: () => (role() === 'manager' ? remote : local),
     picture,
+    /** Pictures this device has just let go of otherwise than through the desk (his progress was erased): off the device, out of the family's folder. */
+    forget: (ids) => drop(ids.filter((id) => typeof id === 'string' && id)),
     sync,
     kick,
     subscribe(fn) {

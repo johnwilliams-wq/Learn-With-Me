@@ -33,8 +33,12 @@ export function ago(t, now = Date.now()) {
 // What survives a redraw of the tab (news from another device redraws it at any moment):
 let said = ''; // the last thing the panel told the grown-up
 let more = false; // is "More" open
+// A press that asks for a second one ("are you sure?") is remembered here and not on the button:
+// the panel is redrawn while the first press is still at work, and the button with it.
+let armed = {}; // what was pressed once -> when
+const isArmed = (act, forMs = 60000) => !!armed[act] && Date.now() - armed[act] < forMs;
 /** A fresh visit to the parent area starts with a clean panel. */
-export const resetFamilyPanel = () => { said = ''; more = false; };
+export const resetFamilyPanel = () => { said = ''; more = false; armed = {}; };
 
 const PLAY_HERE = 'On the device he plays on: For parents, Settings, Family account - sign in and choose “He plays on this device”.';
 
@@ -49,13 +53,15 @@ export function familyNote(ctx) {
       : 'The sign-in to the family account has run out, so nothing is being shared with your other devices at the moment. Sign in again under Settings.');
   }
   if (st.role !== 'manager') return null;
-  const sent = st.waiting - st.unsent;
+  // (a change is sent a moment after it is made: "not sent yet" is only worth saying when sending is the trouble)
+  const stuck = st.error ? st.unsent : 0;
+  const sent = st.waiting - stuck;
   const are = (n) => `${n} ${n === 1 ? 'change is' : 'changes are'}`;
   return note(
     st.connected
       ? `These are HIS lists, from the device he plays on (it last reported ${ago(st.heard)}).`
       : `No device is set as the one he plays on yet, so what you do here waits. ${PLAY_HERE}`,
-    st.unsent ? `${are(st.unsent)} still on this device and will be sent as soon as there is a connection.` : null,
+    stuck ? `${are(stuck)} still on this device and will be sent as soon as there is a connection.` : null,
     sent > 0 ? `${are(sent)} waiting for his device: ${sent === 1 ? 'it is' : 'they are'} carried out the next time the game is open there with internet.` : null,
     st.error ? explain(st.error) : null);
 }
@@ -86,18 +92,21 @@ export function familySection(ctx, redraw) {
   };
   const button = (label, onclick, { cls = '', data = {} } = {}) => h('button', { class: `btn${cls ? ` ${cls}` : ''}`, type: 'button', dataset: data, onclick }, label);
   /** A button that asks to be pressed twice before it does something that cannot be taken back. */
-  const twice = (label, sure, fn, opts) => button(label, job(async (ev) => {
-    const b = ev.currentTarget;
-    const armed = Number(b.dataset.sure) || 0;
-    if (!armed) {
-      b.dataset.sure = String(Date.now());
-      b.textContent = sure;
-      setTimeout(() => { if (b.isConnected && b.dataset.sure) { delete b.dataset.sure; b.textContent = label; } }, 10000); // the warning wears off again
+  const twice = (act, label, sure, fn, opts) => button(isArmed(act, 10000) ? sure : label, job(async (ev) => {
+    if (!isArmed(act, 10000)) {
+      armed[act] = Date.now();
+      ev.currentTarget.textContent = sure;
+      setTimeout(() => { // the warning wears off again
+        if (isArmed(act, 10000)) return;
+        delete armed[act];
+        for (const b of document.querySelectorAll(`.family [data-act="${act}"]`)) b.textContent = label;
+      }, 10100);
       return ' ';
     }
-    if (Date.now() - armed < 700) return ' '; // the tail of a double tap is not a second press
+    if (Date.now() - armed[act] < 700) return ' '; // the tail of a double tap is not a second press
+    delete armed[act];
     return fn();
-  }), opts);
+  }), { ...opts, data: { ...(opts?.data || {}), act } });
   const section = (...kids) => h('section', { class: 'panel family', dataset: { family: st.signedIn ? st.role || 'choose' : 'out' } }, h('h2', {}, 'Family account'), ...kids);
 
   // ---- not signed in
@@ -141,28 +150,31 @@ export function familySection(ctx, redraw) {
    * Before something that empties the list of changes waiting on this device: try to send them.
    * If some cannot be sent, say so once; a second press goes ahead and drops them.
    */
-  const unsentFirst = async (b, what) => {
-    if (b.dataset.drop) return '';
+  const unsentFirst = async (act, what) => {
+    if (isArmed(`drop-${act}`)) return '';
     await fam.sync();
     const n = fam.status().unsent;
     if (!n) return '';
-    b.dataset.drop = '1';
+    armed[`drop-${act}`] = Date.now();
     return `${n} ${n === 1 ? 'change' : 'changes'} made on this device could not be sent yet (no connection?). ${what} now drops ${n === 1 ? 'it' : 'them'} - press again to do it anyway, or try later.`;
   };
-  const out = button('Sign out', job(async (ev) => {
-    const warn = await unsentFirst(ev.currentTarget, 'Signing out');
+  const out = button('Sign out', job(async () => {
+    const warn = await unsentFirst('out', 'Signing out');
     if (warn) return warn;
     await fam.signOut();
+    armed = {};
     return '';
   }), { data: { act: 'sign-out' } });
-  const playHere = (label, cls) => button(label, job(async (ev) => {
-    const b = ev.currentTarget;
-    const warn = await unsentFirst(b, 'Switching');
+  const playHere = (label, cls) => button(isArmed('takeover') ? 'Yes - he plays on THIS device now' : label, job(async () => {
+    const warn = await unsentFirst('switch', 'Switching');
     if (warn) return warn;
-    const res = await fam.setRole('player', { takeOver: !!b.dataset.sure });
-    if (!res.taken) return '';
-    b.dataset.sure = '1';
-    b.textContent = 'Yes - he plays on THIS device now';
+    const res = await fam.setRole('player', { takeOver: isArmed('takeover') });
+    if (!res.taken) {
+      armed = {};
+      return '';
+    }
+    armed.takeover = Date.now();
+    for (const b of document.querySelectorAll('.family [data-role="player"]')) b.textContent = 'Yes - he plays on THIS device now';
     return 'Another device is already set as the one he plays on. Switch only if he really plays on this one from now on: his progress does not move with it.';
   }), { cls, data: { role: 'player' } });
   const mine = (label, cls) => button(label, job(async () => { await fam.setRole('manager'); return ''; }), { cls, data: { role: 'manager' } });
@@ -206,6 +218,6 @@ export function familySection(ctx, redraw) {
               return n ? `${n} sent. They appear on his device the next time the game is open there.` : 'His device has all of them already.';
             }), { data: { act: 'send-own' } })
           : null,
-        twice('Delete the family account', 'Tap again to delete the account and everything stored online', async () => { await fam.deleteAccount(); return ''; }, { cls: 'btn-danger', data: { act: 'delete-account' } })),
+        twice('delete-account', 'Delete the family account', 'Tap again to delete the account and everything stored online', async () => { await fam.deleteAccount(); return ''; }, { cls: 'btn-danger' })),
       h('p', { class: 'fine' }, 'Deleting the account removes what is stored online (the lists as last sent, the pictures, the sign-in). What is on the devices themselves stays.')));
 }

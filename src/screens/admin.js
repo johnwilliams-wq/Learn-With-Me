@@ -154,7 +154,6 @@ const KINDS = {
 };
 
 let editing = null; // 'kind:id' of the row that is open for changes (one at a time)
-let pressedAt = 0; // when a button in a row last did something (see once(); a change of tab starts afresh)
 let showing = []; // pictures on screen: each entry frees one of them again
 const freePictures = () => { for (const free of showing.splice(0)) free(); };
 /**
@@ -166,9 +165,11 @@ const freePictures = () => { for (const free of showing.splice(0)) free(); };
  */
 const kept = { add: {}, edit: null, notes: {} };
 /** Leaving the parent area or changing tab: no form stays open, no picture stays in memory. */
-export const closeForms = () => { editing = null; kept.add = {}; kept.edit = null; kept.notes = {}; pressedAt = 0; freePictures(); };
+export const closeForms = () => { editing = null; kept.add = {}; kept.edit = null; kept.notes = {}; freePictures(); };
 /** A row is being changed and has not been saved: say so there instead of quietly dropping it. Returns true when there is one. */
 function unsavedEdit(except = '') {
+  // (a kept form whose row is no longer on screen - the thing was deleted on another device - has nothing left to save)
+  if (kept.edit && !kept.edit.form.isConnected) kept.edit = null;
   if (!kept.edit || kept.edit.key === except) return false;
   const msg = kept.edit.form.querySelector('.form-msg');
   if (msg) msg.textContent = 'Save or cancel this one first.';
@@ -176,16 +177,8 @@ function unsavedEdit(except = '') {
   return true;
 }
 
-/**
- * For the buttons in a row (Given, Approve, Not yet, Delete, Mark done): a second press within a
- * moment of the last one is the tail of a double tap - and by then the list has been redrawn and
- * the NEXT row sits under the finger. It would hand out, approve or delete that one as well.
- */
-const once = (fn) => (ev) => {
-  if (performance.now() - pressedAt < 500) return;
-  pressedAt = performance.now();
-  fn(ev);
-};
+// (A double tap: after the first tap the tab has been redrawn and another row sits under the finger.
+// The second tap is caught in one place for every button of the parent area - see parent.js.)
 
 /**
  * The form for one reward, chore or expectation: the same for a new one (item = null) and for
@@ -205,6 +198,7 @@ function itemForm(ctx, kind, item, redraw) {
   const title = text(K.example, TITLE_MAX, item?.title || '');
   const note = noteBox(item?.note || '');
   const more = K.fields(item);
+  const first = { icon: icon.value, title: title.value, note: note.value, ...Object.fromEntries(Object.entries(more).map(([name, [, control]]) => [name, control.value])) }; // what the form showed when it was opened
   const msg = h('p', { class: 'form-msg', role: 'status' });
 
   // The picture (rewards in the mine): undefined = leave as it is, null = none, a Blob = a new one.
@@ -259,8 +253,13 @@ function itemForm(ctx, kind, item, redraw) {
       h('button', { class: 'btn btn-primary', type: 'submit' }, item ? 'Save' : 'Add'),
       item ? h('button', { class: 'btn', type: 'button', dataset: { act: 'cancel' }, onclick: () => { editing = null; settled(); redraw(); } }, 'Cancel') : null),
     msg);
-  // Someone has started on this form: from now on it is kept across redraws, until it is saved or cancelled.
+  // Someone has started on this form: from now on it is kept across redraws, until it is saved or
+  // cancelled - or emptied again (a form that is back to how it started holds nothing worth keeping,
+  // and must not hold back news from another device).
+  const typedNow = () => [...form.elements].filter((x) => x.name !== 'file' && x.type !== 'file' && x.type !== 'submit' && x.type !== 'button').map((x) => x.value).join('\u0001');
+  const typedAtFirst = typedNow();
   function touched() {
+    if (picture === undefined && typedNow() === typedAtFirst) return settled();
     form.dataset.dirty = '1';
     if (item) kept.edit = { key, form };
     else kept.add[kind] = form;
@@ -287,8 +286,11 @@ function itemForm(ctx, kind, item, redraw) {
       msg.textContent = 'It needs a name.';
       return void title.focus();
     }
-    const raw = { icon: icon.value, title: title.value, note: note.value };
-    for (const [key, [, control]] of Object.entries(more)) raw[key] = control.value;
+    let raw = { icon: icon.value, title: title.value, note: note.value };
+    for (const [name, [, control]] of Object.entries(more)) raw[name] = control.value;
+    // Changing one: only what was changed here is sent. Whatever someone else changed meanwhile on
+    // another device (its points, say, while this form was open for a new name) is left alone.
+    if (item) raw = Object.fromEntries(Object.entries(raw).filter(([name, value]) => String(value) !== String(first[name] ?? '')));
     busy = true;
     if (picture !== undefined) {
       raw.photo = null;
@@ -308,7 +310,7 @@ function itemForm(ctx, kind, item, redraw) {
     // (A picture that ends up unused - the old one, or a new one for a thing that has gone - is deleted by the desk.)
     desk.run(item ? 'edit' : 'add', item ? { kind, id: item.id, item: raw } : { kind, item: raw });
     if (preview) URL.revokeObjectURL(preview);
-    editing = null;
+    if (editing === key) editing = null; // (an Add leaves a row that is open for changes open)
     settled();
     redraw();
   });
@@ -330,10 +332,10 @@ function itemRow(ctx, kind, item, about, redraw, { before = [], dataset = {} } =
       editing = `${kind}:${item.id}`;
       redraw();
     } }, 'Edit'),
-    h('button', { class: 'btn btn-chip btn-danger', type: 'button', dataset: { act: 'delete' }, 'aria-label': `Delete ${item.title}`, onclick: once(() => {
+    h('button', { class: 'btn btn-chip btn-danger', type: 'button', dataset: { act: 'delete' }, 'aria-label': `Delete ${item.title}`, onclick: () => {
       desk.run('remove', { kind, id: item.id });
       redraw();
-    }) }, 'Delete'));
+    } }, 'Delete'));
 }
 
 // ------------------------------------------------------------------ Rewards tab
@@ -401,10 +403,10 @@ export function rewardsTab(ctx, refresh) {
         ? h('div', { class: 'admin-list' }, waiting.map((e) => h('div', { class: 'admin-row', dataset: { earned: e.id } },
             h('span', { class: 'emoji' }, e.icon || '🎁'),
             h('span', { class: 'grow' }, h('b', {}, e.title), h('small', {}, `${sourceName[e.src] || 'reward'}, won ${when(e.t)}`)),
-            h('button', { class: 'btn btn-chip btn-primary', type: 'button', dataset: { act: 'given' }, onclick: once(() => {
+            h('button', { class: 'btn btn-chip btn-primary', type: 'button', dataset: { act: 'given' }, onclick: () => {
               desk.run('given', { id: e.id });
               refresh();
-            }) }, 'Given'))))
+            } }, 'Given'))))
         : h('p', { class: 'fine' }, 'Nothing waiting. When he wins a reward it appears here until you mark it as given.')),
     h('nav', { class: 'parts', role: 'tablist', 'aria-label': 'The two kinds of reward' },
       choose('mine', 'Reward mine', 'Long-term: unlocked once, when his points reach it', R.tiers.length),
@@ -461,8 +463,8 @@ export function choresTab(ctx, refresh) {
                 h('b', {}, `${e.icon} ${e.title}`), h('small', {}, `${when(e.t)} · +${e.points} points${e.reward ? ` · ${e.reward}` : ''}`),
                 note,
                 h('div', { class: 'row' },
-                  h('button', { class: 'btn btn-done', type: 'button', dataset: { act: 'approve' }, onclick: once(() => decide(e, true)) }, 'Approve'),
-                  h('button', { class: 'btn', type: 'button', dataset: { act: 'reject' }, onclick: once(() => decide(e, false, note.value)) }, 'Not yet'))));
+                  h('button', { class: 'btn btn-done', type: 'button', dataset: { act: 'approve' }, onclick: () => decide(e, true) }, 'Approve'),
+                  h('button', { class: 'btn', type: 'button', dataset: { act: 'reject' }, onclick: () => decide(e, false, note.value) }, 'Not yet'))));
           }))
         : h('p', { class: 'fine' }, 'Nothing to check. When he marks a chore as done it appears here with his photo.')),
     section('Chores',
@@ -487,7 +489,7 @@ export function expectationsTab(ctx, refresh) {
   const confirm = h('input', { type: 'checkbox' });
   confirm.checked = !!s.expectations.confirm;
   confirm.addEventListener('change', () => { desk.run('option', { name: 'confirm', on: confirm.checked }); refresh(); });
-  const set = (id, done) => once(() => { desk.run('expect', { id, done }); refresh(); });
+  const set = (id, done) => () => { desk.run('expect', { id, done }); refresh(); };
   const stateName = { open: 'not done yet', pending: 'he says it is done', done: 'done' };
 
   return [

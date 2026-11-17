@@ -46,6 +46,11 @@ export function expectationsScreen(ctx) {
   function tick(id) {
     audio.unlock();
     sfx.unlock();
+    // The screen can be a moment behind (a grown-up ticked this one from their own device): then
+    // his tap must not undo that. Show how things stand first; he can tap again.
+    const shown = body.querySelector(`[data-expect="${id}"]`)?.classList.contains('state-open') ? 'open' : 'ticked';
+    const real = expectationsToday(store.get()).items.find((e) => e.id === id)?.state === 'open' ? 'open' : 'ticked';
+    if (shown !== real) return void render();
     const before = expectationsToday(store.get()).allDone;
     let now = 'open';
     store.update((s) => { now = tickExpectation(s, id); });
