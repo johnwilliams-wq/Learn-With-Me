@@ -172,8 +172,24 @@ in `tools/tts/accepted.json`, with the reason. In Claude Code cloud sessions use
   twice and must treat their payload as untrusted (it can arrive from another device). An action that
   is about a day says which day (`expect` carries `day`): it may arrive the next morning.
 - **The PIN** is only replaced once a new one has been typed twice (`pinGate(..., { change: true })`):
-  never clear it first. News from another device redraws the open tab, but never over the PIN pad, a
-  row being edited or a form someone has touched (`typing()` in `src/screens/parent.js`).
+  never clear it first. It belongs to the device, not to the save: a backup carries none (not even
+  its hash) and a restore leaves this device's PIN alone. News from another device redraws the open
+  tab, but never over the PIN pad, a row being edited or a form someone has touched (`typing()` in
+  `src/screens/parent.js`).
+- **Every button in the parent area redraws its tab** - that is where its bugs came from (a bug hunt
+  found 27; `tests/unit/parent-rules.test.mjs` and scenario 24 keep them fixed). What follows from it:
+  - a button in a row goes through `once()` (`src/screens/admin.js`): after the first tap of a double
+    tap the list has been redrawn and the NEXT row sits under the finger;
+  - a button redraws the tab where it is (`show(tab, { keep: true })`); only another tab starts at the top;
+  - what a grown-up has started is kept across redraws (`kept` in `admin.js`: a touched form is put
+    back as it is; a row being changed is finished before another is opened);
+  - a button that cannot be taken back (Erase, Delete the family account) needs two presses with a
+    moment between them, and its warning wears off.
+  Parents use phones: look at the map and the parent area at 390 px wide, not only at iPad size.
+- **Chores, the fine print:** the log is cut to 300 entries but never loses an entry that waits for a
+  check or the approval that finished a one-time chore (`trimLog`); a chore sent back after its day
+  was over still shows "try again" with the note (`choreStatus`); a chore made "one time only" while
+  an entry waits keeps that entry. A tick that waited for an OK counts once "needs my OK" is off.
 - A mission counts toward daily rewards only if the level was below 3 stars before it was played
   (`missionCounts`), unless the parent turns that off - otherwise replaying level 1 would farm rewards.
 - Everything a grown-up owes him sits in `rewards.earned` until marked "Given" in the Rewards tab.
