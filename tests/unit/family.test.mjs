@@ -865,3 +865,28 @@ test('a grown-up\'s device that gives up changes it never sent takes their pictu
   assert.deepEqual([...server.db.objects.keys()].map((k) => k.split('/')[1]), [kept], 'the picture of the change that was sent stays for his device to fetch');
 });
 
+// ---------------------------------------------------------------- what a second look at the parent area found
+
+test('erasing his progress takes his waiting chore photos out of the family folder as well', async (t) => {
+  const { server, ipad } = await household(t);
+  const photo = await ipad.photos.save(jpeg('bed'));
+  ipad.store.update((s) => { submitChore(s, s.chores.list[0], photo); });
+  await ipad.family.sync();
+  assert.equal(server.db.objects.size, 1);
+  ipad.store.resetProgress(); // (what the parent area does for "Erase his progress" ...)
+  ipad.family.forget([photo]); // (... together with this)
+  await ipad.family.sync();
+  assert.deepEqual([server.db.objects.size, await ipad.photos.has(photo), server.db.family_state[0].data.chores.log.length], [0, false, 0]);
+});
+
+test('a round on a grown-up\'s device that only sends what was waiting is news for the screen', async (t) => {
+  const { phone } = await household(t);
+  const heard = [];
+  phone.family.subscribe((what) => heard.push(what));
+  phone.family.desk().run('add', { kind: 'chore', item: { title: 'Water the plants' } });
+  assert.equal(phone.family.status().unsent, 1);
+  heard.length = 0;
+  await phone.family.sync();
+  assert.deepEqual([phone.family.status().unsent, phone.family.status().waiting, heard.includes('data')], [0, 1, true], 'the note above the lists must be drawn again: the change has left this device');
+});
+

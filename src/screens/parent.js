@@ -51,8 +51,9 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
     const at = document.activeElement;
     return !!at && body.contains(at) && (at.tagName === 'SELECT' || at.tagName === 'TEXTAREA' || (at.tagName === 'INPUT' && at.type !== 'checkbox'));
   };
-  // Any form a grown-up has touched (a number, a picture, the icon - not only text) counts as being typed in.
-  const touched = (e) => { const form = e.target.closest?.('form'); if (form) form.dataset.dirty = '1'; };
+  // The sign-in form counts as being typed in once it has been touched. (The forms of the lists say so
+  // themselves - and take it back when they are emptied again: see itemForm in admin.js.)
+  const touched = (e) => { const form = e.target.closest?.('form.family-form'); if (form) form.dataset.dirty = '1'; };
   body.addEventListener('input', touched);
   body.addEventListener('change', touched);
   // A double tap: after the first tap the tab has been redrawn and something else sits under the
@@ -86,6 +87,7 @@ export function parentScreen(ctx, { tab: startTab } = {}) {
     if (which !== tab) {
       closeForms(); // a form left open on another tab does not come back
       pressed.t = 0; // (and a press on the new tab is never the tail of one on the old)
+      eraseArmed = 0; // (nor does "Erase" stay armed behind someone's back)
     }
     if (!keep) family.kick('look'); // a grown-up is looking: fetch what is new
     open = true;

@@ -1367,6 +1367,8 @@ scenario('23 family account: a grown-up signs in on their own device and manages
   t.check((await getState(phone)).rewards.tiers.length === 0 && (await getState(phone)).chores.list.length === 0, 'none of this may land in the phone\'s own game');
   await round(phone);
   t.check(fam.db.commands.length === 4 && fam.db.commands.every((c) => !c.applied_at), `four changes should be waiting for his device (${fam.db.commands.length})`);
+  const note = (await phone.textContent('[data-note="family"]')) || '';
+  t.check(/4 changes are waiting for his device/.test(note) && !/still on this device/.test(note), `the note should say that the changes wait for his device - not that they were never sent ("${note.slice(0, 160)}")`);
 
   // --- his device carries them out the next time it is in touch
   await ipad.click('[data-family="player"] [data-act="sync"]');
@@ -1389,9 +1391,24 @@ scenario('23 family account: a grown-up signs in on their own device and manages
   t.check((await ipad.locator('.mine .rung').count()) === 2, 'his mine should have both rewards');
   await ipad.locator('.mine .rung:has-text("New mount") .rung-pic.has-photo img').waitFor({ timeout: 5000 }).catch(() => t.check(false, 'he should see the picture in his mine'));
 
-  // --- he does a chore with a photo; the grown-up checks it on the phone
+  // --- what a grown-up does from the phone shows on the screen he is looking at (it used to stay as it was, and his tap then undid it)
   await ipad.click('.screen.rewards .sub-head .icon-btn');
   await ipad.waitForSelector('.screen.map');
+  await ipad.click('[data-open="expectations"]');
+  await ipad.waitForSelector('.expect-row.state-done[data-expect="expect001"]');
+  await phone.click('[data-expect="expect001"] [data-act="undo"]');
+  await round(phone);
+  await round(ipad);
+  await ipad.waitForSelector('.expect-row.state-open[data-expect="expect001"]', { timeout: 5000 }).catch(() => t.check(false, 'an expectation un-ticked from the phone should show as open on his Expectations screen without him leaving it'));
+  await sleep(600);
+  await phone.click('[data-expect="expect001"] [data-act="ok"]');
+  await round(phone);
+  await round(ipad);
+  await ipad.waitForSelector('.expect-row.state-done[data-expect="expect001"]', { timeout: 5000 }).catch(() => t.check(false, 'and ticked again from the phone, it should show as done'));
+  await ipad.click('.screen.expectations .sub-head .icon-btn');
+  await ipad.waitForSelector('.screen.map');
+
+  // --- he does a chore with a photo; the grown-up checks it on the phone
   await ipad.click('[data-open="chores"]');
   const [camera] = await Promise.all([ipad.waitForEvent('filechooser', { timeout: 5000 }), ipad.click('.chore-row:has-text("Make your bed") [data-act="done"]')]);
   await camera.setFiles({ name: 'bed.png', mimeType: 'image/png', buffer: png });
@@ -1463,6 +1480,16 @@ scenario('23 family account: a grown-up signs in on their own device and manages
   await ipad.waitForFunction(() => /Wrong PIN/.test(document.querySelector('.gate-msg')?.textContent || ''));
   await H.typePin(ipad, '112233');
   await ipad.waitForSelector('.tabs:not([hidden])', { timeout: 5000 }).catch(() => t.check(false, 'the new PIN should open the parent area'));
+
+  // --- a button of the family panel that asks to be pressed twice remembers the first press, although the panel is redrawn meanwhile
+  await H.openTab(phone, 'settings');
+  await phone.click('.family-more summary');
+  await phone.click('.family-more [data-role="player"]');
+  await phone.waitForFunction(() => /already set as the one he plays on/.test(document.querySelector('.family .form-msg')?.textContent || ''));
+  await round(phone);
+  await sleep(300);
+  t.check(/THIS device now/.test(await phone.textContent('.family-more [data-role="player"]')) && (await status(phone)).role === 'manager',
+    'after the warning the button should still offer the take-over when the panel has been redrawn (and nothing is taken over yet)');
 
   // --- signing out on the phone: its own game again; his device carries on, also after a restart
   await H.openTab(phone, 'settings');
@@ -1610,6 +1637,82 @@ scenario('24 the parent area, as a bug hunt left it: double taps, a phone held u
   s = await getState(page);
   const spent = s.missions[s.missions.length - 1].ms;
   t.check(spent > 0 && spent < 10 * 60000 && s.days[day].ms < 10 * 60000, `a mission with a three-hour break in it should count as a few minutes of practice (counted ${Math.round(spent / 60000)} min)`);
+});
+
+// ---------------------------------------------------------------------------------------------
+scenario('25 the parent area, second look: Save and other buttons under a double tap, quick presses on different rows, a row left open, Erase that stays put', async (t) => {
+  const tier = (n, title, points) => ({ id: `tier0000${n}`, title, icon: '🎁', note: '', points, photo: null });
+  const chore = (n, title) => ({ id: `chore000${n}`, title, icon: '✅', note: '', points: 20, repeat: 'daily', reward: '' });
+  const state = { flags: { welcomed: true }, xp: 50,
+    rewards: { tiers: [tier(1, 'One', 100), tier(2, 'Two', 200), tier(3, 'Three', 300)] },
+    chores: { list: [chore(1, 'Make your bed'), chore(2, 'Feed the dog'), chore(3, 'Water the plants')] },
+    expectations: { list: [{ id: 'expect001', title: 'Teeth', icon: '🦷', note: '' }, { id: 'expect002', title: 'Bag', icon: '🎒', note: '' }, { id: 'expect003', title: 'Shoes', icon: '👟', note: '' }] } };
+  const rowOf = (page, title) => page.locator(`.admin-row:not([data-earned]):has(b:text-is("${title}"))`);
+
+  // --- a phone: a double tap on Save must not reach the row that slides under the finger
+  const { page: phone } = await t.open({ state, viewport: { width: 390, height: 844 } });
+  await toMap(phone);
+  await H.openParent(phone);
+  await H.openTab(phone, 'chores');
+  await rowOf(phone, 'Make your bed').locator('[data-act="edit"]').click();
+  await phone.fill('[data-edit="chore"] input[type="text"] >> nth=0', 'Make your bed nicely');
+  await phone.locator('[data-edit="chore"] button[type="submit"]').dblclick();
+  let s = await getState(phone);
+  t.check(s.chores.list.length === 3 && s.chores.list[0].title === 'Make your bed nicely', `a double tap on Save must save - and delete or open nothing else (chores left: ${s.chores.list.map((c) => c.title).join(', ')})`);
+  t.check((await phone.locator('.admin-row.is-open').count()) === 0, 'nor may it open another row');
+
+  // --- quick presses on DIFFERENT rows all count
+  await H.openTab(phone, 'expectations');
+  for (const id of ['expect001', 'expect002', 'expect003']) await phone.click(`[data-expect="${id}"] [data-act="ok"]`);
+  s = await getState(phone);
+  t.check(Object.values(Object.values(s.expectations.days)[0] || {}).filter((v) => v === 'done').length === 3, 'three expectations marked done one after the other should all be done - none silently skipped');
+
+  // --- a row that is open for changes stays open when something is added; what was changed elsewhere meanwhile is not put back
+  const { page } = await t.open({ state });
+  await toMap(page);
+  await H.openParent(page);
+  await H.openTab(page, 'rewards');
+  await rowOf(page, 'Two').locator('[data-act="edit"]').click();
+  await page.fill('[data-edit="tier"] input[type="text"]', 'Two, renamed');
+  await page.fill('[data-form="tier"] input[type="text"]', 'Four');
+  await page.fill('[data-form="tier"] input[type="number"]', '400');
+  await page.click('[data-form="tier"] button[type="submit"]');
+  await rowOf(page, 'Four').waitFor();
+  t.check((await page.locator('.admin-row.is-open').count()) === 1 && (await page.inputValue('[data-edit="tier"] input[type="text"]')) === 'Two, renamed', 'adding a reward must not hide the row that is being changed');
+  await page.evaluate(() => globalThis.__lwm.family.desk().run('edit', { kind: 'tier', id: 'tier00002', item: { points: 250 } })); // someone changes its points meanwhile (another device)
+  await page.click('[data-edit="tier"] button[type="submit"]');
+  await rowOf(page, 'Two, renamed').waitFor();
+  s = await getState(page);
+  t.check(s.rewards.tiers.find((x) => x.id === 'tier00002').points === 250, 'saving a new name must not put the old points back');
+  await rowOf(page, 'One').locator('[data-act="edit"]').click();
+  t.check((await page.locator('.admin-row.is-open').count()) === 1, 'after Save, Edit on another row should work again');
+  await page.click('[data-edit="tier"] [data-act="cancel"]');
+  // a form that is emptied again is not "touched" any more
+  await page.fill('[data-form="tier"] input[type="text"]', 'Changed my mind');
+  t.check((await page.locator('form[data-form="tier"][data-dirty]').count()) === 1, 'typing into the add form marks it as touched');
+  await page.fill('[data-form="tier"] input[type="text"]', '');
+  t.check((await page.locator('form[data-dirty]').count()) === 0, 'emptied again, it should no longer count as touched (it would hold back news from another device)');
+
+  // --- Erase stays where it is when it is armed, says what it did where it can be seen
+  await page.setViewportSize({ width: 720, height: 1000 }); // a small iPad held upright: the longer label used to push the button onto a new line
+  await H.openTab(page, 'settings');
+  const erase = page.locator('[data-act="erase"]');
+  await erase.scrollIntoViewIfNeeded();
+  const before = await erase.boundingBox();
+  await erase.click();
+  const after = await erase.boundingBox();
+  t.check(Math.abs(after.x - before.x) < 4 && Math.abs(after.y - before.y) < 4, `the armed Erase button must not move from under the finger (${Math.round(before.x)},${Math.round(before.y)} -> ${Math.round(after.x)},${Math.round(after.y)})`);
+  await page.evaluate(() => globalThis.__lwm.store.update((st) => { st.settings.sfx = !st.settings.sfx; })); // (the tab is drawn again by something else meanwhile)
+  await H.openTab(page, 'progress');
+  await H.openTab(page, 'settings');
+  t.check(/^Erase his progress$/.test((await page.textContent('[data-act="erase"]')).trim()), 'a look at another tab should take the warning off again');
+  await page.click('[data-act="erase"]');
+  await sleep(800);
+  await page.click('[data-act="erase"]');
+  s = await getState(page);
+  const said = page.locator('.backup-said');
+  const box = await said.boundingBox();
+  t.check(s.xp === 0 && /erased/.test(await said.textContent()) && box && box.y > 0 && box.y < 1000, 'two separate presses erase, and the line that says so should be on the screen');
 });
 
 async function main() {

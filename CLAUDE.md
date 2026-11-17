@@ -178,13 +178,21 @@ in `tools/tts/accepted.json`, with the reason. In Claude Code cloud sessions use
   `src/screens/parent.js`).
 - **Every button in the parent area redraws its tab** - that is where its bugs came from (a bug hunt
   found 27; `tests/unit/parent-rules.test.mjs` and scenario 24 keep them fixed). What follows from it:
-  - a button in a row goes through `once()` (`src/screens/admin.js`): after the first tap of a double
-    tap the list has been redrawn and the NEXT row sits under the finger;
+  - a double tap: after the first tap the tab has been redrawn and something else sits under the
+    finger. One listener in `src/screens/parent.js` catches the second tap for every button: a press on
+    the same spot within half a second of one whose button has been redrawn away is dropped (a press
+    elsewhere, or on a button that is still there, is not). Do not add per-button guards;
   - a button redraws the tab where it is (`show(tab, { keep: true })`); only another tab starts at the top;
   - what a grown-up has started is kept across redraws (`kept` in `admin.js`: a touched form is put
-    back as it is; a row being changed is finished before another is opened);
+    back as the same node; a row being changed is finished before another is opened; a form emptied
+    again is no longer "touched"); Save sends only what was changed in the form, so it never puts back
+    what another device changed meanwhile;
   - a button that cannot be taken back (Erase, Delete the family account) needs two presses with a
-    moment between them, and its warning wears off.
+    moment between them, its warning wears off, and the first press is remembered outside the button
+    (the tab may be redrawn between the two presses);
+  - his own list screens (map, Rewards, Chores, Expectations) are drawn again when a grown-up's change
+    from another device has been carried out (`src/main.js`) - never while a big view is open or he is
+    taking a chore photo (`ctx.debug.camera`).
   Parents use phones: look at the map and the parent area at 390 px wide, not only at iPad size.
 - **Chores, the fine print:** the log is cut to 300 entries but never loses an entry that waits for a
   check or the approval that finished a one-time chore (`trimLog`); a chore sent back after its day
